@@ -8,7 +8,7 @@
 4. `call_curl_task` 节点调用 Eureka conversational 接口，`query` 使用 `generated_prompt`。
 5. 从响应中解析 `session_id`，生成 Eureka session 会话链接。
 6. `call_curl_task` 继续调用 secure-share/create，解析 `data.share_id`。
-7. 输出 Markdown 表格：输入、生成后的 prompt、session 会话链接、最终分享链接。
+7. 输出 Markdown 表格：输入、生成后的 prompt、session 会话链接、最终分享链接和报告元数据。
 8. 默认把本次结果追加到 `outputs/topic_workflow_records.csv`，并重新生成 `outputs/topic_workflow_records.md`。
 
 ## 安装
@@ -58,11 +58,44 @@ outputs/topic_workflow_records.csv
 outputs/topic_workflow_records.md
 ```
 
-记录表包含四列：
+记录表包含这些列：
 
 ```text
-输入, generate prompt 后的 prompt, session 会话链接, 最终分享链接
+input
+generated_prompt
+session_url
+share_url
+title
+categories
+keywords
+description
+role
+industry
+jtbd
+date
+sub_industry
 ```
+
+其中 `categories`、`keywords`、`jtbd`、`sub_industry` 在 CSV 中保存为 JSON array 字符串。
+
+`generate_prompt` 节点会要求模型返回结构化 JSON：
+
+```json
+{
+  "title": "string",
+  "categories": ["scout_report"],
+  "keywords": ["keyword"],
+  "description": "string",
+  "role": "innovation_product_strategy",
+  "industry": "automotive",
+  "jtbd": ["identify_innovation_opportunities"],
+  "date": "2026-09-08",
+  "sub_industry": ["ev_and_battery_systems"],
+  "prompt": "给 Eureka 执行的完整提示词"
+}
+```
+
+枚举值维护在 `enum_entities.json`。
 
 临时运行、不想保存时：
 

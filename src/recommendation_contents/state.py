@@ -8,7 +8,17 @@ from typing import Any, TypedDict
 class TopicWorkflowState(TypedDict, total=False):
     topic: str
     request_context: dict[str, Any]
+    prompt_generation_raw_response: str
     generated_prompt: str
+    title: str
+    categories: list[str]
+    keywords: list[str]
+    description: str
+    role: str
+    industry: str
+    jtbd: list[str]
+    date: str
+    sub_industry: list[str]
     curl_payload: dict[str, Any]
     curl_response: str
     curl_success: bool

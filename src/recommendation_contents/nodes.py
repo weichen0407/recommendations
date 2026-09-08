@@ -2,12 +2,22 @@
 
 from __future__ import annotations
 
+import json
 from dataclasses import dataclass
 from typing import Any
 
 from .config import AppSettings
+from .dates import today_iso
+from .entities import (
+    content_category_values,
+    industry_values,
+    jtbd_values,
+    role_values,
+    sub_industry_values,
+)
 from .llm import create_chat_model
 from .prompts import build_prompt_generation_prompt
+from .records import build_markdown_table
 from .services.eureka_curl import EurekaCurlClient, find_first_value, parse_json_body
 from .state import TopicWorkflowState
 
@@ -52,13 +62,26 @@ def generate_prompt(state: TopicWorkflowState, runtime: RuntimeDependencies) -> 
     prompt = build_prompt_generation_prompt(state)
     response = runtime.get_llm().invoke(prompt)
     content = getattr(response, "content", str(response))
+    metadata, errors = _parse_prompt_generation_response(content, state)
 
     return {
-        "generated_prompt": content.strip(),
+        "prompt_generation_raw_response": content.strip(),
+        "generated_prompt": metadata["generated_prompt"],
+        "title": metadata["title"],
+        "categories": metadata["categories"],
+        "keywords": metadata["keywords"],
+        "description": metadata["description"],
+        "role": metadata["role"],
+        "industry": metadata["industry"],
+        "jtbd": metadata["jtbd"],
+        "date": metadata["date"],
+        "sub_industry": metadata["sub_industry"],
+        "errors": errors,
         "debug": {
             **(state.get("debug") or {}),
             "llm_model": runtime.settings.openai.model,
             "prompt_generated": True,
+            "prompt_response_json": metadata["parsed_json"],
         },
     }
 
@@ -154,16 +177,25 @@ def call_curl_task(state: TopicWorkflowState, runtime: RuntimeDependencies) -> d
 def finalize_result(state: TopicWorkflowState) -> dict[str, Any]:
     rows = [
         {
-            "输入": state.get("topic", ""),
-            "generate prompt 后的 prompt": state.get("generated_prompt", ""),
-            "session 会话链接": state.get("session_link", ""),
-            "最终分享链接": state.get("share_link", ""),
+            "input": state.get("topic", ""),
+            "generated_prompt": state.get("generated_prompt", ""),
+            "session_url": state.get("session_link", ""),
+            "share_url": state.get("share_link", ""),
+            "title": state.get("title", ""),
+            "categories": _csv_list(state.get("categories") or []),
+            "keywords": _csv_list(state.get("keywords") or []),
+            "description": state.get("description", ""),
+            "role": state.get("role", ""),
+            "industry": state.get("industry", ""),
+            "jtbd": _csv_list(state.get("jtbd") or []),
+            "date": state.get("date") or today_iso(),
+            "sub_industry": _csv_list(state.get("sub_industry") or []),
         }
     ]
 
     return {
         "result_table_rows": rows,
-        "result_table_markdown": _build_markdown_table(rows),
+        "result_table_markdown": build_markdown_table(rows),
         "debug": {
             **(state.get("debug") or {}),
             "finished": True,
@@ -177,16 +209,85 @@ def _curl_error_message(label: str, return_code: int, status_code: int, stderr: 
     return f"{label} returned HTTP {status_code}"
 
 
-def _build_markdown_table(rows: list[dict[str, str]]) -> str:
-    headers = ["输入", "generate prompt 后的 prompt", "session 会话链接", "最终分享链接"]
-    lines = [
-        "| " + " | ".join(headers) + " |",
-        "| " + " | ".join(["---"] * len(headers)) + " |",
-    ]
-    for row in rows:
-        lines.append("| " + " | ".join(_markdown_cell(row.get(header, "")) for header in headers) + " |")
-    return "\n".join(lines)
+def _parse_prompt_generation_response(
+    content: str,
+    state: TopicWorkflowState,
+) -> tuple[dict[str, Any], list[str]]:
+    errors = list(state.get("errors") or [])
+    payload = _parse_json_object(content)
+    parsed_json = isinstance(payload, dict)
+
+    if not parsed_json:
+        errors.append("generate_prompt did not return valid JSON; using raw response as prompt")
+        payload = {}
+
+    topic = state.get("topic", "")
+    generated_prompt = _string_value(payload.get("prompt")) or content.strip()
+    title = _string_value(payload.get("title")) or topic
+    metadata = {
+        "generated_prompt": generated_prompt,
+        "title": title,
+        "categories": _enum_list(payload.get("categories"), content_category_values(), ["scout_report"]),
+        "keywords": _string_list(payload.get("keywords")),
+        "description": _string_value(payload.get("description")),
+        "role": _enum_value(payload.get("role"), role_values(), "other"),
+        "industry": _enum_value(payload.get("industry"), industry_values(), "other"),
+        "jtbd": _enum_list(payload.get("jtbd"), jtbd_values(), ["other"]),
+        "date": _string_value(payload.get("date")) or today_iso(),
+        "sub_industry": _enum_list(payload.get("sub_industry"), sub_industry_values(), []),
+        "parsed_json": parsed_json,
+    }
+    return metadata, errors
 
 
-def _markdown_cell(value: str) -> str:
-    return str(value).replace("|", "\\|").replace("\n", "<br>").strip()
+def _parse_json_object(content: str) -> dict[str, Any] | None:
+    text = _strip_json_fence(content)
+    try:
+        payload = json.loads(text)
+    except json.JSONDecodeError:
+        return None
+    return payload if isinstance(payload, dict) else None
+
+
+def _strip_json_fence(content: str) -> str:
+    text = content.strip()
+    if not text.startswith("```"):
+        return text
+
+    lines = text.splitlines()
+    if lines and lines[0].startswith("```"):
+        lines = lines[1:]
+    if lines and lines[-1].strip() == "```":
+        lines = lines[:-1]
+    return "\n".join(lines).strip()
+
+
+def _string_value(value: Any) -> str:
+    return value.strip() if isinstance(value, str) else ""
+
+
+def _string_list(value: Any) -> list[str]:
+    if isinstance(value, str):
+        value = [value]
+    if not isinstance(value, list):
+        return []
+    return [item.strip() for item in value if isinstance(item, str) and item.strip()]
+
+
+def _enum_value(value: Any, allowed: list[str], default: str) -> str:
+    if isinstance(value, str) and value in allowed:
+        return value
+    return default
+
+
+def _enum_list(value: Any, allowed: list[str], default: list[str]) -> list[str]:
+    values = _string_list(value)
+    filtered = []
+    for item in values:
+        if item in allowed and item not in filtered:
+            filtered.append(item)
+    return filtered or default
+
+
+def _csv_list(values: list[str]) -> str:
+    return json.dumps(values, ensure_ascii=False)

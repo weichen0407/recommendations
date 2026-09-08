@@ -1,3 +1,5 @@
+import json
+
 from recommendation_contents.config import (
     AppSettings,
     EurekaSettings,
@@ -12,7 +14,21 @@ from recommendation_contents.services.eureka_curl import (
 
 
 class FakeMessage:
-    content = "请围绕主题完成一份结构化研究提示词。"
+    content = json.dumps(
+        {
+            "title": "新能源汽车电池回收趋势研究",
+            "categories": ["scout_report"],
+            "keywords": ["新能源汽车", "电池回收"],
+            "description": "面向电池回收趋势的结构化研究报告。",
+            "role": "innovation_product_strategy",
+            "industry": "automotive",
+            "jtbd": ["identify_innovation_opportunities"],
+            "date": "2026-09-08",
+            "sub_industry": ["ev_and_battery_systems"],
+            "prompt": "请围绕主题完成一份结构化研究提示词。",
+        },
+        ensure_ascii=False,
+    )
 
 
 class FakeLlm:
@@ -33,8 +49,10 @@ def test_topic_workflow_skips_curl_without_authorization():
 
     assert result["topic"] == "新能源汽车电池回收趋势"
     assert result["generated_prompt"] == "请围绕主题完成一份结构化研究提示词。"
+    assert result["title"] == "新能源汽车电池回收趋势研究"
+    assert result["categories"] == ["scout_report"]
     assert result["curl_skipped"] is True
-    assert result["result_table_rows"][0]["session 会话链接"] == ""
+    assert result["result_table_rows"][0]["session_url"] == ""
     assert result["debug"]["finished"] is True
 
 
@@ -72,7 +90,9 @@ def test_topic_workflow_creates_eureka_links(monkeypatch):
     assert result["share_id"] == "share_test"
     assert result["session_link"].startswith("https://eureka.patsnap.com/ai-search/sess_test")
     assert result["share_link"].startswith("https://eureka.patsnap.com/share/?id=share_test")
-    assert "最终分享链接" in result["result_table_markdown"]
+    assert result["result_table_rows"][0]["title"] == "新能源汽车电池回收趋势研究"
+    assert result["result_table_rows"][0]["categories"] == '["scout_report"]'
+    assert "share_url" in result["result_table_markdown"]
 
 
 def test_build_curl_command_uses_argument_list():

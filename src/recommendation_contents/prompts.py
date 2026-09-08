@@ -6,13 +6,17 @@ import json
 from collections.abc import Mapping
 from typing import Any
 
+from .dates import today_iso
+from .schemas import prompt_generation_output_schema
+
 SYSTEM_INSTRUCTIONS = """You are a senior prompt engineer for Eureka research/report generation.
-Expand the user's short topic into a complete, task-ready prompt for Eureka.
-Do not answer the topic itself. Only write the prompt that Eureka should execute."""
+Expand the user's short topic into a structured report record and a complete, task-ready prompt
+for Eureka. Do not answer the topic itself."""
 
 
 def build_prompt_generation_prompt(state: Mapping[str, Any]) -> str:
     context = state.get("request_context") or {}
+    output_schema = prompt_generation_output_schema()
 
     return f"""{SYSTEM_INSTRUCTIONS}
 
@@ -22,12 +26,28 @@ Topic:
 Context JSON:
 {json.dumps(context, ensure_ascii=False, indent=2)}
 
-Write a complete report-generation prompt in Chinese unless the context explicitly asks for
-another language. Keep the generated prompt concise and complete: target 800-1400 Chinese
-characters, and do not stop mid-sentence.
+Output JSON schema:
+{json.dumps(output_schema, ensure_ascii=False, indent=2)}
 
-The generated prompt must be directly executable by Eureka and should include these parts
-without over-expanding any single section:
+Return valid JSON only. Do not wrap it in Markdown fences.
+
+Field requirements:
+- title: create a clear, searchable title for the generated report.
+- categories: choose the best content type(s) from the categories enum. Prefer one primary
+  category unless the topic clearly needs more.
+- keywords: include concrete technical, product, market, or problem keywords; avoid broad filler.
+- description: summarize what the report will cover and why it is useful.
+- role: choose the best target user role from the role enum.
+- industry: choose the best industry from the industry enum.
+- jtbd: choose one or more jobs-to-be-done from the jtbd enum.
+- date: use today's date: {today_iso()}.
+- sub_industry: choose relevant values from the sub_industry enum.
+- prompt: write a complete report-generation prompt in Chinese unless context explicitly asks for
+  another language. Keep it concise and complete: target 800-1400 Chinese characters, and do not
+  stop mid-sentence.
+
+The prompt field must be directly executable by Eureka and should include these parts without
+over-expanding any single section:
 
 1. Role
 Ask Eureka to act as a senior research analyst. Choose the analyst type from the topic and
@@ -68,6 +88,4 @@ decision-making.
 7. Output constraints
 Ask Eureka to write the final report in clear Chinese, with concise headings, readable tables,
 and no irrelevant filler.
-
-Return plain text only. Do not wrap it in Markdown fences.
 """
