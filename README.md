@@ -97,6 +97,8 @@ sub_industry
 
 枚举值维护在 `enum_entities.json`。
 
+如果模型第一次没有返回合法 JSON，`generate_prompt` 会自动做一次 JSON 修复重试。重试仍失败时，才会把原始回复当作 `generated_prompt` 兜底，并在 `errors` 中记录。
+
 临时运行、不想保存时：
 
 ```bash
@@ -160,13 +162,30 @@ uv run pytest
 {
   "dependencies": ["."],
   "graphs": {
-    "topic_workflow": "./src/recommendation_contents/graph.py:build_graph"
+    "topic_workflow": "recommendation_contents.graph:build_graph"
   },
   "env": ".env"
 }
 ```
 
 安装 LangGraph CLI 后，可以在项目根目录继续接 `uv run langgraph dev`、LangGraph Studio 或部署流程。
+
+## LangSmith
+
+如果要在 LangSmith 里看链路，在 `.env` 中配置：
+
+```bash
+LANGSMITH_TRACING=true
+LANGSMITH_API_KEY=...
+LANGSMITH_PROJECT=recommendation-contents
+```
+
+直接跑 CLI 时，程序会先把 `.env` 注入当前进程环境，因此 LangSmith 可以读取到
+`LANGSMITH_*` 配置。为了兼容不同版本的 LangChain，程序也会自动补齐
+`LANGCHAIN_TRACING_V2`、`LANGCHAIN_API_KEY`、`LANGCHAIN_PROJECT` 等旧变量名。
+
+LangSmith UI 中的项目通常会在第一次成功上传 trace 后出现；如果运行环境无法访问
+`https://api.smith.langchain.com`，本地执行仍会完成，但 UI 里不会看到新项目或链路。
 
 ## 目录
 

@@ -16,7 +16,11 @@ from .services.eureka_curl import EurekaCurlClient
 from .state import TopicWorkflowState
 
 
-def build_graph(
+def build_graph():
+    return build_graph_with_dependencies()
+
+
+def build_graph_with_dependencies(
     settings: AppSettings | None = None,
     llm: Any | None = None,
     eureka_client: EurekaCurlClient | None = None,

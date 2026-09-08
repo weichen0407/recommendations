@@ -6,8 +6,8 @@ import argparse
 import json
 from typing import Any
 
-from .config import AppSettings
-from .graph import build_graph
+from .config import AppSettings, apply_env_file_to_process
+from .graph import build_graph_with_dependencies
 from .records import DEFAULT_RECORDS_CSV, DEFAULT_RECORDS_MARKDOWN, save_result_table
 
 
@@ -49,8 +49,9 @@ def main() -> None:
     args = parser.parse_args()
 
     context = _load_context(args.context_json)
+    apply_env_file_to_process(args.env_file)
     settings = AppSettings.from_env_file(args.env_file)
-    graph = build_graph(settings=settings)
+    graph = build_graph_with_dependencies(settings=settings)
     result = graph.invoke(
         {
             "topic": args.topic,

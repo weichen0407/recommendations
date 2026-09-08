@@ -6,7 +6,7 @@ from recommendation_contents.config import (
     OpenAISettings,
     ProfileGateSettings,
 )
-from recommendation_contents.graph import build_graph
+from recommendation_contents.graph import build_graph_with_dependencies
 from recommendation_contents.services.eureka_curl import (
     build_curl_command,
     split_curl_output,
@@ -31,6 +31,11 @@ class FakeMessage:
     )
 
 
+class Message:
+    def __init__(self, content):
+        self.content = content
+
+
 class FakeLlm:
     def invoke(self, prompt):
         assert "新能源汽车电池回收趋势" in prompt
@@ -43,7 +48,7 @@ def test_topic_workflow_skips_curl_without_authorization():
         profile_gate=ProfileGateSettings(),
         eureka=EurekaSettings(),
     )
-    graph = build_graph(settings=settings, llm=FakeLlm())
+    graph = build_graph_with_dependencies(settings=settings, llm=FakeLlm())
 
     result = graph.invoke({"topic": "新能源汽车电池回收趋势", "request_context": {}})
 
@@ -80,7 +85,7 @@ def test_topic_workflow_creates_eureka_links(monkeypatch):
         profile_gate=ProfileGateSettings(),
         eureka=EurekaSettings(authorization="Bearer token", signature_id="pt_test"),
     )
-    graph = build_graph(settings=settings, llm=FakeLlm())
+    graph = build_graph_with_dependencies(settings=settings, llm=FakeLlm())
 
     result = graph.invoke({"topic": "新能源汽车电池回收趋势", "request_context": {}})
 
@@ -93,6 +98,53 @@ def test_topic_workflow_creates_eureka_links(monkeypatch):
     assert result["result_table_rows"][0]["title"] == "新能源汽车电池回收趋势研究"
     assert result["result_table_rows"][0]["categories"] == '["scout_report"]'
     assert "share_url" in result["result_table_markdown"]
+
+
+def test_topic_workflow_repairs_invalid_prompt_json():
+    class RepairingLlm:
+        def __init__(self):
+            self.calls = 0
+
+        def invoke(self, prompt):
+            self.calls += 1
+            if self.calls == 1:
+                return Message("请围绕主题完成一份结构化研究提示词。")
+            return Message(FakeMessage.content)
+
+    llm = RepairingLlm()
+    settings = AppSettings(
+        openai=OpenAISettings(api_key="test-key", model="test-model"),
+        profile_gate=ProfileGateSettings(),
+        eureka=EurekaSettings(),
+    )
+    graph = build_graph_with_dependencies(settings=settings, llm=llm)
+
+    result = graph.invoke({"topic": "新能源汽车电池回收趋势", "request_context": {}})
+
+    assert llm.calls == 2
+    assert result["debug"]["prompt_response_json"] is True
+    assert result["debug"]["prompt_response_repaired"] is True
+    assert "generate_prompt did not return valid JSON; using raw response as prompt" not in result["errors"]
+    assert result["generated_prompt"] == "请围绕主题完成一份结构化研究提示词。"
+
+
+def test_topic_workflow_extracts_json_from_wrapped_response():
+    class WrappedJsonLlm:
+        def invoke(self, prompt):
+            return Message(f"好的，结果如下：\n```json\n{FakeMessage.content}\n```")
+
+    settings = AppSettings(
+        openai=OpenAISettings(api_key="test-key", model="test-model"),
+        profile_gate=ProfileGateSettings(),
+        eureka=EurekaSettings(),
+    )
+    graph = build_graph_with_dependencies(settings=settings, llm=WrappedJsonLlm())
+
+    result = graph.invoke({"topic": "新能源汽车电池回收趋势", "request_context": {}})
+
+    assert result["debug"]["prompt_response_json"] is True
+    assert result["debug"]["prompt_response_repaired"] is False
+    assert result["title"] == "新能源汽车电池回收趋势研究"
 
 
 def test_build_curl_command_uses_argument_list():

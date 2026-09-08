@@ -16,7 +16,7 @@ from .entities import (
     sub_industry_values,
 )
 from .llm import create_chat_model
-from .prompts import build_prompt_generation_prompt
+from .prompts import build_prompt_generation_prompt, build_prompt_repair_prompt
 from .records import build_markdown_table
 from .services.eureka_curl import EurekaCurlClient, find_first_value, parse_json_body
 from .state import TopicWorkflowState
@@ -63,6 +63,19 @@ def generate_prompt(state: TopicWorkflowState, runtime: RuntimeDependencies) -> 
     response = runtime.get_llm().invoke(prompt)
     content = getattr(response, "content", str(response))
     metadata, errors = _parse_prompt_generation_response(content, state)
+    repair_content = ""
+
+    if not metadata["parsed_json"]:
+        repair_prompt = build_prompt_repair_prompt(state, content)
+        repair_response = runtime.get_llm().invoke(repair_prompt)
+        repair_content = getattr(repair_response, "content", str(repair_response))
+        repaired_metadata, repaired_errors = _parse_prompt_generation_response(repair_content, state)
+        if repaired_metadata["parsed_json"]:
+            metadata = repaired_metadata
+            errors = list(state.get("errors") or [])
+        else:
+            errors = repaired_errors
+            errors.append("generate_prompt repair did not return valid JSON")
 
     return {
         "prompt_generation_raw_response": content.strip(),
@@ -82,6 +95,8 @@ def generate_prompt(state: TopicWorkflowState, runtime: RuntimeDependencies) -> 
             "llm_model": runtime.settings.openai.model,
             "prompt_generated": True,
             "prompt_response_json": metadata["parsed_json"],
+            "prompt_response_repaired": bool(repair_content and metadata["parsed_json"]),
+            "prompt_repair_raw_response": repair_content.strip(),
         },
     }
 
@@ -242,11 +257,48 @@ def _parse_prompt_generation_response(
 
 def _parse_json_object(content: str) -> dict[str, Any] | None:
     text = _strip_json_fence(content)
+    payload = _loads_json_object(text)
+    if payload is None:
+        extracted = _extract_first_json_object(text)
+        payload = _loads_json_object(extracted) if extracted else None
+    return payload if isinstance(payload, dict) else None
+
+
+def _loads_json_object(text: str) -> dict[str, Any] | None:
     try:
         payload = json.loads(text)
     except json.JSONDecodeError:
         return None
     return payload if isinstance(payload, dict) else None
+
+
+def _extract_first_json_object(text: str) -> str:
+    start = text.find("{")
+    if start == -1:
+        return ""
+
+    depth = 0
+    in_string = False
+    escaped = False
+    for index, char in enumerate(text[start:], start=start):
+        if escaped:
+            escaped = False
+            continue
+        if char == "\\":
+            escaped = True
+            continue
+        if char == '"':
+            in_string = not in_string
+            continue
+        if in_string:
+            continue
+        if char == "{":
+            depth += 1
+        elif char == "}":
+            depth -= 1
+            if depth == 0:
+                return text[start : index + 1]
+    return ""
 
 
 def _strip_json_fence(content: str) -> str:

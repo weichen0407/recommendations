@@ -89,3 +89,26 @@ decision-making.
 Ask Eureka to write the final report in clear Chinese, with concise headings, readable tables,
 and no irrelevant filler.
 """
+
+
+def build_prompt_repair_prompt(state: Mapping[str, Any], raw_response: str) -> str:
+    output_schema = prompt_generation_output_schema()
+
+    return f"""The previous response was not valid JSON.
+
+Convert it into valid JSON that matches this schema exactly:
+{json.dumps(output_schema, ensure_ascii=False, indent=2)}
+
+Topic:
+{state.get("topic", "")}
+
+Previous response:
+{raw_response}
+
+Rules:
+- Return JSON only.
+- Do not wrap the JSON in Markdown fences.
+- If a field is missing, infer the best value from the topic and previous response.
+- Use only enum values from the schema.
+- The prompt field must contain the full Eureka report-generation prompt.
+"""

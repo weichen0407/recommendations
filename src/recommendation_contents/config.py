@@ -46,6 +46,28 @@ def merged_env(env_file: str = ".env") -> dict[str, str]:
     return values
 
 
+def apply_env_file_to_process(env_file: str = ".env") -> None:
+    """Expose dotenv values to libraries that read directly from process env."""
+    values = load_env_file(env_file)
+    for key, value in values.items():
+        os.environ.setdefault(key, value)
+
+    _apply_langsmith_compat_env()
+
+
+def _apply_langsmith_compat_env() -> None:
+    aliases = {
+        "LANGSMITH_TRACING": "LANGCHAIN_TRACING_V2",
+        "LANGSMITH_API_KEY": "LANGCHAIN_API_KEY",
+        "LANGSMITH_PROJECT": "LANGCHAIN_PROJECT",
+        "LANGSMITH_ENDPOINT": "LANGCHAIN_ENDPOINT",
+    }
+    for source_key, alias_key in aliases.items():
+        value = os.environ.get(source_key)
+        if value:
+            os.environ.setdefault(alias_key, value)
+
+
 def _json_env(env: Mapping[str, str], key: str, default: Any | None = None) -> Any:
     raw = env.get(key)
     if raw is None or raw == "":
