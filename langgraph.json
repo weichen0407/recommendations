@@ -1,0 +1,7 @@
+{
+  "dependencies": ["."],
+  "graphs": {
+    "topic_workflow": "./src/recommendation_contents/graph.py:build_graph"
+  },
+  "env": ".env"
+}

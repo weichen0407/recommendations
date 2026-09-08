@@ -1,0 +1,358 @@
+{
+  "content_categories": [
+    {
+      "value": "scout_report",
+      "label": "Scout Report"
+    },
+    {
+      "value": "case",
+      "label": "Case"
+    },
+    {
+      "value": "market_landscape",
+      "label": "Market Landscape"
+    },
+    {
+      "value": "patent_landscape",
+      "label": "Patent Landscape"
+    },
+    {
+      "value": "competitor_analysis",
+      "label": "Competitor Analysis"
+    },
+    {
+      "value": "opportunity_brief",
+      "label": "Opportunity Brief"
+    },
+    {
+      "value": "risk_watch",
+      "label": "Risk Watch"
+    },
+    {
+      "value": "trend_brief",
+      "label": "Trend Brief"
+    }
+  ],
+  "roles": [
+    {
+      "value": "rd_engineer_inventor",
+      "label": "R&D Engineer / Inventor"
+    },
+    {
+      "value": "researcher_scientist",
+      "label": "Researcher / Scientist"
+    },
+    {
+      "value": "innovation_product_strategy",
+      "label": "Innovation & Product Strategy"
+    },
+    {
+      "value": "in_house_ip_legal",
+      "label": "In-house IP & Legal"
+    },
+    {
+      "value": "patent_ip_services",
+      "label": "Patent & IP Services"
+    },
+    {
+      "value": "other",
+      "label": "Other"
+    }
+  ],
+  "jtbd": [
+    {
+      "value": "find_technical_solutions",
+      "label": "Find technical solutions"
+    },
+    {
+      "value": "explore_existing_technologies",
+      "label": "Explore existing technologies"
+    },
+    {
+      "value": "generate_product_ideas",
+      "label": "Generate product ideas"
+    },
+    {
+      "value": "assess_technical_feasibility",
+      "label": "Assess technical feasibility"
+    },
+    {
+      "value": "assess_patent_and_ip_risk",
+      "label": "Assess patent and IP risk"
+    },
+    {
+      "value": "explore_new_research_fields",
+      "label": "Explore new research fields"
+    },
+    {
+      "value": "find_research_methods",
+      "label": "Find research methods"
+    },
+    {
+      "value": "track_research_trends",
+      "label": "Track research trends"
+    },
+    {
+      "value": "generate_research_ideas",
+      "label": "Generate research ideas"
+    },
+    {
+      "value": "search_patents_and_literature",
+      "label": "Search patents and literature"
+    },
+    {
+      "value": "track_technologies_and_competitors",
+      "label": "Track technologies and competitors"
+    },
+    {
+      "value": "identify_innovation_opportunities",
+      "label": "Identify innovation opportunities"
+    },
+    {
+      "value": "evaluate_r_and_d_directions",
+      "label": "Evaluate R&D directions"
+    },
+    {
+      "value": "explore_patent_landscapes",
+      "label": "Explore patent landscapes"
+    },
+    {
+      "value": "assess_product_ip_risks",
+      "label": "Assess product IP risks"
+    },
+    {
+      "value": "search_prior_art_assess_novelty",
+      "label": "Search prior art, assess novelty"
+    },
+    {
+      "value": "check_fto_and_design_risks",
+      "label": "Check FTO and design risks"
+    },
+    {
+      "value": "draft_and_review_patents",
+      "label": "Draft and review patents"
+    },
+    {
+      "value": "respond_to_office_actions",
+      "label": "Respond to office actions"
+    },
+    {
+      "value": "conduct_fto_searches",
+      "label": "Conduct FTO searches"
+    },
+    {
+      "value": "draft_and_review_applications",
+      "label": "Draft and review applications"
+    },
+    {
+      "value": "draft_and_refine_claims",
+      "label": "Draft and refine claims"
+    },
+    {
+      "value": "track_technology_trends",
+      "label": "Track technology trends"
+    },
+    {
+      "value": "generate_ideas_and_concepts",
+      "label": "Generate ideas and concepts"
+    },
+    {
+      "value": "search_or_draft_patents",
+      "label": "Search or draft patents"
+    },
+    {
+      "value": "other",
+      "label": "Other"
+    }
+  ],
+  "role_jtbd_map": {
+    "rd_engineer_inventor": [
+      "find_technical_solutions",
+      "explore_existing_technologies",
+      "generate_product_ideas",
+      "assess_technical_feasibility",
+      "assess_patent_and_ip_risk",
+      "other"
+    ],
+    "researcher_scientist": [
+      "explore_new_research_fields",
+      "find_research_methods",
+      "track_research_trends",
+      "generate_research_ideas",
+      "search_patents_and_literature",
+      "other"
+    ],
+    "innovation_product_strategy": [
+      "track_technologies_and_competitors",
+      "identify_innovation_opportunities",
+      "evaluate_r_and_d_directions",
+      "explore_patent_landscapes",
+      "assess_product_ip_risks",
+      "other"
+    ],
+    "in_house_ip_legal": [
+      "search_prior_art_assess_novelty",
+      "check_fto_and_design_risks",
+      "explore_patent_landscapes",
+      "draft_and_review_patents",
+      "respond_to_office_actions",
+      "other"
+    ],
+    "patent_ip_services": [
+      "search_prior_art_assess_novelty",
+      "conduct_fto_searches",
+      "draft_and_review_applications",
+      "draft_and_refine_claims",
+      "respond_to_office_actions",
+      "other"
+    ],
+    "other": [
+      "find_technical_solutions",
+      "track_technology_trends",
+      "generate_ideas_and_concepts",
+      "assess_technical_feasibility",
+      "search_or_draft_patents",
+      "other"
+    ]
+  },
+  "industries": [
+    {
+      "value": "medical_devices",
+      "label": "Medical Devices",
+      "sub_industries": [
+        "diagnostic_devices",
+        "surgical_and_interventional_devices",
+        "wearable_and_digital_health_devices",
+        "device_materials_and_components"
+      ]
+    },
+    {
+      "value": "materials",
+      "label": "Materials",
+      "sub_industries": [
+        "advanced_materials",
+        "polymers_and_resins",
+        "coatings_and_surfaces",
+        "metals_and_alloys",
+        "semiconductor_materials"
+      ]
+    },
+    {
+      "value": "automotive",
+      "label": "Automotive",
+      "sub_industries": [
+        "ev_and_battery_systems",
+        "vehicle_components",
+        "autonomous_and_connected_vehicle",
+        "automotive_manufacturing"
+      ]
+    },
+    {
+      "value": "electronics_manufacturing",
+      "label": "Electronics Manufacturing",
+      "sub_industries": [
+        "semiconductor_and_packaging",
+        "photonics_and_optics",
+        "consumer_electronics_components",
+        "manufacturing_processes"
+      ]
+    },
+    {
+      "value": "engineering",
+      "label": "Engineering",
+      "sub_industries": [
+        "industrial_equipment",
+        "mechanical_systems",
+        "manufacturing_process_engineering",
+        "construction_engineering_overlap"
+      ]
+    },
+    {
+      "value": "biotechnology",
+      "label": "Biotechnology",
+      "sub_industries": [
+        "drug_discovery",
+        "synthetic_biology",
+        "diagnostics_and_biomarkers",
+        "bio_based_materials"
+      ]
+    },
+    {
+      "value": "food",
+      "label": "Food",
+      "sub_industries": [
+        "food_ingredients",
+        "food_formulation",
+        "food_processing",
+        "food_packaging"
+      ]
+    },
+    {
+      "value": "farming_production",
+      "label": "Farming Production",
+      "sub_industries": [
+        "crop_science",
+        "livestock_and_animal_health",
+        "precision_agriculture",
+        "agri_inputs"
+      ]
+    },
+    {
+      "value": "energy",
+      "label": "Energy",
+      "sub_industries": [
+        "batteries_and_storage",
+        "hydrogen_and_fuel_cells",
+        "solar_and_power_electronics",
+        "carbon_and_efficiency"
+      ]
+    },
+    {
+      "value": "chemical",
+      "label": "Chemical",
+      "sub_industries": [
+        "specialty_chemicals",
+        "industrial_formulations",
+        "polymers_and_additives",
+        "household_and_personal_care_chemistry"
+      ]
+    },
+    {
+      "value": "construction",
+      "label": "Construction",
+      "sub_industries": [
+        "building_materials",
+        "infrastructure",
+        "construction_methods",
+        "building_systems"
+      ]
+    },
+    {
+      "value": "other",
+      "label": "Other",
+      "sub_industries": [
+        {
+          "value": "consumer_products",
+          "children": [
+            "home_appliance",
+            "personal_care_devices",
+            "household_care_products"
+          ]
+        },
+        {
+          "value": "packaging_and_retail",
+          "children": [
+            "consumer_packaging",
+            "retail_and_ecommerce"
+          ]
+        },
+        {
+          "value": "general_strategy",
+          "children": [
+            "market_research"
+          ]
+        }
+      ]
+    }
+  ]
+}

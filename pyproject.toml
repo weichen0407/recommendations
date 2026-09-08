@@ -1,0 +1,37 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "recommendation-contents"
+version = "0.1.0"
+description = "A LangGraph framework for topic prompt generation and curl task execution."
+readme = "README.md"
+requires-python = ">=3.9"
+dependencies = [
+  "httpx>=0.27.0",
+  "langchain-openai>=0.1.0",
+  "langgraph>=0.2.0",
+]
+
+[dependency-groups]
+dev = [
+  "langgraph-cli[inmem]>=0.3.0",
+  "pytest>=8.0",
+  "ruff>=0.6.0",
+]
+
+[project.scripts]
+recommendation-graph = "recommendation_contents.main:main"
+topic-workflow = "recommendation_contents.main:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+pythonpath = ["src"]
+testpaths = ["tests"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py39"
