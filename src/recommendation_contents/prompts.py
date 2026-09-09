@@ -7,11 +7,15 @@ from collections.abc import Mapping
 from typing import Any
 
 from .dates import today_iso
-from .schemas import prompt_generation_output_schema
+from .schemas import article_metadata_extraction_schema, prompt_generation_output_schema
 
 SYSTEM_INSTRUCTIONS = """You are a senior prompt engineer for Eureka research/report generation.
 Expand the user's short topic into a structured report record and a complete, task-ready prompt
 for Eureka. Do not answer the topic itself."""
+
+ARTICLE_EXTRACTION_SYSTEM_INSTRUCTIONS = """You are a precise content taxonomist.
+Extract structured metadata from an existing article. Do not rewrite the article, summarize it
+as a report, or add facts that are not supported by the article."""
 
 
 def build_prompt_generation_prompt(state: Mapping[str, Any]) -> str:
@@ -111,4 +115,55 @@ Rules:
 - If a field is missing, infer the best value from the topic and previous response.
 - Use only enum values from the schema.
 - The prompt field must contain the full Eureka report-generation prompt.
+"""
+
+
+def build_article_metadata_extraction_prompt(state: Mapping[str, Any]) -> str:
+    context = state.get("request_context") or {}
+    article = (
+        state.get("article")
+        or state.get("article_text")
+        or state.get("content")
+        or state.get("markdown")
+        or ""
+    )
+    output_schema = article_metadata_extraction_schema()
+
+    return f"""{ARTICLE_EXTRACTION_SYSTEM_INSTRUCTIONS}
+
+Article:
+{article}
+
+Context JSON:
+{json.dumps(context, ensure_ascii=False, indent=2)}
+
+Output JSON schema:
+{json.dumps(output_schema, ensure_ascii=False, indent=2)}
+
+Return valid JSON only. Do not wrap it in Markdown fences.
+
+Field requirements:
+- title: extract the article's original title if present. If no title is present, infer a concise,
+  searchable title from the article content.
+- categories: classify the article into one or more content types from the categories enum. Prefer
+  one primary category unless the article clearly combines multiple formats.
+- keywords: extract concrete technologies, products, materials, companies, applications, markets,
+  or problem keywords from the article. Avoid broad filler words. Target 5-12 keywords when enough
+  evidence exists.
+- description: write a one to two sentence Chinese abstract of what the article says and why it is
+  useful.
+- role: choose the primary user role that would benefit from this article, using only the role enum.
+- industry: choose the best industry enum value based on the article evidence.
+- jtbd: choose the jobs-to-be-done that the article helps with, using only the jtbd enum.
+- date: extract the article's publication or event date and normalize it to YYYY-MM-DD. If the
+  article has no usable date, use today's date: {today_iso()}.
+- sub_industry: choose relevant sub_industry enum values. Prefer sub-industries that belong to the
+  selected industry when possible.
+
+Classification rules:
+- Use enum values exactly as they appear in the schema; do not use display names or translations.
+- Base extraction on the article. Infer classification fields only when the article gives enough
+  evidence.
+- If evidence is weak, choose the closest enum value and keep the description conservative.
+- Return arrays for categories, keywords, jtbd, and sub_industry even when there is only one item.
 """

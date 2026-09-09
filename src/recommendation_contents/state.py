@@ -2,7 +2,9 @@
 
 from __future__ import annotations
 
-from typing import Any, TypedDict
+from typing import Any
+
+from typing_extensions import TypedDict
 
 
 class TopicWorkflowState(TypedDict, total=False):
@@ -19,6 +21,14 @@ class TopicWorkflowState(TypedDict, total=False):
     jtbd: list[str]
     date: str
     sub_industry: list[str]
+    token_status: str
+    token_reason: str
+    token_source: str
+    token_refresh_available: bool
+    token_refresh_attempted: bool
+    token_refresh_success: bool
+    token_refresh_error: str
+    eureka_auth_status: str
     curl_payload: dict[str, Any]
     curl_response: str
     curl_success: bool

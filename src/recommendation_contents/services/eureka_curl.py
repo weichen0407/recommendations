@@ -49,19 +49,37 @@ class CurlResult:
 class EurekaCurlClient:
     def __init__(self, settings: EurekaSettings) -> None:
         self.settings = settings
+        self._authorization = settings.authorization
+        self._signature_id = settings.signature_id
+        self._site_lang = settings.site_lang
+        self._cookie = settings.extra_headers.get("cookie", "")
 
     def has_authorization_header(self) -> bool:
         return any(key.lower() == "authorization" and value for key, value in self.headers().items())
 
+    def set_authorization(self, authorization: str) -> None:
+        self._authorization = authorization
+
+    def set_signature_id(self, signature_id: str) -> None:
+        self._signature_id = signature_id
+
+    def set_site_lang(self, site_lang: str) -> None:
+        self._site_lang = site_lang
+
+    def set_cookie(self, cookie: str) -> None:
+        self._cookie = cookie
+
     def headers(self) -> dict[str, str]:
         headers = dict(DEFAULT_EUREKA_HEADERS)
-        if self.settings.authorization:
-            headers["authorization"] = self.settings.authorization
-        if self.settings.signature_id:
-            headers["x-signature-id"] = self.settings.signature_id
-        if self.settings.site_lang:
-            headers["x-site-lang"] = self.settings.site_lang
         headers.update(self.settings.extra_headers)
+        if self._authorization:
+            headers["authorization"] = self._authorization
+        if self._signature_id:
+            headers["x-signature-id"] = self._signature_id
+        if self._site_lang:
+            headers["x-site-lang"] = self._site_lang
+        if self._cookie:
+            headers["cookie"] = self._cookie
         return {key: value for key, value in headers.items() if value}
 
     def create_conversation(self, query: str) -> CurlResult:

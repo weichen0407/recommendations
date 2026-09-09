@@ -36,6 +36,11 @@ def test_settings_from_env_file(tmp_path):
         EUREKA_SIGNATURE_ID=pt_test
         EUREKA_SITE_LANG=CN
         EUREKA_EXTRA_HEADERS_JSON={"X-Test-Eureka":"1"}
+        EUREKA_TOKEN_CHECK_MODE=presence
+        EUREKA_TOKEN_CACHE=/tmp/eureka-token.json
+        EUREKA_TOKEN_REFRESH_ENABLED=true
+        EUREKA_TOKEN_REFRESH_URL=https://refresh.test/token
+        EUREKA_TOKEN_REFRESH_BODY_JSON={"refresh_token":"refresh"}
         """,
         encoding="utf-8",
     )
@@ -52,6 +57,11 @@ def test_settings_from_env_file(tmp_path):
     assert settings.eureka.authorization == "Bearer token"
     assert settings.eureka.signature_id == "pt_test"
     assert settings.eureka.extra_headers["X-Test-Eureka"] == "1"
+    assert settings.eureka.token_check_mode == "presence"
+    assert settings.eureka.token_cache == "/tmp/eureka-token.json"
+    assert settings.eureka.token_refresh_enabled is True
+    assert settings.eureka.token_refresh_url == "https://refresh.test/token"
+    assert settings.eureka.token_refresh_body == {"refresh_token": "refresh"}
 
 
 def test_apply_env_file_to_process_exports_langsmith_aliases(tmp_path, monkeypatch):

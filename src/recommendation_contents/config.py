@@ -92,6 +92,13 @@ def _optional_float_env(env: Mapping[str, str], key: str) -> float | None:
     return float(raw)
 
 
+def _bool_env(env: Mapping[str, str], key: str, default: bool) -> bool:
+    raw = env.get(key)
+    if raw is None or raw == "":
+        return default
+    return raw.strip().lower() in {"1", "true", "yes", "y", "on"}
+
+
 def _int_env(env: Mapping[str, str], key: str, default: int) -> int:
     raw = env.get(key)
     if raw is None or raw == "":
@@ -179,6 +186,20 @@ class EurekaSettings:
     extra_headers: dict[str, str] = field(default_factory=dict)
     timeout_seconds: float = 60.0
     timezone: str = "Asia/Shanghai"
+    token_check_mode: str = "presence"
+    token_cache: str = ""
+    token_expiry_skew_seconds: float = 60.0
+    token_refresh_enabled: bool = False
+    token_refresh_cmd: str = ""
+    token_refresh_url: str = ""
+    token_refresh_method: str = "POST"
+    token_refresh_headers: dict[str, str] = field(default_factory=dict)
+    token_refresh_body: dict[str, Any] = field(default_factory=dict)
+    token_refresh_authorization_path: str = "authorization"
+    token_refresh_access_token_path: str = "access_token"
+    token_refresh_refresh_token_path: str = "refresh_token"
+    token_refresh_expires_at_path: str = "expires_at"
+    token_refresh_expires_in_path: str = "expires_in"
     session_link_template: str = (
         "https://eureka.patsnap.com/ai-search/{session_id}"
         "?from=rd-home&start_from=eureka_landingpage"
@@ -216,6 +237,40 @@ class EurekaSettings:
             extra_headers=extra_headers,
             timeout_seconds=_float_env(env, "EUREKA_TIMEOUT_SECONDS", 60.0),
             timezone=env.get("EUREKA_TIMEZONE", "Asia/Shanghai") or "Asia/Shanghai",
+            token_check_mode=env.get("EUREKA_TOKEN_CHECK_MODE", "presence") or "presence",
+            token_cache=env.get("EUREKA_TOKEN_CACHE", ""),
+            token_expiry_skew_seconds=_float_env(env, "EUREKA_TOKEN_EXPIRY_SKEW_SECONDS", 60.0),
+            token_refresh_enabled=_bool_env(env, "EUREKA_TOKEN_REFRESH_ENABLED", False),
+            token_refresh_cmd=env.get("EUREKA_TOKEN_REFRESH_CMD", ""),
+            token_refresh_url=env.get("EUREKA_TOKEN_REFRESH_URL", ""),
+            token_refresh_method=env.get("EUREKA_TOKEN_REFRESH_METHOD", "POST") or "POST",
+            token_refresh_headers=_json_env(env, "EUREKA_TOKEN_REFRESH_HEADERS_JSON", {}) or {},
+            token_refresh_body=_json_env(env, "EUREKA_TOKEN_REFRESH_BODY_JSON", {}) or {},
+            token_refresh_authorization_path=env.get(
+                "EUREKA_TOKEN_REFRESH_AUTHORIZATION_PATH",
+                "authorization",
+            )
+            or "authorization",
+            token_refresh_access_token_path=env.get(
+                "EUREKA_TOKEN_REFRESH_ACCESS_TOKEN_PATH",
+                "access_token",
+            )
+            or "access_token",
+            token_refresh_refresh_token_path=env.get(
+                "EUREKA_TOKEN_REFRESH_REFRESH_TOKEN_PATH",
+                "refresh_token",
+            )
+            or "refresh_token",
+            token_refresh_expires_at_path=env.get(
+                "EUREKA_TOKEN_REFRESH_EXPIRES_AT_PATH",
+                "expires_at",
+            )
+            or "expires_at",
+            token_refresh_expires_in_path=env.get(
+                "EUREKA_TOKEN_REFRESH_EXPIRES_IN_PATH",
+                "expires_in",
+            )
+            or "expires_in",
             session_link_template=env.get(
                 "EUREKA_SESSION_LINK_TEMPLATE",
                 "https://eureka.patsnap.com/ai-search/{session_id}"

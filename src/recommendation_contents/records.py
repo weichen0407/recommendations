@@ -37,6 +37,8 @@ def save_result_table(
     markdown_path: str = DEFAULT_RECORDS_MARKDOWN,
 ) -> None:
     append_csv_row(row=row, csv_path=csv_path)
+    if not markdown_path:
+        return
     rows = read_csv_rows(csv_path)
     write_markdown_table(rows=rows, markdown_path=markdown_path)
 
