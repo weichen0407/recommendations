@@ -16,6 +16,11 @@ from .entities import (
     sub_industry_values,
 )
 from .llm import create_chat_model
+from .onboarding_fields import (
+    onboarding_industry_value,
+    onboarding_jtbd_values,
+    onboarding_role_value,
+)
 from .prompts import build_prompt_generation_prompt, build_prompt_repair_prompt
 from .records import build_markdown_table
 from .services.eureka_curl import EurekaCurlClient, find_first_value, parse_json_body
@@ -300,9 +305,9 @@ def finalize_result(state: TopicWorkflowState) -> dict[str, Any]:
             "categories": _csv_list(state.get("categories") or []),
             "keywords": _csv_list(state.get("keywords") or []),
             "description": state.get("description", ""),
-            "role": state.get("role", ""),
-            "industry": state.get("industry", ""),
-            "jtbd": _csv_list(state.get("jtbd") or []),
+            "role": onboarding_role_value(state.get("role", "")),
+            "industry": onboarding_industry_value(state.get("industry", "")),
+            "jtbd": _csv_list(onboarding_jtbd_values(state.get("jtbd") or [])),
             "date": state.get("date") or today_iso(),
             "sub_industry": _csv_list(state.get("sub_industry") or []),
         }

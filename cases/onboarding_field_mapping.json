@@ -1,0 +1,336 @@
+{
+  "source_workbook": "Onboarding字段映射_三列版.xlsx",
+  "sheet": "正常映射",
+  "columns": [
+    "字段",
+    "文案",
+    "正常存储值"
+  ],
+  "field_aliases": {
+    "role": "job_role",
+    "industry": "industry_type",
+    "jtbd": "jtbd_primary"
+  },
+  "rows": [
+    {
+      "field": "job_role",
+      "label": "R&D Engineer / Inventor",
+      "storage_value": "rd_engineer"
+    },
+    {
+      "field": "job_role",
+      "label": "Researcher / Scientist",
+      "storage_value": "researcher"
+    },
+    {
+      "field": "job_role",
+      "label": "Innovation & Product Strategy",
+      "storage_value": "innovation_product_strategy"
+    },
+    {
+      "field": "job_role",
+      "label": "In-house IP & Legal",
+      "storage_value": "in_house_ip_legal"
+    },
+    {
+      "field": "job_role",
+      "label": "Patent & IP Services",
+      "storage_value": "patent_ip_services"
+    },
+    {
+      "field": "job_role",
+      "label": "Other",
+      "storage_value": "other"
+    },
+    {
+      "field": "jtbd_primary",
+      "label": "Find technical solutions",
+      "storage_value": "technical_solutions"
+    },
+    {
+      "field": "jtbd_primary",
+      "label": "Explore existing technologies",
+      "storage_value": "existing_technologies"
+    },
+    {
+      "field": "jtbd_primary",
+      "label": "Generate product ideas",
+      "storage_value": "product_ideas"
+    },
+    {
+      "field": "jtbd_primary",
+      "label": "Assess technical feasibility",
+      "storage_value": "technical_feasibility"
+    },
+    {
+      "field": "jtbd_primary",
+      "label": "Assess patent and IP risk",
+      "storage_value": "patent_ip_risk"
+    },
+    {
+      "field": "jtbd_primary",
+      "label": "Explore new research fields",
+      "storage_value": "new_research_fields"
+    },
+    {
+      "field": "jtbd_primary",
+      "label": "Find research methods",
+      "storage_value": "research_methods"
+    },
+    {
+      "field": "jtbd_primary",
+      "label": "Track research trends",
+      "storage_value": "research_trends"
+    },
+    {
+      "field": "jtbd_primary",
+      "label": "Generate research ideas",
+      "storage_value": "research_ideas"
+    },
+    {
+      "field": "jtbd_primary",
+      "label": "Search patents and literature",
+      "storage_value": "patents_literature"
+    },
+    {
+      "field": "jtbd_primary",
+      "label": "Track technologies and competitors",
+      "storage_value": "technology_competitors"
+    },
+    {
+      "field": "jtbd_primary",
+      "label": "Identify innovation opportunities",
+      "storage_value": "innovation_opportunities"
+    },
+    {
+      "field": "jtbd_primary",
+      "label": "Evaluate R&D directions",
+      "storage_value": "rd_directions"
+    },
+    {
+      "field": "jtbd_primary",
+      "label": "Explore patent landscapes",
+      "storage_value": "patent_landscapes"
+    },
+    {
+      "field": "jtbd_primary",
+      "label": "Assess product IP risks",
+      "storage_value": "product_ip_risks"
+    },
+    {
+      "field": "jtbd_primary",
+      "label": "Search prior art, assess novelty",
+      "storage_value": "prior_art"
+    },
+    {
+      "field": "jtbd_primary",
+      "label": "Check FTO and design risks",
+      "storage_value": "fto_design_risks"
+    },
+    {
+      "field": "jtbd_primary",
+      "label": "Draft and review patents",
+      "storage_value": "draft_review_patents"
+    },
+    {
+      "field": "jtbd_primary",
+      "label": "Respond to office actions",
+      "storage_value": "office_actions"
+    },
+    {
+      "field": "jtbd_primary",
+      "label": "Conduct FTO searches",
+      "storage_value": "fto_searches"
+    },
+    {
+      "field": "jtbd_primary",
+      "label": "Draft and review applications",
+      "storage_value": "draft_review_applications"
+    },
+    {
+      "field": "jtbd_primary",
+      "label": "Draft and refine claims",
+      "storage_value": "draft_refine_claims"
+    },
+    {
+      "field": "jtbd_primary",
+      "label": "Track technology trends",
+      "storage_value": "technology_trends"
+    },
+    {
+      "field": "jtbd_primary",
+      "label": "Generate ideas and concepts",
+      "storage_value": "ideas_concepts"
+    },
+    {
+      "field": "jtbd_primary",
+      "label": "Search or draft patents",
+      "storage_value": "search_draft_patents"
+    },
+    {
+      "field": "jtbd_primary",
+      "label": "Other",
+      "storage_value": "other"
+    },
+    {
+      "field": "industry_type",
+      "label": "Medical Devices",
+      "storage_value": "medical_devices"
+    },
+    {
+      "field": "industry_type",
+      "label": "Materials",
+      "storage_value": "materials"
+    },
+    {
+      "field": "industry_type",
+      "label": "Automotive",
+      "storage_value": "automotive"
+    },
+    {
+      "field": "industry_type",
+      "label": "Electronics Manufacturing",
+      "storage_value": "electronics_manufacturing"
+    },
+    {
+      "field": "industry_type",
+      "label": "Engineering",
+      "storage_value": "engineering"
+    },
+    {
+      "field": "industry_type",
+      "label": "Biotechnology",
+      "storage_value": "biotech"
+    },
+    {
+      "field": "industry_type",
+      "label": "Food / Farming Production",
+      "storage_value": "food_farming_production"
+    },
+    {
+      "field": "industry_type",
+      "label": "Energy",
+      "storage_value": "energy"
+    },
+    {
+      "field": "industry_type",
+      "label": "Chemical",
+      "storage_value": "chemical"
+    },
+    {
+      "field": "industry_type",
+      "label": "Construction",
+      "storage_value": "construction"
+    },
+    {
+      "field": "industry_type",
+      "label": "Other",
+      "storage_value": "other"
+    }
+  ],
+  "by_field_label": {
+    "job_role": {
+      "R&D Engineer / Inventor": "rd_engineer",
+      "Researcher / Scientist": "researcher",
+      "Innovation & Product Strategy": "innovation_product_strategy",
+      "In-house IP & Legal": "in_house_ip_legal",
+      "Patent & IP Services": "patent_ip_services",
+      "Other": "other"
+    },
+    "jtbd_primary": {
+      "Find technical solutions": "technical_solutions",
+      "Explore existing technologies": "existing_technologies",
+      "Generate product ideas": "product_ideas",
+      "Assess technical feasibility": "technical_feasibility",
+      "Assess patent and IP risk": "patent_ip_risk",
+      "Explore new research fields": "new_research_fields",
+      "Find research methods": "research_methods",
+      "Track research trends": "research_trends",
+      "Generate research ideas": "research_ideas",
+      "Search patents and literature": "patents_literature",
+      "Track technologies and competitors": "technology_competitors",
+      "Identify innovation opportunities": "innovation_opportunities",
+      "Evaluate R&D directions": "rd_directions",
+      "Explore patent landscapes": "patent_landscapes",
+      "Assess product IP risks": "product_ip_risks",
+      "Search prior art, assess novelty": "prior_art",
+      "Check FTO and design risks": "fto_design_risks",
+      "Draft and review patents": "draft_review_patents",
+      "Respond to office actions": "office_actions",
+      "Conduct FTO searches": "fto_searches",
+      "Draft and review applications": "draft_review_applications",
+      "Draft and refine claims": "draft_refine_claims",
+      "Track technology trends": "technology_trends",
+      "Generate ideas and concepts": "ideas_concepts",
+      "Search or draft patents": "search_draft_patents",
+      "Other": "other"
+    },
+    "industry_type": {
+      "Medical Devices": "medical_devices",
+      "Materials": "materials",
+      "Automotive": "automotive",
+      "Electronics Manufacturing": "electronics_manufacturing",
+      "Engineering": "engineering",
+      "Biotechnology": "biotech",
+      "Food / Farming Production": "food_farming_production",
+      "Energy": "energy",
+      "Chemical": "chemical",
+      "Construction": "construction",
+      "Other": "other"
+    }
+  },
+  "current_to_onboarding_storage_value": {
+    "role": {
+      "rd_engineer_inventor": "rd_engineer",
+      "researcher_scientist": "researcher",
+      "innovation_product_strategy": "innovation_product_strategy",
+      "in_house_ip_legal": "in_house_ip_legal",
+      "patent_ip_services": "patent_ip_services",
+      "other": "other"
+    },
+    "industry": {
+      "medical_devices": "medical_devices",
+      "materials": "materials",
+      "automotive": "automotive",
+      "electronics_manufacturing": "electronics_manufacturing",
+      "engineering": "engineering",
+      "biotechnology": "biotech",
+      "biotech": "biotech",
+      "food": "food_farming_production",
+      "farming_production": "food_farming_production",
+      "food_farming_production": "food_farming_production",
+      "energy": "energy",
+      "chemical": "chemical",
+      "construction": "construction",
+      "other": "other"
+    },
+    "jtbd": {
+      "find_technical_solutions": "technical_solutions",
+      "explore_existing_technologies": "existing_technologies",
+      "generate_product_ideas": "product_ideas",
+      "assess_technical_feasibility": "technical_feasibility",
+      "assess_patent_and_ip_risk": "patent_ip_risk",
+      "explore_new_research_fields": "new_research_fields",
+      "find_research_methods": "research_methods",
+      "track_research_trends": "research_trends",
+      "generate_research_ideas": "research_ideas",
+      "search_patents_and_literature": "patents_literature",
+      "track_technologies_and_competitors": "technology_competitors",
+      "identify_innovation_opportunities": "innovation_opportunities",
+      "evaluate_r_and_d_directions": "rd_directions",
+      "explore_patent_landscapes": "patent_landscapes",
+      "assess_product_ip_risks": "product_ip_risks",
+      "search_prior_art_assess_novelty": "prior_art",
+      "check_fto_and_design_risks": "fto_design_risks",
+      "draft_and_review_patents": "draft_review_patents",
+      "respond_to_office_actions": "office_actions",
+      "conduct_fto_searches": "fto_searches",
+      "draft_and_review_applications": "draft_review_applications",
+      "draft_and_refine_claims": "draft_refine_claims",
+      "track_technology_trends": "technology_trends",
+      "generate_ideas_and_concepts": "ideas_concepts",
+      "search_or_draft_patents": "search_draft_patents",
+      "other": "other"
+    }
+  }
+}

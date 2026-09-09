@@ -120,6 +120,7 @@ def test_topic_workflow_creates_eureka_links(monkeypatch):
     assert result["share_link"].startswith("https://eureka.patsnap.com/share/?id=share_test")
     assert result["result_table_rows"][0]["title"] == "新能源汽车电池回收趋势研究"
     assert result["result_table_rows"][0]["categories"] == '["scout_report"]'
+    assert result["result_table_rows"][0]["jtbd"] == '["innovation_opportunities"]'
     assert "share_url" in result["result_table_markdown"]
 
 

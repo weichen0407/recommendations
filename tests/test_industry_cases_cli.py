@@ -72,6 +72,27 @@ def test_select_unused_cases_by_industry_can_filter_industries():
     assert selected["energy"][0][0] == 1
 
 
+def test_select_unused_cases_by_industry_uses_source_industry_for_mapped_values():
+    records = [
+        {
+            "title": "food one",
+            "source_industry": "food",
+            "industry": "food_farming_production",
+        },
+        {
+            "title": "farming one",
+            "source_industry": "farming_production",
+            "industry": "food_farming_production",
+        },
+    ]
+
+    selected = select_unused_cases_by_industry(records, {}, per_industry=3)
+
+    assert list(selected) == ["farming_production", "food"]
+    assert selected["food"][0][0] == 0
+    assert selected["farming_production"][0][0] == 1
+
+
 def test_usage_table_marks_selected_and_used(tmp_path):
     usage_path = tmp_path / "case_usage.csv"
     usage_rows = {}

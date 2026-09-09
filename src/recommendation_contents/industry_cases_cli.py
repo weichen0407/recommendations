@@ -25,6 +25,11 @@ from .cases_cli import (
 )
 from .config import AppSettings, apply_env_file_to_process
 from .nodes import RuntimeDependencies
+from .onboarding_fields import (
+    onboarding_industry_value,
+    onboarding_jtbd_values,
+    onboarding_role_value,
+)
 from .records import save_result_table
 
 DEFAULT_USAGE_CSV = "cases/case_usage.csv"
@@ -211,7 +216,8 @@ def main() -> None:
                 allow_refresh=allow_refresh,
                 log_progress=args.output == "summary",
             )
-            result["industry"] = industry
+            result["source_industry"] = industry
+            result["industry"] = onboarding_industry_value(industry)
             results.append(result)
             write_results_json(results=results, path=args.results_json)
 
@@ -251,7 +257,11 @@ def select_unused_cases_by_industry(
     for record_index, item in enumerate(records):
         case_index = case_index_from_item(item, record_index)
         industry = _case_industry(item)
-        if allowed_industries and industry not in allowed_industries:
+        if (
+            allowed_industries
+            and industry not in allowed_industries
+            and onboarding_industry_value(industry) not in allowed_industries
+        ):
             continue
         if _is_used(usage_rows.get(case_index)):
             continue
@@ -321,15 +331,17 @@ def write_usage_rows(rows: dict[int, dict[str, str]], path: str) -> None:
 
 
 def _selection_item(case_index: int, item: dict[str, Any]) -> dict[str, Any]:
+    source_industry = _case_industry(item)
     return {
         "case_index": case_index,
         "title": _string(item.get("title")),
-        "industry": _case_industry(item),
+        "source_industry": source_industry,
+        "industry": onboarding_industry_value(source_industry),
         "categories": _string_list(item.get("categories")),
         "keywords": _string_list(item.get("keywords")),
         "description": _string(item.get("description")),
-        "role": _string(item.get("role")),
-        "jtbd": _string_list(item.get("jtbd")),
+        "role": onboarding_role_value(item.get("role")),
+        "jtbd": onboarding_jtbd_values(_string_list(item.get("jtbd"))),
         "date": _string(item.get("date")),
         "sub_industry": _string_list(item.get("sub_industry")),
         "output": _string(item.get("output")),
@@ -372,7 +384,7 @@ def _base_usage_row(case_index: int, item: dict[str, Any]) -> dict[str, str]:
     return {
         "case_index": str(case_index),
         "title": _string(item.get("title")),
-        "industry": _case_industry(item),
+        "industry": onboarding_industry_value(_case_industry(item)),
         "status": "",
         "selected_at": "",
         "used_at": "",
@@ -438,7 +450,7 @@ def _allowed_industries(raw: str) -> set[str] | None:
 
 
 def _case_industry(item: dict[str, Any]) -> str:
-    return _string(item.get("industry")) or "unknown"
+    return _string(item.get("source_industry")) or _string(item.get("industry")) or "unknown"
 
 
 def _is_used(row: dict[str, str] | None) -> bool:
