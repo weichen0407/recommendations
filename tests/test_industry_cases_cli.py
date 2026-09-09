@@ -124,6 +124,7 @@ def test_usage_table_marks_selected_and_used(tmp_path):
     assert used_rows[3]["used_at"]
     assert used_rows[3]["session_url"].endswith("/sess")
     assert used_rows[3]["share_url"].endswith("share")
+    assert used_rows[3]["isCompleted"] == ""
 
 
 def test_industry_main_stops_before_next_case_when_url_is_missing(tmp_path, monkeypatch):
@@ -251,3 +252,24 @@ def test_usage_table_marks_failed_without_used_at():
     assert usage_rows[3]["status"] == "failed"
     assert usage_rows[3]["used_at"] == ""
     assert usage_rows[3]["error"] == "Eureka query returned HTTP 401"
+
+
+def test_usage_table_marks_used_before_separate_completion_validation():
+    usage_rows = {}
+    item = {"title": "auto one", "industry": "automotive"}
+
+    update_usage_after_run(
+        usage_rows,
+        3,
+        item,
+        {
+            "curl_success": True,
+            "session_url": "https://eureka.patsnap.com/ai-search/sess",
+            "share_url": "https://eureka.patsnap.com/share/?id=share",
+            "errors": [],
+        },
+    )
+
+    assert usage_rows[3]["status"] == "used"
+    assert usage_rows[3]["used_at"]
+    assert usage_rows[3]["isCompleted"] == ""

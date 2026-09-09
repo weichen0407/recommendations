@@ -284,6 +284,25 @@ def test_build_curl_command_uses_argument_list():
     assert command[command.index("--data-raw") + 1] == '{"topic": "abc", "prompt": "def", "context": {}}'
 
 
+def test_build_curl_command_omits_body_for_get():
+    command = build_curl_command(
+        url="https://example.test/status",
+        headers={"Authorization": "Bearer token"},
+        timeout_seconds=12,
+        payload={"session_id": "sess_test"},
+        method="GET",
+    )
+
+    assert command[:4] == [
+        "curl",
+        "-sS",
+        "--url",
+        "https://example.test/status?session_id=sess_test",
+    ]
+    assert "--data-raw" not in command
+    assert command[command.index("--request") + 1] == "GET"
+
+
 def test_split_curl_output_extracts_status_code():
     body, status = split_curl_output('{"ok":true}\n201')
 

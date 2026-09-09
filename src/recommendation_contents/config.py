@@ -179,6 +179,13 @@ class ProfileGateSettings:
 class EurekaSettings:
     query_endpoint: str = "https://eureka-service.patsnap.com/api/eureka/query/conversational"
     share_endpoint: str = "https://eureka-service.patsnap.com/eureka/secure-share/create"
+    completion_endpoint: str = (
+        "https://eureka-service.patsnap.com/api/eureka/share/sessions/{session_id}/events"
+    )
+    completion_method: str = "GET"
+    completion_body: dict[str, Any] = field(default_factory=dict)
+    completion_timeout_seconds: float = 600.0
+    completion_poll_interval_seconds: float = 5.0
     authorization: str = ""
     bearer_token: str = ""
     signature_id: str = ""
@@ -229,6 +236,18 @@ class EurekaSettings:
             share_endpoint=env.get(
                 "EUREKA_SHARE_ENDPOINT",
                 "https://eureka-service.patsnap.com/eureka/secure-share/create",
+            ),
+            completion_endpoint=env.get(
+                "EUREKA_COMPLETION_ENDPOINT",
+                "https://eureka-service.patsnap.com/api/eureka/share/sessions/{session_id}/events",
+            ),
+            completion_method=env.get("EUREKA_COMPLETION_METHOD", "GET") or "GET",
+            completion_body=_json_env(env, "EUREKA_COMPLETION_BODY_JSON", {}) or {},
+            completion_timeout_seconds=_float_env(env, "EUREKA_COMPLETION_TIMEOUT_SECONDS", 600.0),
+            completion_poll_interval_seconds=_float_env(
+                env,
+                "EUREKA_COMPLETION_POLL_INTERVAL_SECONDS",
+                5.0,
             ),
             authorization=authorization,
             bearer_token=bearer_token,

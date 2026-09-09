@@ -376,6 +376,7 @@ class FakeEurekaClient:
         self.signature_id = ""
         self.cookie = ""
         self.query_calls = 0
+        self.completion_calls = 0
 
     def has_authorization_header(self):
         return bool(self.authorization)
@@ -412,6 +413,25 @@ class FakeEurekaClient:
         return CurlResult(
             payload={},
             body='{"data":{"share_id":"share_retry"}}',
+            status_code=200,
+            return_code=0,
+        )
+
+    def has_completion_endpoint(self):
+        return True
+
+    def get_completion_status(self, _session_id):
+        self.completion_calls += 1
+        if self.completion_calls < 2:
+            return CurlResult(
+                payload={},
+                body='{"data":{"status":"running"}}',
+                status_code=200,
+                return_code=0,
+            )
+        return CurlResult(
+            payload={},
+            body='{"data":{"completion":{"content":"done"}}}',
             status_code=200,
             return_code=0,
         )

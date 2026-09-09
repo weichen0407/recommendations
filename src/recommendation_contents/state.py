@@ -45,6 +45,18 @@ class TopicWorkflowState(TypedDict, total=False):
     session_link: str
     share_id: str
     share_link: str
+    completion_required: bool
+    completion_checked: bool
+    isCompleted: bool
+    completion_status: str
+    completion_value: Any
+    completion_error: str
+    completion_status_path: str
+    completion_error_path: str
+    completion_poll_count: int
+    eureka_completion_response: str
+    eureka_completion_status_code: int
+    eureka_completion_return_code: int
     result_table_rows: list[dict[str, str]]
     result_table_markdown: str
     errors: list[str]

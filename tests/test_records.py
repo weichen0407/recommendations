@@ -11,6 +11,7 @@ def test_save_result_table_appends_csv_and_regenerates_markdown(tmp_path):
             "generated_prompt": "提示词一",
             "session_url": "https://example.test/session-1",
             "share_url": "https://example.test/share-1",
+            "isCompleted": "true",
             "title": "标题一",
             "categories": "[\"scout_report\"]",
             "keywords": "[\"关键词一\"]",
@@ -30,6 +31,7 @@ def test_save_result_table_appends_csv_and_regenerates_markdown(tmp_path):
             "generated_prompt": "提示词二\n第二行",
             "session_url": "https://example.test/session-2",
             "share_url": "https://example.test/share-2",
+            "isComplete": "false",
             "title": "标题二",
             "categories": "[\"case\"]",
             "keywords": "[\"关键词二\"]",
@@ -48,6 +50,8 @@ def test_save_result_table_appends_csv_and_regenerates_markdown(tmp_path):
     markdown = markdown_path.read_text(encoding="utf-8")
 
     assert [row["input"] for row in rows] == ["主题一", "主题二"]
+    assert [row["isCompleted"] for row in rows] == ["true", "false"]
+    assert "isComplete" not in rows[0]
     assert "提示词二<br>第二行" in markdown
     assert "scout_report" in markdown
     assert "share_url" in markdown
@@ -68,6 +72,7 @@ def test_save_result_table_migrates_legacy_headers(tmp_path):
             "generated_prompt": "新提示词",
             "session_url": "https://example.test/session-new",
             "share_url": "https://example.test/share-new",
+            "isComplete": "true",
             "title": "新标题",
         },
         csv_path=str(csv_path),
@@ -79,4 +84,7 @@ def test_save_result_table_migrates_legacy_headers(tmp_path):
     assert rows[0]["input"] == "旧主题"
     assert rows[0]["generated_prompt"] == "旧提示词"
     assert rows[0]["session_url"] == "https://example.test/session-old"
+    assert rows[0]["isCompleted"] == ""
+    assert "isComplete" not in rows[0]
     assert rows[1]["input"] == "新主题"
+    assert rows[1]["isCompleted"] == "true"

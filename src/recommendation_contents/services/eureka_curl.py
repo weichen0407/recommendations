@@ -6,7 +6,7 @@ import json
 import subprocess
 from dataclasses import dataclass
 from typing import Any
-from urllib.parse import quote
+from urllib.parse import quote, urlencode
 
 from recommendation_contents.config import EurekaSettings
 
@@ -111,6 +111,25 @@ class EurekaCurlClient:
             timeout_seconds=self.settings.timeout_seconds,
         )
 
+    def has_completion_endpoint(self) -> bool:
+        return bool(self.settings.completion_endpoint)
+
+    def get_completion_status(self, session_id: str) -> CurlResult:
+        payload = _replace_template_values(
+            self.settings.completion_body,
+            {"session_id": session_id},
+        )
+        return run_curl_json(
+            url=_format_template_url(
+                self.settings.completion_endpoint,
+                {"session_id": session_id},
+            ),
+            headers=self.headers(),
+            payload=payload,
+            timeout_seconds=self.settings.timeout_seconds,
+            method=self.settings.completion_method,
+        )
+
     def build_session_link(self, session_id: str) -> str:
         return self.settings.session_link_template.format(session_id=quote(session_id, safe=""))
 
@@ -123,12 +142,14 @@ def run_curl_json(
     headers: dict[str, str],
     payload: dict[str, Any],
     timeout_seconds: float,
+    method: str = "POST",
 ) -> CurlResult:
     command = build_curl_command(
         url=url,
         headers=headers,
         payload=payload,
         timeout_seconds=timeout_seconds,
+        method=method,
     )
     try:
         result = subprocess.run(command, check=False, capture_output=True, text=True)
@@ -156,29 +177,53 @@ def build_curl_command(
     headers: dict[str, str],
     payload: dict[str, Any],
     timeout_seconds: float,
+    method: str = "POST",
 ) -> list[str]:
+    normalized_method = method.upper()
     command = [
         "curl",
         "-sS",
         "--url",
-        url,
+        _url_with_query_payload(url, payload) if normalized_method == "GET" else url,
         "--request",
-        "POST",
+        normalized_method,
         "--max-time",
         str(timeout_seconds),
     ]
     for key, value in headers.items():
         command.extend(["-H", f"{key}: {value}"])
 
-    command.extend(
-        [
-            "--data-raw",
-            json.dumps(payload, ensure_ascii=False),
-            "-w",
-            "\n%{http_code}",
-        ]
-    )
+    if normalized_method != "GET":
+        command.extend(["--data-raw", json.dumps(payload, ensure_ascii=False)])
+    command.extend(["-w", "\n%{http_code}"])
     return command
+
+
+def _format_template_url(url: str, values: dict[str, str]) -> str:
+    formatted = url
+    for key, value in values.items():
+        formatted = formatted.replace(f"{{{key}}}", quote(value, safe=""))
+    return formatted
+
+
+def _replace_template_values(value: Any, values: dict[str, str]) -> Any:
+    if isinstance(value, str):
+        result = value
+        for key, replacement in values.items():
+            result = result.replace(f"{{{key}}}", replacement)
+        return result
+    if isinstance(value, list):
+        return [_replace_template_values(item, values) for item in value]
+    if isinstance(value, dict):
+        return {key: _replace_template_values(item, values) for key, item in value.items()}
+    return value
+
+
+def _url_with_query_payload(url: str, payload: dict[str, Any]) -> str:
+    if not payload:
+        return url
+    separator = "&" if "?" in url else "?"
+    return f"{url}{separator}{urlencode(payload, doseq=True)}"
 
 
 def split_curl_output(stdout: str) -> tuple[str, int]:

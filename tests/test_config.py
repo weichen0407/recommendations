@@ -32,6 +32,11 @@ def test_settings_from_env_file(tmp_path):
         PROFILE_GATE_EXTRA_HEADERS_JSON={"X-Test":"1"}
         EUREKA_QUERY_ENDPOINT=https://query.test
         EUREKA_SHARE_ENDPOINT=https://share.test
+        EUREKA_COMPLETION_ENDPOINT=https://completion.test/{session_id}
+        EUREKA_COMPLETION_METHOD=POST
+        EUREKA_COMPLETION_BODY_JSON={"session_id":"{session_id}"}
+        EUREKA_COMPLETION_TIMEOUT_SECONDS=120
+        EUREKA_COMPLETION_POLL_INTERVAL_SECONDS=3
         EUREKA_AUTHORIZATION=Bearer token
         EUREKA_SIGNATURE_ID=pt_test
         EUREKA_SITE_LANG=CN
@@ -54,6 +59,11 @@ def test_settings_from_env_file(tmp_path):
     assert settings.profile_gate.extra_headers == {"X-Test": "1"}
     assert settings.eureka.query_endpoint == "https://query.test"
     assert settings.eureka.share_endpoint == "https://share.test"
+    assert settings.eureka.completion_endpoint == "https://completion.test/{session_id}"
+    assert settings.eureka.completion_method == "POST"
+    assert settings.eureka.completion_body == {"session_id": "{session_id}"}
+    assert settings.eureka.completion_timeout_seconds == 120
+    assert settings.eureka.completion_poll_interval_seconds == 3
     assert settings.eureka.authorization == "Bearer token"
     assert settings.eureka.signature_id == "pt_test"
     assert settings.eureka.extra_headers["X-Test-Eureka"] == "1"

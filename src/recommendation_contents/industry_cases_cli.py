@@ -44,6 +44,9 @@ USAGE_HEADERS = [
     "last_run_at",
     "session_url",
     "share_url",
+    "isCompleted",
+    "completionStatus",
+    "completionError",
     "error",
 ]
 
@@ -315,7 +318,7 @@ def read_usage_rows(path: str) -> dict[int, dict[str, str]]:
                 case_index = int(row.get("case_index", ""))
             except ValueError:
                 continue
-            rows[case_index] = {header: row.get(header, "") for header in USAGE_HEADERS}
+            rows[case_index] = _normalize_usage_row(row)
         return rows
 
 
@@ -375,6 +378,9 @@ def update_usage_after_run(
         row["used_at"] = now
     row["session_url"] = _string(result.get("session_url"))
     row["share_url"] = _string(result.get("share_url"))
+    row["isCompleted"] = _string(result.get("isCompleted"))
+    row["completionStatus"] = ""
+    row["completionError"] = ""
     errors = result.get("errors") or []
     row["error"] = _string(errors[0]) if errors else ""
     usage_rows[case_index] = row
@@ -391,6 +397,9 @@ def _base_usage_row(case_index: int, item: dict[str, Any]) -> dict[str, str]:
         "last_run_at": "",
         "session_url": "",
         "share_url": "",
+        "isCompleted": "",
+        "completionStatus": "",
+        "completionError": "",
         "error": "",
     }
 
@@ -455,6 +464,13 @@ def _case_industry(item: dict[str, Any]) -> str:
 
 def _is_used(row: dict[str, str] | None) -> bool:
     return bool(row and row.get("status") == "used")
+
+
+def _normalize_usage_row(row: dict[str, str]) -> dict[str, str]:
+    normalized = {header: row.get(header, "") for header in USAGE_HEADERS}
+    if not normalized["isCompleted"]:
+        normalized["isCompleted"] = row.get("isCompletion") or row.get("isComplete") or ""
+    return normalized
 
 
 def _string(value: Any) -> str:

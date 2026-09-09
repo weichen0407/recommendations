@@ -210,6 +210,7 @@ def run_case_item(
         item=item,
         runtime=runtime,
         allow_refresh=allow_refresh,
+        log_progress=log_progress,
     )
 
     for attempt in range(max(0, retry_attempts)):
@@ -258,6 +259,7 @@ def run_case_item(
             item=item,
             runtime=runtime,
             allow_refresh=allow_refresh,
+            log_progress=log_progress,
         )
 
     row = (state.get("result_table_rows") or [{}])[0]
@@ -271,6 +273,15 @@ def run_case_item(
         "share_url": state.get("share_link", ""),
         "session_id": state.get("session_id", ""),
         "share_id": state.get("share_id", ""),
+        "isCompleted": "",
+        "completion_checked": False,
+        "completion_status": "",
+        "completion_error": "",
+        "completion_status_path": "",
+        "completion_error_path": "",
+        "eureka_completion_response": "",
+        "eureka_completion_status_code": 0,
+        "eureka_completion_return_code": 0,
         "curl_success": state.get("curl_success", False),
         "curl_skipped": state.get("curl_skipped", False),
         "eureka_auth_status": state.get("eureka_auth_status", ""),
@@ -324,6 +335,7 @@ def _run_case_once(
     item: dict[str, Any],
     runtime: RuntimeDependencies,
     allow_refresh: bool = True,
+    log_progress: bool = False,
 ) -> TopicWorkflowState:
     state = case_state_from_item(item=item, case_index=case_index)
     state.update(check_user_token(state, runtime))

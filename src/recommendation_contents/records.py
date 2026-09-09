@@ -11,6 +11,9 @@ RECORD_HEADERS = [
     "generated_prompt",
     "session_url",
     "share_url",
+    "isCompleted",
+    "completionStatus",
+    "completionError",
     "title",
     "categories",
     "keywords",
@@ -53,7 +56,8 @@ def append_csv_row(row: dict[str, str], csv_path: str) -> None:
         writer = csv.DictWriter(file, fieldnames=RECORD_HEADERS)
         if not file_exists:
             writer.writeheader()
-        writer.writerow({header: row.get(header, "") for header in RECORD_HEADERS})
+        normalized = _normalize_legacy_row(row)
+        writer.writerow({header: normalized.get(header, "") for header in RECORD_HEADERS})
 
 
 def read_csv_rows(csv_path: str) -> list[dict[str, str]]:
@@ -63,7 +67,7 @@ def read_csv_rows(csv_path: str) -> list[dict[str, str]]:
 
     with path.open("r", encoding="utf-8", newline="") as file:
         return [
-            {header: row.get(header, "") for header in RECORD_HEADERS}
+            _normalize_legacy_row(row)
             for row in csv.DictReader(file)
         ]
 
@@ -90,6 +94,8 @@ def _normalize_legacy_row(row: dict[str, str]) -> dict[str, str]:
     for legacy_header, current_header in LEGACY_HEADER_MAP.items():
         if not normalized[current_header] and row.get(legacy_header):
             normalized[current_header] = row[legacy_header]
+    if not normalized["isCompleted"]:
+        normalized["isCompleted"] = row.get("isCompletion") or row.get("isComplete") or ""
     return normalized
 
 

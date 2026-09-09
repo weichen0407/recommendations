@@ -197,6 +197,36 @@ uv run industry-case-workflow cases/500articles.json \
   --import-clipboard-on-401
 ```
 
+推荐把生成和完成验证分开。生成阶段拿到 `session_id`、`session_url`、`share_url` 后就进入下一条；
+过一段时间再单独调用 events 接口验证是否完成。`.env` 中的默认 events 接口是：
+
+```env
+EUREKA_COMPLETION_ENDPOINT=https://eureka-service.patsnap.com/api/eureka/share/sessions/{session_id}/events
+EUREKA_COMPLETION_METHOD=GET
+```
+
+生成完成后，单独验证并回填 `isCompleted`、`completionStatus`、`completionError`。
+下面这条会同时扫描英文原版和英文 HTML 两个 records CSV：
+
+```bash
+uv run eureka-completion \
+  --records-csv outputs/industry_outlook_records_en.csv \
+  --records-csv outputs/industry_outlook_records_html_en.csv
+```
+
+验证逻辑读取 `/events` 返回的最新 `status`：`completed` 会标记
+`isCompleted=true`；`running` 会标记 `isCompleted=false` 并保留 running 状态；
+`failed` 会去 events 中查找 `type=error` 的 `message`，写入 `completionError`。
+如果也想同步 usage 文件，可以额外加上：
+
+```bash
+uv run eureka-completion \
+  --records-csv outputs/industry_outlook_records_en.csv \
+  --records-csv outputs/industry_outlook_records_html_en.csv \
+  --usage-csv cases/industry_outlook_usage_en.csv \
+  --usage-csv cases/industry_outlook_usage_html_en.csv
+```
+
 如果已经先导出了这一波内容，也可以直接用 selection JSON 作为输入：
 
 ```bash
