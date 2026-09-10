@@ -114,15 +114,20 @@ class EurekaCurlClient:
     def has_completion_endpoint(self) -> bool:
         return bool(self.settings.completion_endpoint)
 
-    def get_completion_status(self, session_id: str) -> CurlResult:
+    def get_completion_status(self, session_id: str, cursor: str = "") -> CurlResult:
+        values = {"session_id": session_id, "cursor": cursor}
         payload = _replace_template_values(
             self.settings.completion_body,
-            {"session_id": session_id},
+            values,
         )
+        if not cursor and payload.get("cursor") == "":
+            payload.pop("cursor")
+        if cursor and "cursor" not in payload and "{cursor}" not in self.settings.completion_endpoint:
+            payload["cursor"] = cursor
         return run_curl_json(
             url=_format_template_url(
                 self.settings.completion_endpoint,
-                {"session_id": session_id},
+                values,
             ),
             headers=self.headers(),
             payload=payload,

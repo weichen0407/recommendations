@@ -1,0 +1,20 @@
+[
+  {
+    "btu_id": "430a1abdf48c4ee9967d58b97fba2214",
+    "product_line": "Engineering",
+    "product_agent": "SuperAgent",
+    "resolved_session_id": "sess_64c448dab585481c",
+    "session_date": "2026-09-09",
+    "session_start_time": "2026-09-09 13:21:34",
+    "first_activation_date": "2026-09-09",
+    "first_activation_time": "2026-09-09 13:34:48",
+    "is_initiated_session": "1",
+    "is_true_activation_session": "1",
+    "has_download": "1",
+    "has_share": "0",
+    "has_copy": "0",
+    "max_round": "2",
+    "first_query_time": "2026-09-09 13:21:34",
+    "last_query_time": "2026-09-09 13:21:34"
+  }
+]

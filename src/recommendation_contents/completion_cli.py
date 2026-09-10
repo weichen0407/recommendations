@@ -4,8 +4,10 @@ from __future__ import annotations
 
 import argparse
 import csv
+import inspect
 import json
 import re
+import sys
 from collections import Counter
 from dataclasses import dataclass
 from pathlib import Path
@@ -30,6 +32,7 @@ DEFAULT_INDUSTRY_RECORDS_CSVS = [
     "outputs/industry_outlook_records_html_en.csv",
 ]
 SESSION_ID_RE = re.compile(r"sess_[A-Za-z0-9_-]+")
+DEFAULT_COMPLETION_MAX_PAGES = 20
 
 
 @dataclass(frozen=True)
@@ -77,9 +80,21 @@ def main() -> None:
     parser.add_argument("--env-file", default=".env", help="Path to dotenv file.")
     parser.add_argument("--limit", type=int, default=0, help="Maximum sessions to check.")
     parser.add_argument(
+        "--max-pages",
+        type=int,
+        default=DEFAULT_COMPLETION_MAX_PAGES,
+        help="Maximum event pages to follow when has_more=true.",
+    )
+    parser.add_argument(
         "--all",
         action="store_true",
         help="Recheck sessions already marked isCompleted=true.",
+    )
+    parser.add_argument(
+        "--progress",
+        action=argparse.BooleanOptionalAction,
+        default=None,
+        help="Print per-session progress logs to stderr. Defaults to on for summary output.",
     )
     parser.add_argument(
         "--use-refresh",
@@ -108,6 +123,7 @@ def main() -> None:
     settings = AppSettings.from_env_file(args.env_file)
     runtime = RuntimeDependencies(settings=settings)
     _ensure_auth_ready(runtime, allow_refresh=args.use_refresh)
+    log_progress = args.progress if args.progress is not None else args.output == "summary"
 
     updates: list[SessionCompletionUpdate] = []
     records_updated: dict[str, int] = {}
@@ -121,6 +137,8 @@ def main() -> None:
             runtime=runtime,
             limit=args.limit,
             recheck_completed=args.all,
+            max_pages=args.max_pages,
+            log_progress=log_progress,
         )
         write_results_json(results=results, path=str(results_path))
         results_checked = len(result_updates)
@@ -138,6 +156,8 @@ def main() -> None:
                 runtime=runtime,
                 limit=remaining,
                 recheck_completed=args.all,
+                max_pages=args.max_pages,
+                log_progress=log_progress,
             )
             records_updated[records_csv] = len(record_updates)
             updates.extend(record_updates)
@@ -169,31 +189,53 @@ def validate_results(
     runtime: RuntimeDependencies,
     limit: int = 0,
     recheck_completed: bool = False,
+    max_pages: int = DEFAULT_COMPLETION_MAX_PAGES,
+    log_progress: bool = False,
 ) -> list[SessionCompletionUpdate]:
     updates: list[SessionCompletionUpdate] = []
     client = runtime.get_eureka_client()
     if not client.has_completion_endpoint():
         raise SystemExit("EUREKA_COMPLETION_ENDPOINT is required to validate Eureka sessions")
 
-    for result in results:
-        if limit > 0 and len(updates) >= limit:
-            break
+    candidates = _result_completion_candidates(
+        results=results,
+        limit=limit,
+        recheck_completed=recheck_completed,
+    )
+    total = len(candidates)
+    for progress_index, result in enumerate(candidates, start=1):
         if not isinstance(result, dict):
-            continue
-        if not recheck_completed and _result_is_complete(result):
             continue
 
         session_id = _result_session_id(result)
         if not session_id:
             continue
 
-        curl_result = client.get_completion_status(session_id)
+        _log_completion_progress(
+            enabled=log_progress,
+            progress_index=progress_index,
+            total=total,
+            target="results-json",
+            result=result,
+            session_id=session_id,
+            phase="checking",
+        )
+        curl_result = _get_completion_status_until_final_page(client, session_id, max_pages=max_pages)
         update = _completion_update_from_response(
             result={**result, "session_id": session_id},
             curl_result=curl_result,
         )
         apply_completion_update(result, update)
         updates.append(update)
+        _log_completion_progress(
+            enabled=log_progress,
+            progress_index=progress_index,
+            total=total,
+            target="results-json",
+            update=update,
+            phase="done",
+            pages=_completion_page_count(curl_result),
+        )
     return updates
 
 
@@ -202,6 +244,8 @@ def validate_records_csv(
     runtime: RuntimeDependencies,
     limit: int = 0,
     recheck_completed: bool = False,
+    max_pages: int = DEFAULT_COMPLETION_MAX_PAGES,
+    log_progress: bool = False,
 ) -> list[SessionCompletionUpdate]:
     csv_path = Path(path)
     if not csv_path.exists() or csv_path.stat().st_size == 0:
@@ -216,36 +260,171 @@ def validate_records_csv(
         fieldnames = _with_completion_fields(list(reader.fieldnames or []), after="share_url")
         rows = list(reader)
 
-    updates: list[SessionCompletionUpdate] = []
-    for row_number, row in enumerate(rows, start=1):
-        _sync_completion_field(row)
-        if limit > 0 and len(updates) >= limit:
-            break
-        if not _string(row.get("session_url")):
-            continue
-        if not recheck_completed and _row_is_complete(row):
-            continue
+    candidates = _record_completion_candidates(
+        rows=rows,
+        limit=limit,
+        recheck_completed=recheck_completed,
+    )
 
+    updates: list[SessionCompletionUpdate] = []
+    total = len(candidates)
+    for progress_index, (row_number, row) in enumerate(candidates, start=1):
         session_id = _session_id_from_row(row)
         if not session_id:
             update = _missing_session_update(row, row_number)
             _apply_completion_fields(row, update)
             updates.append(update)
+            _log_completion_progress(
+                enabled=log_progress,
+                progress_index=progress_index,
+                total=total,
+                target=path,
+                update=update,
+                phase="done",
+            )
             continue
 
-        curl_result = client.get_completion_status(session_id)
+        _log_completion_progress(
+            enabled=log_progress,
+            progress_index=progress_index,
+            total=total,
+            target=path,
+            row=row,
+            session_id=session_id,
+            phase="checking",
+        )
+        curl_result = _get_completion_status_until_final_page(client, session_id, max_pages=max_pages)
         update = _completion_update_from_response(
             result=_result_from_record_row(row, row_number, session_id),
             curl_result=curl_result,
         )
         _apply_completion_fields(row, update)
         updates.append(update)
+        _log_completion_progress(
+            enabled=log_progress,
+            progress_index=progress_index,
+            total=total,
+            target=path,
+            update=update,
+            phase="done",
+            pages=_completion_page_count(curl_result),
+        )
 
     with csv_path.open("w", encoding="utf-8", newline="") as file:
         writer = csv.DictWriter(file, fieldnames=fieldnames)
         writer.writeheader()
         writer.writerows(rows)
     return updates
+
+
+def _result_completion_candidates(
+    results: list[dict[str, Any]],
+    limit: int,
+    recheck_completed: bool,
+) -> list[dict[str, Any]]:
+    candidates: list[dict[str, Any]] = []
+    for result in results:
+        if limit > 0 and len(candidates) >= limit:
+            break
+        if not isinstance(result, dict):
+            continue
+        if not recheck_completed and _result_is_complete(result):
+            continue
+        if not _result_session_id(result):
+            continue
+        candidates.append(result)
+    return candidates
+
+
+def _record_completion_candidates(
+    rows: list[dict[str, Any]],
+    limit: int,
+    recheck_completed: bool,
+) -> list[tuple[int, dict[str, Any]]]:
+    candidates: list[tuple[int, dict[str, Any]]] = []
+    for row_number, row in enumerate(rows, start=1):
+        _sync_completion_field(row)
+        if limit > 0 and len(candidates) >= limit:
+            break
+        if not _string(row.get("session_url")):
+            continue
+        if not recheck_completed and _row_is_complete(row):
+            continue
+        candidates.append((row_number, row))
+    return candidates
+
+
+def _log_completion_progress(
+    enabled: bool,
+    progress_index: int,
+    total: int,
+    target: str,
+    phase: str,
+    session_id: str = "",
+    result: dict[str, Any] | None = None,
+    row: dict[str, Any] | None = None,
+    update: SessionCompletionUpdate | None = None,
+    pages: int = 0,
+) -> None:
+    if not enabled:
+        return
+
+    source = result or row or {}
+    case_index = update.case_index if update else _string(source.get("case_index"))
+    title = update.title if update else (_string(source.get("title")) or _string(source.get("input")))
+    session = update.session_id if update else session_id
+
+    parts = [
+        f"[{progress_index}/{total}]",
+        phase,
+        f"target={_short_target(target)}",
+    ]
+    if case_index != "":
+        parts.append(f"case_index={case_index}")
+    if session:
+        parts.append(f"session={session}")
+    if title:
+        parts.append(f"title={_short_log_value(title)}")
+    if update:
+        parts.append(f"status={update.status}")
+        parts.append(f"isCompleted={str(update.is_complete).lower()}")
+    if pages:
+        parts.append(f"pages={pages}")
+    if update and update.error_message:
+        parts.append(f"error={_short_log_value(update.error_message, limit=140)}")
+
+    print(" ".join(parts), file=sys.stderr, flush=True)
+
+
+def _completion_page_count(curl_result: CurlResult) -> int:
+    data = parse_json_body(curl_result.body)
+    if isinstance(data, dict):
+        pagination = data.get("pagination")
+        if isinstance(pagination, dict):
+            page_count = pagination.get("page_count")
+            if isinstance(page_count, int):
+                return page_count
+            if isinstance(page_count, str) and page_count.isdigit():
+                return int(page_count)
+        pages = data.get("pages")
+        if isinstance(pages, list):
+            return len(pages)
+    return 1 if curl_result.body else 0
+
+
+def _short_target(target: str) -> str:
+    if not target:
+        return "unknown"
+    if target == "results-json":
+        return target
+    return Path(target).name
+
+
+def _short_log_value(value: Any, limit: int = 80) -> str:
+    text = str(value).replace("\n", " ").strip()
+    if len(text) <= limit:
+        return json.dumps(text, ensure_ascii=False)
+    return json.dumps(f"{text[: limit - 1]}…", ensure_ascii=False)
 
 
 def apply_completion_update(result: dict[str, Any], update: SessionCompletionUpdate) -> None:
@@ -419,6 +598,165 @@ def _curl_error_message(curl_result: CurlResult) -> str:
     if curl_result.return_code != 0:
         return f"Eureka completion curl exited with code {curl_result.return_code}: {curl_result.stderr}"
     return f"Eureka completion returned HTTP {curl_result.status_code}"
+
+
+def _get_completion_status_until_final_page(
+    client: Any,
+    session_id: str,
+    max_pages: int = DEFAULT_COMPLETION_MAX_PAGES,
+) -> CurlResult:
+    max_pages = max(1, max_pages)
+    pages: list[Any] = []
+    page_results: list[CurlResult] = []
+    seen_cursors: set[str] = set()
+    cursor = ""
+
+    for _page_number in range(max_pages):
+        curl_result = _get_completion_status_page(client, session_id, cursor)
+        page_results.append(curl_result)
+        if not curl_result.success:
+            return curl_result
+
+        page_body = parse_json_body(curl_result.body)
+        pages.append(page_body)
+        if not _completion_has_more(page_body):
+            return _combined_completion_result(page_results, pages)
+
+        next_cursor = _completion_next_cursor(page_body)
+        if not next_cursor:
+            return _completion_pagination_error(
+                page_results=page_results,
+                pages=pages,
+                message="Eureka completion returned has_more=true without stream_cursor",
+            )
+        if next_cursor in seen_cursors:
+            return _completion_pagination_error(
+                page_results=page_results,
+                pages=pages,
+                message=f"Eureka completion cursor repeated: {next_cursor}",
+            )
+        seen_cursors.add(next_cursor)
+        cursor = next_cursor
+
+    return _completion_pagination_error(
+        page_results=page_results,
+        pages=pages,
+        message=f"Eureka completion pagination exceeded --max-pages={max_pages}",
+    )
+
+
+def _get_completion_status_page(client: Any, session_id: str, cursor: str) -> CurlResult:
+    if not cursor:
+        return client.get_completion_status(session_id)
+    if _completion_client_accepts_cursor(client):
+        return client.get_completion_status(session_id, cursor=cursor)
+    return CurlResult(
+        payload={},
+        body="",
+        status_code=0,
+        return_code=1,
+        stderr="Eureka completion client does not support cursor pagination",
+    )
+
+
+def _completion_client_accepts_cursor(client: Any) -> bool:
+    try:
+        signature = inspect.signature(client.get_completion_status)
+    except (TypeError, ValueError):
+        return True
+    return "cursor" in signature.parameters or any(
+        parameter.kind == inspect.Parameter.VAR_KEYWORD
+        for parameter in signature.parameters.values()
+    )
+
+
+def _completion_has_more(data: Any) -> bool:
+    if not isinstance(data, dict):
+        return False
+    value = data.get("has_more", data.get("hasMore", False))
+    if isinstance(value, str):
+        return value.strip().lower() == "true"
+    return bool(value)
+
+
+def _completion_next_cursor(data: Any) -> str:
+    if not isinstance(data, dict):
+        return ""
+    for key in ("stream_cursor", "streamCursor", "cursor", "next_cursor", "nextCursor"):
+        value = data.get(key)
+        if isinstance(value, str) and value.strip():
+            return value.strip()
+    return ""
+
+
+def _combined_completion_result(
+    page_results: list[CurlResult],
+    pages: list[Any],
+) -> CurlResult:
+    if len(page_results) == 1:
+        return page_results[0]
+    final_result = page_results[-1]
+    combined_body = _combined_completion_body(pages)
+    return CurlResult(
+        payload=final_result.payload,
+        body=json.dumps(combined_body, ensure_ascii=False),
+        status_code=final_result.status_code,
+        return_code=final_result.return_code,
+        stderr=final_result.stderr,
+    )
+
+
+def _combined_completion_body(pages: list[Any]) -> Any:
+    final_page = pages[-1] if pages else {}
+    if not isinstance(final_page, dict):
+        return {"pages": pages, "events": []}
+
+    combined = dict(final_page)
+    combined["events"] = _combined_events(pages)
+    combined["pages"] = pages
+    combined["pagination"] = {
+        "page_count": len(pages),
+        "final_has_more": _completion_has_more(final_page),
+        "final_cursor": _completion_next_cursor(final_page),
+    }
+    return combined
+
+
+def _combined_events(pages: list[Any]) -> list[Any]:
+    events: list[Any] = []
+    for page in pages:
+        if isinstance(page, dict) and isinstance(page.get("events"), list):
+            events.extend(page["events"])
+    return events
+
+
+def _completion_pagination_error(
+    page_results: list[CurlResult],
+    pages: list[Any],
+    message: str,
+) -> CurlResult:
+    last_result = page_results[-1] if page_results else CurlResult(
+        payload={},
+        body="",
+        status_code=0,
+        return_code=1,
+    )
+    body = {
+        "error": message,
+        "pages": pages,
+        "pagination": {
+            "page_count": len(pages),
+            "final_has_more": _completion_has_more(pages[-1]) if pages else False,
+            "final_cursor": _completion_next_cursor(pages[-1]) if pages else "",
+        },
+    }
+    return CurlResult(
+        payload=last_result.payload,
+        body=json.dumps(body, ensure_ascii=False),
+        status_code=0,
+        return_code=1,
+        stderr=message,
+    )
 
 
 def _apply_completion_fields(row: dict[str, Any], update: SessionCompletionUpdate) -> None:

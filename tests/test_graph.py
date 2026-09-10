@@ -8,6 +8,7 @@ from recommendation_contents.config import (
 )
 from recommendation_contents.graph import build_graph_with_dependencies
 from recommendation_contents.services.eureka_curl import (
+    EurekaCurlClient,
     build_curl_command,
     split_curl_output,
 )
@@ -301,6 +302,36 @@ def test_build_curl_command_omits_body_for_get():
     ]
     assert "--data-raw" not in command
     assert command[command.index("--request") + 1] == "GET"
+
+
+def test_completion_status_posts_limit_then_cursor(monkeypatch):
+    calls = []
+
+    class FakeCompletedProcess:
+        stderr = ""
+        returncode = 0
+        stdout = '{"status":"running"}\n200'
+
+    def fake_run(command, check, capture_output, text):
+        calls.append(command)
+        return FakeCompletedProcess()
+
+    monkeypatch.setattr("recommendation_contents.services.eureka_curl.subprocess.run", fake_run)
+    client = EurekaCurlClient(
+        EurekaSettings(
+            authorization="Bearer token",
+            completion_method="POST",
+            completion_body={"cursor": "{cursor}", "limit": 500},
+        )
+    )
+
+    client.get_completion_status("sess_test")
+    client.get_completion_status("sess_test", cursor="archive:1788961829534-0")
+
+    first_payload = json.loads(calls[0][calls[0].index("--data-raw") + 1])
+    second_payload = json.loads(calls[1][calls[1].index("--data-raw") + 1])
+    assert first_payload == {"limit": 500}
+    assert second_payload == {"cursor": "archive:1788961829534-0", "limit": 500}
 
 
 def test_split_curl_output_extracts_status_code():

@@ -115,144 +115,246 @@ uv run topic-workflow "新能源汽车电池回收趋势" \
   --records-md outputs/custom_records.md
 ```
 
-## 批量读取 cases
+## 推荐内容批量生成
 
-如果 `cases` 目录里已经放好了抽取后的 JSON，可以直接读取其中的 `output` 字段作为下游
-Eureka curl 输入，不再经过 `generate_prompt`：
+当前推荐内容流程先假设已经有一个批次 `subject.json`。它保存每篇待生成内容的
+`title`、`output`、`industry`、`sub_industry`、`content_category`、`categories`、
+`keywords`、`role`、`jtbd` 等字段。后续可以扩展成由 agent 自动生成
+`subject.json`，再进入同一套生成和验证命令。
 
-```bash
-uv run case-workflow cases/500articles.json --limit 3
+批次目录按两层日期组织：
+
+```text
+outputs/
+  0909/
+    090916/
+      report/
+      html/
+    090922/
+      report/
+  0910/
+    091010/
+      subject.csv
+      subject.json
+      subject_distribution_preview.csv
+      report/
+      html/
+      plg-rd-case-default-us.json
+  recommend-content-counts.csv
 ```
 
-如果运行过程中可能需要你重新从浏览器导入 header，可以开启 401 等待重试。程序遇到 401
-后会等待指定秒数，重新读取 `.secrets/eureka_token.json`；只有发现 authorization、
-signature 或 cookie 发生变化时，才会重试当前 case：
+第一层是日期，例如 `0910`；第二层是批次时间，例如 `091010` 表示 9 月 10 日 10 点。
+`subject.csv` 给人检查，`subject.json` 给脚本运行。最终产品文件
+`plg-rd-case-default-us.json` 里的 list 字段必须是真 JSON 数组，不能是转义后的字符串。
+
+### 运行 report
+
+当前 `091010` 批次一共有 144 条 subject。跑完整 report：
 
 ```bash
-uv run case-workflow cases/500articles.json \
-  --limit 3 \
-  --wait-on-401 10 \
+uv run case-workflow outputs/0910/091010/subject.json \
+  --mode report \
+  --limit 144 \
+  --wait-on-401 60 \
   --retry-on-auth-change \
+  --retry-attempts 2 \
   --import-clipboard-on-401
 ```
 
-加上 `--import-clipboard-on-401` 后，程序等待期间会轮询 macOS 剪贴板。你只需要在浏览器里
-对 `api/eureka/query/conversational` 请求执行 Copy as cURL，程序会自动导入新的 header。
+`--mode report` 会使用 `subject.json` 中的基础 `output` 作为 prompt，并默认写入：
+
+```text
+outputs/0910/091010/report/recommend_content_091010_report_records.csv
+/tmp/recommend_content_091010_report_results.json
+```
+
+### 运行 HTML
+
+跑完整 HTML：
+
+```bash
+uv run case-workflow outputs/0910/091010/subject.json \
+  --mode html \
+  --limit 144 \
+  --wait-on-401 60 \
+  --retry-on-auth-change \
+  --retry-attempts 2 \
+  --import-clipboard-on-401
+```
+
+`--mode html` 会在 prompt 后追加：
+
+```text
+Use artifact-generator to generate the final result as HTML.
+```
+
+并默认写入：
+
+```text
+outputs/0910/091010/html/recommend_content_091010_html_records.csv
+/tmp/recommend_content_091010_html_results.json
+```
+
+如果只想试跑前 3 条，把 `--limit 144` 改成 `--limit 3`。如果不传 `--limit`，默认只跑
+3 条。
+
+生成命令默认会在终端输出进度日志，例如：
+
+```text
+[1/144] start case-workflow case_index=0 mode=report title="..."
+[1/144] done case-workflow case_index=0 mode=report title="..." status=ok session=yes share=yes
+```
+
+如果不想显示进度，可以加 `--no-progress`。如果使用 `--output json`，默认不会打印进度；
+需要同时看进度时，可以额外加 `--progress`。
+
+生成阶段有一个硬规则：当前条必须成功拿到 `session_url` 和 `share_url`，脚本才会写入
+records CSV 并进入下一条。如果当前条没有生成 URL，脚本会停在当前条，不会继续跑后面的内容。
+
+### 401 和 token 更新
+
+如果运行过程中 token 过期，可以开启 401 等待重试。脚本遇到 401 后会等待指定秒数，
+并重新读取 `.secrets/eureka_token.json`；只有发现 authorization、signature 或 cookie
+发生变化时，才会重试当前 case。
+
+加上 `--import-clipboard-on-401` 后，等待期间会轮询 macOS 剪贴板。你只需要在浏览器里对
+`api/eureka/query/conversational` 请求执行 Copy as cURL，脚本会自动导入新的 header。
 
 使用 `--retry-on-auth-change` 时，`case-workflow` 默认进入 access-only 模式，不会先调用
 refresh token。需要继续使用 refresh token 分支时，再额外加：
 
 ```bash
-uv run case-workflow cases/500articles.json \
-  --limit 3 \
-  --wait-on-401 10 \
+uv run case-workflow outputs/0910/091010/subject.json \
+  --mode report \
+  --limit 144 \
+  --wait-on-401 60 \
   --retry-on-auth-change \
+  --retry-attempts 2 \
+  --import-clipboard-on-401 \
   --use-refresh
 ```
 
-默认会写入：
+### 完成状态验证
+
+推荐把“生成 URL”和“验证内容是否完成”分开。生成阶段只负责拿到 `session_url` 和
+`share_url`；过一段时间后，再单独调用 events 接口验证 session 是否完成。
+
+验证 report：
+
+```bash
+uv run eureka-completion \
+  --records-csv outputs/0910/091010/report/recommend_content_091010_report_records.csv
+```
+
+验证 HTML：
+
+```bash
+uv run eureka-completion \
+  --records-csv outputs/0910/091010/html/recommend_content_091010_html_records.csv
+```
+
+同时验证两份：
+
+```bash
+uv run eureka-completion \
+  --records-csv outputs/0910/091010/report/recommend_content_091010_report_records.csv \
+  --records-csv outputs/0910/091010/html/recommend_content_091010_html_records.csv
+```
+
+默认会跳过已经 `isCompleted=true` 的行。如果想全部重新检查，加 `--all`：
+
+```bash
+uv run eureka-completion \
+  --records-csv outputs/0910/091010/report/recommend_content_091010_report_records.csv \
+  --all
+```
+
+如果单个 session 的 events 很长，可以用 `--max-pages` 调整最多翻页次数，默认是 20：
+
+```bash
+uv run eureka-completion \
+  --records-csv outputs/0910/091010/report/recommend_content_091010_report_records.csv \
+  --max-pages 50
+```
+
+验证命令也会默认输出进度日志，例如：
 
 ```text
-outputs/case_workflow_records.csv
-outputs/case_workflow_results.json
+[1/144] checking target=recommend_content_091010_report_records.csv case_index=0 session=sess_xxx title="..."
+[1/144] done target=recommend_content_091010_report_records.csv case_index=0 session=sess_xxx title="..." status=completed isCompleted=true pages=2
 ```
 
-其中 `case_workflow_results.json` 会在每条 case 处理完后立即更新；只有成功生成
-session 链接和分享链接后，CSV 才会保存输入、`output` 生成的 prompt 和元数据字段。
-如果当前 case 没有生成链接，脚本会停在这一条，不会继续跑下一条。
+同样可以用 `--no-progress` 关闭，或在 `--output json` 时额外加 `--progress` 打开。
 
-需要额外生成 Markdown 表时再显式传入：
-
-```bash
-uv run case-workflow cases/500articles.json \
-  --limit 3 \
-  --records-md outputs/case_workflow_records.md
-```
-
-### 按行业批量生成
-
-按 `industry` 分组，每个行业最多选择 5 篇未使用内容：
-
-```bash
-uv run industry-case-workflow cases/500articles.json --dry-run
-```
-
-先把这一波内容取出来、不调用 Eureka：
-
-```bash
-uv run industry-case-workflow cases/500articles.json \
-  --per-industry 5 \
-  --select-only \
-  --selection-json cases/industry_case_selection.json
-```
-
-正式运行：
-
-```bash
-uv run industry-case-workflow cases/500articles.json \
-  --per-industry 5 \
-  --wait-on-401 60 \
-  --retry-on-auth-change \
-  --retry-attempts 2 \
-  --import-clipboard-on-401
-```
-
-推荐把生成和完成验证分开。生成阶段拿到 `session_id`、`session_url`、`share_url` 后就进入下一条；
-过一段时间再单独调用 events 接口验证是否完成。`.env` 中的默认 events 接口是：
+completion endpoint 由 `.env` 控制。当前脚本默认按这个格式请求：
 
 ```env
 EUREKA_COMPLETION_ENDPOINT=https://eureka-service.patsnap.com/api/eureka/share/sessions/{session_id}/events
-EUREKA_COMPLETION_METHOD=GET
+EUREKA_COMPLETION_METHOD=POST
+EUREKA_COMPLETION_BODY_JSON={"limit":500}
 ```
 
-生成完成后，单独验证并回填 `isCompleted`、`completionStatus`、`completionError`。
-下面这条会同时扫描英文原版和英文 HTML 两个 records CSV：
+如果浏览器里真实 events 请求不是这个 URL 或不是 POST，需要把 `.env` 改成浏览器里那条请求的
+真实 endpoint、method 和 body。否则会出现 HTTP 405 或一直判断不准。
 
-```bash
-uv run eureka-completion \
-  --records-csv outputs/industry_outlook_records_en.csv \
-  --records-csv outputs/industry_outlook_records_html_en.csv
+验证逻辑是：
+
+1. 从 records CSV 的 `session_url` 里提取 `sess_...`。
+2. 第一次请求 events URL，body 只带 `limit=500`，不带 cursor。
+3. 如果返回 `has_more=true`，读取这一页的 `stream_cursor`。
+4. 用 `{"cursor":"<stream_cursor>","limit":500}` 再请求下一页 events。
+5. 重复第 3-4 步，直到最后一页返回 `has_more=false`。
+6. 如果中间 HTTP 失败、没有 `stream_cursor`、cursor 重复或超过 `--max-pages`，写入
+   `completionStatus=http_error`，`isCompleted=false`。
+7. 到达 `has_more=false` 的最后一页后，优先用最后一页顶层 `status` 或 `state` 判断。
+8. 如果最后一页顶层没有状态，再扫描合并后的全部 `events`，取最后一个 `status` 或 `state`。
+9. `completed`、`complete`、`done`、`success` 等会写成 `isCompleted=true`。
+10. `failed`、`error` 等会写成 `isCompleted=false`，并从全部 events 中的 `type=error` 提取
+   `message` 写入 `completionError`。
+11. `running`、`pending`、`processing` 等会写成 `isCompleted=false`，保留
+   `completionStatus`。
+
+如果你在浏览器里看到的响应类似：
+
+```json
+{
+  "events": [],
+  "status": "completed",
+  "terminal": true
+}
 ```
 
-验证逻辑读取 `/events` 返回的最新 `status`：`completed` 会标记
-`isCompleted=true`；`running` 会标记 `isCompleted=false` 并保留 running 状态；
-`failed` 会去 events 中查找 `type=error` 的 `message`，写入 `completionError`。
-如果也想同步 usage 文件，可以额外加上：
+脚本会先继续用 `stream_cursor` 翻到 `has_more=false` 的最后一页，再用最后一页的
+`status=completed` 标记 `isCompleted=true`。如果实际没有标记成功，优先检查 `.env` 里的
+`EUREKA_COMPLETION_ENDPOINT` 和 `EUREKA_COMPLETION_METHOD` 是否和浏览器里看到的 events
+请求一致。
 
-```bash
-uv run eureka-completion \
-  --records-csv outputs/industry_outlook_records_en.csv \
-  --records-csv outputs/industry_outlook_records_html_en.csv \
-  --usage-csv cases/industry_outlook_usage_en.csv \
-  --usage-csv cases/industry_outlook_usage_html_en.csv
-```
+### 生成产品 JSON
 
-如果已经先导出了这一波内容，也可以直接用 selection JSON 作为输入：
-
-```bash
-uv run industry-case-workflow cases/industry_case_selection.json \
-  --per-industry 5 \
-  --wait-on-401 60 \
-  --retry-on-auth-change \
-  --retry-attempts 2 \
-  --import-clipboard-on-401
-```
-
-脚本会优先读取每条记录里的 `case_index`，所以 usage 表仍然会更新原始 cases 的编号。
-
-脚本会在 `cases` 目录维护 usage 表：
+产品侧默认推荐内容文件放在批次目录下：
 
 ```text
-cases/case_usage.csv
+outputs/0910/091010/plg-rd-case-default-us.json
 ```
 
-`status=used` 的 case 后续不会再被选中；失败会标记为 `failed` 并保留错误原因，下次仍可重试。
-正式运行时必须先生成当前 case 的 session 链接和分享链接，脚本才会进入下一条。
-默认仍只写两个结果文件：
+它通常从完成后的 records CSV 转换得到。转换时需要：
 
-```text
-outputs/case_workflow_records.csv
-outputs/case_workflow_results.json
+- `session_url` 改成 `session_id`，只保留 `sess_...`。
+- `share_url` 改成 `share_id`，只保留 `id=` 到 `&from` 中间的值。
+- `categories`、`keywords`、`jtbd`、`sub_industry` 这类 list 字段写成真实 JSON 数组。
+
+### 旧 cases 输入
+
+通用 `case-workflow` 仍然可以直接读取已有 cases JSON：
+
+```bash
+uv run case-workflow cases/500articles.json --limit 3
+```
+
+`industry-case-workflow` 也仍然可以按 `industry` 分组选择未使用内容：
+
+```bash
+uv run industry-case-workflow cases/500articles.json --dry-run
 ```
 
 ## Eureka curl 配置
@@ -402,10 +504,13 @@ uv run eureka-auth-watcher --profile .browser/eureka --interval 60
 watcher 捕获到请求后会打印脱敏的 `eureka_auth_updated` 事件。后续批处理可以继续用：
 
 ```bash
-uv run industry-case-workflow cases/industry_case_selection.json \
+uv run case-workflow outputs/0910/091010/subject.json \
+  --mode report \
+  --limit 144 \
   --wait-on-401 120 \
   --retry-on-auth-change \
-  --retry-attempts 3
+  --retry-attempts 3 \
+  --import-clipboard-on-401
 ```
 
 如果要过夜跑，防止 Mac 睡眠：

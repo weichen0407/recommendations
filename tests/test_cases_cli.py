@@ -7,6 +7,9 @@ import pytest
 
 from recommendation_contents import cases_cli
 from recommendation_contents.cases_cli import (
+    HTML_ARTIFACT_INSTRUCTION,
+    apply_generation_mode,
+    apply_mode_defaults,
     case_state_from_item,
     ensure_auth_ready,
     load_case_items,
@@ -90,6 +93,62 @@ def test_case_state_from_item_uses_output_as_generated_prompt():
     assert state["categories"] == ["competitor_analysis"]
     assert state["jtbd"] == ["track_technologies_and_competitors"]
     assert state["errors"] == []
+
+
+def test_case_state_from_item_parses_json_array_strings():
+    state = case_state_from_item(
+        {
+            "title": "JSON arrays",
+            "categories": '["case"]',
+            "keywords": '["wearable", "digital health"]',
+            "jtbd": '["identify_innovation_opportunities"]',
+            "sub_industry": '["wearable_and_digital_health_devices"]',
+            "output": "prompt",
+        },
+        case_index=0,
+    )
+
+    assert state["categories"] == ["case"]
+    assert state["keywords"] == ["wearable", "digital health"]
+    assert state["jtbd"] == ["identify_innovation_opportunities"]
+    assert state["sub_industry"] == ["wearable_and_digital_health_devices"]
+
+
+def test_apply_generation_mode_html_appends_artifact_instruction_once():
+    item = {"title": "HTML", "output": "Write a report."}
+
+    first = apply_generation_mode(item, "html")
+    second = apply_generation_mode(first, "html")
+
+    assert first["output"].endswith(HTML_ARTIFACT_INSTRUCTION)
+    assert second["output"].count(HTML_ARTIFACT_INSTRUCTION) == 1
+    assert item["output"] == "Write a report."
+
+
+def test_apply_generation_mode_report_removes_artifact_instruction():
+    item = {"title": "Report", "output": f"Write a report. {HTML_ARTIFACT_INSTRUCTION}"}
+
+    result = apply_generation_mode(item, "report")
+
+    assert result["output"] == "Write a report."
+
+
+def test_apply_mode_defaults_uses_batch_folder_paths():
+    args = type(
+        "Args",
+        (),
+        {
+            "mode": "html",
+            "cases_json": "outputs/0910/091010/subject.json",
+            "records_csv": "outputs/case_workflow_records.csv",
+            "results_json": "outputs/case_workflow_results.json",
+        },
+    )()
+
+    apply_mode_defaults(args, ["outputs/0910/091010/subject.json", "--mode", "html"])
+
+    assert args.records_csv == "outputs/0910/091010/html/recommend_content_091010_html_records.csv"
+    assert args.results_json == "/tmp/recommend_content_091010_html_results.json"
 
 
 def test_main_stops_before_next_case_when_url_is_missing(tmp_path, monkeypatch):

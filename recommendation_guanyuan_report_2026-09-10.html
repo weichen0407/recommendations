@@ -1,0 +1,683 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>推荐系统 Guanyuan 数据 - 2026-09-09 至 2026-09-10</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --ink: #16202a;
+      --muted: #667382;
+      --line: #d7dde4;
+      --bg: #f6f8fa;
+      --panel: #ffffff;
+      --blue: #2563eb;
+      --teal: #0f766e;
+      --amber: #b45309;
+      --rose: #be123c;
+      --green: #15803d;
+      --shadow: 0 8px 24px rgba(21, 32, 43, 0.08);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--ink);
+      font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+      line-height: 1.5;
+    }
+
+    .page {
+      width: min(1180px, calc(100% - 32px));
+      margin: 0 auto;
+      padding: 28px 0 40px;
+    }
+
+    header {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 10px;
+      padding: 8px 0 18px;
+    }
+
+    .eyebrow {
+      color: var(--teal);
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: clamp(28px, 5vw, 44px);
+      line-height: 1.08;
+      letter-spacing: 0;
+    }
+
+    .meta {
+      max-width: 920px;
+      color: var(--muted);
+      font-size: 14px;
+      overflow-wrap: anywhere;
+    }
+
+    .grid {
+      display: grid;
+      gap: 16px;
+    }
+
+    .cards {
+      grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+      margin: 18px 0;
+    }
+
+    .card,
+    .panel {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      box-shadow: var(--shadow);
+      min-width: 0;
+    }
+
+    .card {
+      min-height: 152px;
+      padding: 18px;
+      display: grid;
+      align-content: space-between;
+      gap: 14px;
+    }
+
+    .label {
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    .metric {
+      display: flex;
+      align-items: baseline;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .number {
+      font-size: 38px;
+      line-height: 1;
+      font-weight: 780;
+      letter-spacing: 0;
+    }
+
+    .unit {
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 650;
+    }
+
+    .subline {
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .tag {
+      display: inline-flex;
+      align-items: center;
+      min-height: 24px;
+      padding: 3px 8px;
+      border-radius: 999px;
+      background: #eef6ff;
+      color: #1d4ed8;
+      border: 1px solid #bfdbfe;
+      font-size: 12px;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+
+    .status {
+      display: inline-flex;
+      align-items: center;
+      min-height: 24px;
+      padding: 3px 8px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 750;
+      white-space: nowrap;
+    }
+
+    .status.true {
+      background: #dcfce7;
+      border: 1px solid #86efac;
+      color: #166534;
+    }
+
+    .status.false {
+      background: #f1f5f9;
+      border: 1px solid #cbd5e1;
+      color: #475569;
+    }
+
+    .status.unknown {
+      background: #fff7ed;
+      border: 1px solid #fed7aa;
+      color: #9a3412;
+    }
+
+    .panel {
+      padding: 20px;
+      overflow: hidden;
+    }
+
+    .two-col {
+      grid-template-columns: 1.3fr 1fr;
+      align-items: start;
+    }
+
+    h2 {
+      margin: 0 0 14px;
+      font-size: 18px;
+      letter-spacing: 0;
+    }
+
+    .funnel {
+      display: grid;
+      gap: 14px;
+    }
+
+    .funnel-row {
+      display: grid;
+      grid-template-columns: 128px 1fr 76px;
+      gap: 12px;
+      align-items: center;
+    }
+
+    .bar-track {
+      height: 18px;
+      background: #edf1f5;
+      border-radius: 999px;
+      overflow: hidden;
+    }
+
+    .bar {
+      height: 100%;
+      border-radius: inherit;
+      background: linear-gradient(90deg, var(--blue), var(--teal));
+      min-width: 2px;
+    }
+
+    .bar.click {
+      background: linear-gradient(90deg, var(--amber), var(--rose));
+    }
+
+    .right {
+      text-align: right;
+      font-variant-numeric: tabular-nums;
+      font-weight: 720;
+    }
+
+    .note {
+      margin-top: 14px;
+      padding: 12px 14px;
+      border: 1px solid #f7d48a;
+      background: #fffbeb;
+      color: #7c4a03;
+      border-radius: 8px;
+      font-size: 13px;
+    }
+
+    .mini-bars {
+      display: grid;
+      gap: 12px;
+    }
+
+    .mini-row {
+      display: grid;
+      grid-template-columns: 54px 1fr 44px;
+      gap: 10px;
+      align-items: center;
+      font-size: 13px;
+    }
+
+    .mini-row .bar-track {
+      height: 12px;
+    }
+
+    .split {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 16px;
+    }
+
+    table {
+      width: 100%;
+      max-width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+      table-layout: fixed;
+    }
+
+    th,
+    td {
+      padding: 11px 10px;
+      border-bottom: 1px solid var(--line);
+      text-align: left;
+      vertical-align: top;
+    }
+
+    th {
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 750;
+      background: #f8fafc;
+    }
+
+    td {
+      word-break: break-word;
+    }
+
+    tbody tr:last-child td {
+      border-bottom: 0;
+    }
+
+    code {
+      font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+      font-size: 12px;
+      background: #eef2f7;
+      color: #233244;
+      padding: 2px 5px;
+      border-radius: 5px;
+      white-space: normal;
+      word-break: break-word;
+    }
+
+    .kv {
+      display: grid;
+      grid-template-columns: 170px 1fr;
+      gap: 9px 16px;
+      font-size: 13px;
+    }
+
+    .kv div:nth-child(odd) {
+      color: var(--muted);
+      font-weight: 700;
+    }
+
+    .callout {
+      border-left: 4px solid var(--green);
+      padding: 12px 14px;
+      background: #f0fdf4;
+      color: #14532d;
+      border-radius: 0 8px 8px 0;
+      font-size: 13px;
+      overflow-wrap: anywhere;
+    }
+
+    .section-gap {
+      margin-top: 16px;
+    }
+
+    @media (max-width: 980px) {
+      .cards {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .two-col,
+      .split {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 620px) {
+      .page {
+        width: min(100% - 20px, 1180px);
+        padding-top: 18px;
+      }
+
+      .cards {
+        grid-template-columns: 1fr;
+      }
+
+      .card,
+      .panel {
+        padding: 16px;
+      }
+
+      .funnel-row {
+        grid-template-columns: 1fr;
+        gap: 6px;
+      }
+
+      .right {
+        text-align: left;
+      }
+
+      .kv {
+        grid-template-columns: 1fr;
+        gap: 5px;
+      }
+
+      .meta,
+      .callout,
+      .kv {
+        word-break: break-word;
+      }
+
+      table {
+        display: block;
+        overflow-x: auto;
+        white-space: nowrap;
+      }
+
+      th,
+      td {
+        min-width: 132px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="page">
+    <header>
+      <div class="eyebrow">Guanyuan 数据快看</div>
+      <h1>推荐系统两日埋点对比</h1>
+      <div class="meta">
+        日期：2026-09-09 至 2026-09-10。筛选字段为 <code>event_ts</code> 和 <code>source_type</code>，其中 <code>source_type=plg_show_rc</code> 表示推荐板块展开，<code>source_type=plg_click_rc</code> 表示 RD Home 触发对话。
+      </div>
+    </header>
+
+    <section class="grid cards" aria-label="两日合计指标">
+      <article class="card">
+        <div>
+          <div class="label">推荐板块展开，两日合计</div>
+          <div class="metric"><span class="number">56</span><span class="unit">PV</span></div>
+        </div>
+        <div class="subline"><span class="tag">plg_show_rc</span> 有效 UV 32</div>
+      </article>
+
+      <article class="card">
+        <div>
+          <div class="label">RD Home 触发对话，两日合计</div>
+          <div class="metric"><span class="number">8</span><span class="unit">PV</span></div>
+        </div>
+        <div class="subline"><span class="tag">plg_click_rc</span> 有效 UV 2</div>
+      </article>
+
+      <article class="card">
+        <div>
+          <div class="label">点击 / 展开转化</div>
+          <div class="metric"><span class="number">14.29%</span><span class="unit">PV</span></div>
+        </div>
+        <div class="subline">有效 UV 转化 6.25%</div>
+      </article>
+
+      <article class="card">
+        <div>
+          <div class="label">点击后的 share/session</div>
+          <div class="metric"><span class="number">6</span><span class="unit">share_id</span></div>
+        </div>
+        <div class="subline">7 个 session_id，1 条点击未传 session_id</div>
+      </article>
+
+      <article class="card">
+        <div>
+          <div class="label">真激活率</div>
+          <div class="metric"><span class="number">14.29%</span><span class="unit">session</span></div>
+        </div>
+        <div class="subline">1 / 7 个可判定推荐点击会话为真激活</div>
+      </article>
+    </section>
+
+    <section class="panel">
+      <h2>两日总览</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>日期</th>
+            <th>展开 PV</th>
+            <th>展开 UV</th>
+            <th>触发 PV</th>
+            <th>触发 UV</th>
+            <th>PV 转化</th>
+            <th>share_id</th>
+            <th>session_id</th>
+            <th>真激活</th>
+            <th>真激活率</th>
+            <th>未传 session</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>2026-09-09</td>
+            <td>14</td>
+            <td>10</td>
+            <td>6</td>
+            <td>1</td>
+            <td>42.86%</td>
+            <td>5</td>
+            <td>5</td>
+            <td>1</td>
+            <td>20.00%</td>
+            <td>1</td>
+          </tr>
+          <tr>
+            <td>2026-09-10</td>
+            <td>42</td>
+            <td>22</td>
+            <td>2</td>
+            <td>1</td>
+            <td>4.76%</td>
+            <td>1</td>
+            <td>2</td>
+            <td>0</td>
+            <td>0.00%</td>
+            <td>0</td>
+          </tr>
+          <tr>
+            <td><strong>合计</strong></td>
+            <td><strong>56</strong></td>
+            <td><strong>32</strong></td>
+            <td><strong>8</strong></td>
+            <td><strong>2</strong></td>
+            <td><strong>14.29%</strong></td>
+            <td><strong>6</strong></td>
+            <td><strong>7</strong></td>
+            <td><strong>1</strong></td>
+            <td><strong>14.29%</strong></td>
+            <td><strong>1</strong></td>
+          </tr>
+        </tbody>
+      </table>
+      <div class="note">
+        真激活率按“有 session_id 的推荐点击会话”计算：1 / 7 = 14.29%。如果按全部点击 PV 计算，则为 1 / 8 = 12.50%。9 月 9 日点击转化更高：6 / 14 = 42.86%；9 月 10 日展开量更大，但点击只有 2 次。
+      </div>
+    </section>
+
+    <section class="grid two-col section-gap">
+      <article class="panel">
+        <h2>按天链路漏斗</h2>
+        <div class="funnel">
+          <div class="funnel-row">
+            <div><strong>9/9 展开</strong><br><span class="subline">plg_show_rc</span></div>
+            <div class="bar-track"><div class="bar" style="width: 33.3%"></div></div>
+            <div class="right">14</div>
+          </div>
+          <div class="funnel-row">
+            <div><strong>9/9 触发</strong><br><span class="subline">plg_click_rc</span></div>
+            <div class="bar-track"><div class="bar click" style="width: 14.3%"></div></div>
+            <div class="right">6</div>
+          </div>
+          <div class="funnel-row">
+            <div><strong>9/10 展开</strong><br><span class="subline">plg_show_rc</span></div>
+            <div class="bar-track"><div class="bar" style="width: 100%"></div></div>
+            <div class="right">42</div>
+          </div>
+          <div class="funnel-row">
+            <div><strong>9/10 触发</strong><br><span class="subline">plg_click_rc</span></div>
+            <div class="bar-track"><div class="bar click" style="width: 4.8%"></div></div>
+            <div class="right">2</div>
+          </div>
+        </div>
+      </article>
+
+      <article class="panel">
+        <h2>小时分布</h2>
+        <table>
+          <thead>
+            <tr><th>日期</th><th>展开小时</th><th>点击小时</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>2026-09-09</td><td>13 点 5；14 点 3；15 点 3；17/19/20 点各 1</td><td>13 点 3；14 点 3</td></tr>
+            <tr><td>2026-09-10</td><td>01 点 22；02 点 20</td><td>01 点 2</td></tr>
+          </tbody>
+        </table>
+        <div class="section-gap subline">两天导出均未触达 60,000 行预览上限。</div>
+      </article>
+    </section>
+
+    <section class="grid split section-gap">
+      <article class="panel">
+        <h2>用户类型</h2>
+        <table>
+          <thead>
+            <tr><th>日期</th><th>展开 PLG</th><th>展开游客</th><th>触发 PLG</th><th>触发游客</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>2026-09-09</td><td>14</td><td>0</td><td>6</td><td>0</td></tr>
+            <tr><td>2026-09-10</td><td>26</td><td>16</td><td>2</td><td>0</td></tr>
+          </tbody>
+        </table>
+      </article>
+
+      <article class="panel">
+        <h2>地区</h2>
+        <table>
+          <thead>
+            <tr><th>日期</th><th>展开 US</th><th>触发 US</th><th>其他</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>2026-09-09</td><td>14</td><td>6</td><td>0</td></tr>
+            <tr><td>2026-09-10</td><td>42</td><td>2</td><td>0</td></tr>
+          </tbody>
+        </table>
+      </article>
+    </section>
+
+    <section class="panel section-gap">
+      <h2>share_id 汇总</h2>
+      <table>
+        <thead>
+          <tr><th>日期</th><th>share_id</th><th>点击次数</th><th>session_id 情况</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>2026-09-09</td><td>3027eb3b123e35f5859904f9462154ce</td><td>2</td><td>2 个 session</td></tr>
+          <tr><td>2026-09-09</td><td>42acb055b3e200bdf4be8e0903d60b64</td><td>1</td><td>1 个 session</td></tr>
+          <tr><td>2026-09-09</td><td>7cda8a6d139fae54270dc36ca292164e</td><td>1</td><td>1 个 session</td></tr>
+          <tr><td>2026-09-09</td><td>499f235496b0035eacea2658bf754b7f</td><td>1</td><td>1 个 session</td></tr>
+          <tr><td>2026-09-09</td><td>0164107cc94cda02b14796e73bed6862</td><td>1</td><td>未传 session_id</td></tr>
+          <tr><td>2026-09-10</td><td>e63a4d6b2bc4aeb2632d3c053b048a32</td><td>2</td><td>2 个 session</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section class="panel section-gap">
+      <h2>真激活匹配</h2>
+      <div class="callout">
+        真激活来自数据集 <code>RunWise重构验证-会话主表与真激活</code>，用推荐点击里解析出的真实 <code>session_id</code> 匹配该表 <code>resolved_session_id</code>，再读取 <code>is_true_activation_session</code>。
+      </div>
+      <table class="section-gap">
+        <thead>
+          <tr>
+            <th>日期</th>
+            <th>点击 PV</th>
+            <th>有 session_id</th>
+            <th>主表命中</th>
+            <th>真激活 session</th>
+            <th>真激活率</th>
+            <th>全部点击口径</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td>2026-09-09</td><td>6</td><td>5</td><td>1</td><td>1</td><td>20.00%</td><td>16.67%</td></tr>
+          <tr><td>2026-09-10</td><td>2</td><td>2</td><td>0</td><td>0</td><td>0.00%</td><td>0.00%</td></tr>
+          <tr><td><strong>合计</strong></td><td><strong>8</strong></td><td><strong>7</strong></td><td><strong>1</strong></td><td><strong>1</strong></td><td><strong>14.29%</strong></td><td><strong>12.50%</strong></td></tr>
+        </tbody>
+      </table>
+      <table class="section-gap">
+        <thead>
+          <tr>
+            <th>命中 session_id</th>
+            <th>share_id</th>
+            <th>query</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>sess_64c448dab585481c</td>
+            <td>42acb055b3e200bdf4be8e0903d60b64</td>
+            <td>[2] 概述一下</td>
+          </tr>
+        </tbody>
+      </table>
+      <div class="note">
+        另按 <code>btu_id + session_date</code> 检查到 9 月 9 日同一 btu 还有一个更早的真激活会话 <code>sess_11016e83cc9e4b66</code>，但它不是推荐点击传入的 session_id，所以没有计入推荐点击真激活率。
+      </div>
+    </section>
+
+    <section class="panel section-gap">
+      <h2>点击明细</h2>
+      <div class="callout">
+        <code>session_id</code> 使用 <code>event_detail</code> JSON 中真实传入的值；<code>resolved_session_id=row|...</code> 只作为行级兜底，不作为对话 session。
+      </div>
+      <table class="section-gap">
+        <thead>
+          <tr>
+            <th>send_ts</th>
+            <th>user_id</th>
+            <th>btu_id</th>
+            <th>share_id</th>
+            <th>session_id</th>
+            <th>真激活</th>
+            <th>激活时间</th>
+            <th>query</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td>2026-09-09 13:21:03</td><td>b104f27c2f0c463da94abe71332080f5</td><td>430a1abdf48c4ee9967d58b97fba2214</td><td>42acb055b3e200bdf4be8e0903d60b64</td><td>sess_64c448dab585481c</td><td><span class="status true">真激活</span></td><td>2026-09-09 13:34:48</td><td>[2] 概述一下</td></tr>
+          <tr><td>2026-09-09 13:23:04</td><td>b104f27c2f0c463da94abe71332080f5</td><td>430a1abdf48c4ee9967d58b97fba2214</td><td>3027eb3b123e35f5859904f9462154ce</td><td>sess_edd634c1121a49e0</td><td><span class="status false">未命中</span></td><td></td><td>未匹配到会话主表</td></tr>
+          <tr><td>2026-09-09 13:36:52</td><td>b104f27c2f0c463da94abe71332080f5</td><td>430a1abdf48c4ee9967d58b97fba2214</td><td>3027eb3b123e35f5859904f9462154ce</td><td>sess_4d6d721e15e445ff</td><td><span class="status false">未命中</span></td><td></td><td>未匹配到会话主表</td></tr>
+          <tr><td>2026-09-09 14:00:27</td><td>b104f27c2f0c463da94abe71332080f5</td><td>430a1abdf48c4ee9967d58b97fba2214</td><td>0164107cc94cda02b14796e73bed6862</td><td>未传</td><td><span class="status unknown">无法判定</span></td><td></td><td>未传 session_id</td></tr>
+          <tr><td>2026-09-09 14:05:00</td><td>b104f27c2f0c463da94abe71332080f5</td><td>430a1abdf48c4ee9967d58b97fba2214</td><td>499f235496b0035eacea2658bf754b7f</td><td>sess_a980012ae72f45ba</td><td><span class="status false">未命中</span></td><td></td><td>未匹配到会话主表</td></tr>
+          <tr><td>2026-09-09 14:20:29</td><td>b104f27c2f0c463da94abe71332080f5</td><td>430a1abdf48c4ee9967d58b97fba2214</td><td>7cda8a6d139fae54270dc36ca292164e</td><td>sess_5927f1b4966246e6</td><td><span class="status false">未命中</span></td><td></td><td>未匹配到会话主表</td></tr>
+          <tr><td>2026-09-10 01:45:24</td><td>a34560aa5aab4285bff5d84b87ad1e49</td><td>83fd33bddee74b53814a6131921a8a76</td><td>e63a4d6b2bc4aeb2632d3c053b048a32</td><td>sess_e1bb14217c1e4a14</td><td><span class="status false">未命中</span></td><td></td><td>未匹配到会话主表</td></tr>
+          <tr><td>2026-09-10 01:45:58</td><td>a34560aa5aab4285bff5d84b87ad1e49</td><td>83fd33bddee74b53814a6131921a8a76</td><td>e63a4d6b2bc4aeb2632d3c053b048a32</td><td>sess_6e05b306c0a4421c</td><td><span class="status false">未命中</span></td><td></td><td>未匹配到会话主表</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section class="panel section-gap">
+      <h2>口径说明</h2>
+      <div class="kv">
+        <div>数据日期</div>
+        <div>2026-09-09 和 2026-09-10。</div>
+        <div>数据集</div>
+        <div>eureka产品行为数据 - 2025年1月及以后-关联付费属性。</div>
+        <div>PV</div>
+        <div>按过滤后的事件行数计算：<code>source_type=plg_show_rc</code> 为展开，<code>source_type=plg_click_rc</code> 为触发对话。</div>
+        <div>有效 UV</div>
+        <div>优先使用非空且非 <code>0000000000000000</code> 的 <code>user_id</code>，其次使用 <code>btu_id</code>，再用 <code>event_detail.session_id</code> 或 <code>raw_session_id</code>。如果仍缺失，只能落到 <code>resolved_session_id</code> 的行级兜底。</div>
+        <div>UV 风险</div>
+        <div>2026-09-10 的 <code>plg_show_rc</code> 有 16 条游客行没有 <code>btu_id</code> 和真实 session，行级兜底会让有效 UV 偏高；2026-09-09 没有游客行。</div>
+        <div>真激活口径</div>
+        <div>用点击明细里的 <code>session_id</code> 匹配真激活表 <code>resolved_session_id</code>，且 <code>is_true_activation_session=1</code> 计为真激活。未传 <code>session_id</code> 的点击记为无法判定。</div>
+        <div>query 来源</div>
+        <div><code>query</code> 来自真激活/会话主表的 <code>full_query_with_round</code>。只有精确匹配到 <code>resolved_session_id</code> 的推荐点击会话展示 query；未命中会话主表的不反查其他用户会话。</div>
+        <div>本地文件</div>
+        <div>明细导出保存在 <code>plg_show_rc_2026-09-09.json</code>、<code>plg_click_rc_2026-09-09.json</code>、<code>plg_show_rc_2026-09-10.json</code>、<code>plg_click_rc_2026-09-10.json</code>、<code>recommendation_true_activation_matched_sessions_with_query.json</code>。</div>
+      </div>
+    </section>
+  </main>
+</body>
+</html>

@@ -1,0 +1,52 @@
+industry,industry_label,parent_sub_industry,parent_sub_industry_label,sub_industry,sub_industry_label,scout_report,case,market_landscape,patent_landscape,competitor_analysis,opportunity_brief,risk_watch,trend_brief,total_generated
+medical_devices,Medical Devices,,,diagnostic_devices,Diagnostic Devices,1,0,0,1,1,0,0,0,3
+medical_devices,Medical Devices,,,surgical_and_interventional_devices,Surgical and Interventional Devices,1,1,0,0,0,1,0,0,3
+medical_devices,Medical Devices,,,wearable_and_digital_health_devices,Wearable and Digital Health Devices,0,1,1,0,0,0,1,0,3
+medical_devices,Medical Devices,,,device_materials_and_components,Device Materials and Components,0,0,1,1,0,0,0,1,3
+materials,Materials,,,advanced_materials,Advanced Materials,0,0,0,1,1,0,1,0,3
+materials,Materials,,,polymers_and_resins,Polymers and Resins,0,1,0,0,0,1,0,1,3
+materials,Materials,,,coatings_and_surfaces,Coatings and Surfaces,0,0,1,0,0,0,1,0,2
+materials,Materials,,,metals_and_alloys,Metals and Alloys,0,0,0,0,1,0,0,1,2
+materials,Materials,,,semiconductor_materials,Semiconductor Materials,1,0,0,0,0,1,0,0,2
+automotive,Automotive,,,ev_and_battery_systems,Ev and Battery Systems,1,1,0,1,0,0,0,0,3
+automotive,Automotive,,,vehicle_components,Vehicle Components,0,0,1,0,1,1,0,0,3
+automotive,Automotive,,,autonomous_and_connected_vehicle,Autonomous and Connected Vehicle,1,0,0,1,0,0,1,0,3
+automotive,Automotive,,,automotive_manufacturing,Automotive Manufacturing,0,1,0,0,1,0,0,1,3
+electronics_manufacturing,Electronics Manufacturing,,,semiconductor_and_packaging,Semiconductor and Packaging,0,0,1,0,0,2,0,0,3
+electronics_manufacturing,Electronics Manufacturing,,,photonics_and_optics,Photonics and Optics,0,0,0,1,0,0,2,0,3
+electronics_manufacturing,Electronics Manufacturing,,,consumer_electronics_components,Consumer Electronics Components,0,0,0,0,1,0,0,2,3
+electronics_manufacturing,Electronics Manufacturing,,,manufacturing_processes,Manufacturing Processes,2,1,0,0,0,0,0,0,3
+engineering,Engineering,,,industrial_equipment,Industrial Equipment,0,1,1,0,0,1,0,0,3
+engineering,Engineering,,,mechanical_systems,Mechanical Systems,0,0,1,1,0,0,1,0,3
+engineering,Engineering,,,manufacturing_process_engineering,Manufacturing Process Engineering,0,0,0,1,1,0,0,1,3
+engineering,Engineering,,,construction_engineering_overlap,Construction Engineering Overlap,1,1,0,0,1,0,0,0,3
+biotechnology,Biotechnology,,,drug_discovery,Drug Discovery,0,0,1,0,0,2,0,0,3
+biotechnology,Biotechnology,,,synthetic_biology,Synthetic Biology,0,0,0,1,0,0,2,0,3
+biotechnology,Biotechnology,,,diagnostics_and_biomarkers,Diagnostics and Biomarkers,0,0,0,0,1,0,0,2,3
+biotechnology,Biotechnology,,,bio_based_materials,Bio Based Materials,2,1,0,0,0,0,0,0,3
+food,Food,,,food_ingredients,Food Ingredients,0,1,1,0,0,1,0,0,3
+food,Food,,,food_formulation,Food Formulation,0,0,1,1,0,0,1,0,3
+food,Food,,,food_processing,Food Processing,0,0,0,1,1,0,0,1,3
+food,Food,,,food_packaging,Food Packaging,1,1,0,0,1,0,0,0,3
+farming_production,Farming Production,,,crop_science,Crop Science,0,0,1,0,0,2,0,0,3
+farming_production,Farming Production,,,livestock_and_animal_health,Livestock and Animal Health,0,0,0,1,0,0,2,0,3
+farming_production,Farming Production,,,precision_agriculture,Precision Agriculture,0,0,0,0,1,0,0,2,3
+farming_production,Farming Production,,,agri_inputs,Agri Inputs,2,1,0,0,0,0,0,0,3
+energy,Energy,,,batteries_and_storage,Batteries and Storage,0,1,1,0,0,1,0,0,3
+energy,Energy,,,hydrogen_and_fuel_cells,Hydrogen and Fuel Cells,0,0,1,1,0,0,1,0,3
+energy,Energy,,,solar_and_power_electronics,Solar and Power Electronics,0,0,0,1,1,0,0,1,3
+energy,Energy,,,carbon_and_efficiency,Carbon and Efficiency,1,1,0,0,1,0,0,0,3
+chemical,Chemical,,,specialty_chemicals,Specialty Chemicals,0,0,1,0,0,2,0,0,3
+chemical,Chemical,,,industrial_formulations,Industrial Formulations,0,0,0,1,0,0,2,0,3
+chemical,Chemical,,,polymers_and_additives,Polymers and Additives,0,0,0,0,1,0,0,2,3
+chemical,Chemical,,,household_and_personal_care_chemistry,Household and Personal Care Chemistry,2,1,0,0,0,0,0,0,3
+construction,Construction,,,building_materials,Building Materials,0,1,1,0,0,1,0,0,3
+construction,Construction,,,infrastructure,Infrastructure,0,0,1,1,0,0,1,0,3
+construction,Construction,,,construction_methods,Construction Methods,0,0,0,1,1,0,0,1,3
+construction,Construction,,,building_systems,Building Systems,1,1,0,0,1,0,0,0,3
+other,Other,consumer_products,Consumer Products,home_appliance,Home Appliance,0,0,0,1,0,1,0,0,2
+other,Other,consumer_products,Consumer Products,personal_care_devices,Personal Care Devices,0,0,0,0,1,0,1,0,2
+other,Other,consumer_products,Consumer Products,household_care_products,Household Care Products,0,0,1,0,0,0,0,1,2
+other,Other,packaging_and_retail,Packaging and Retail,consumer_packaging,Consumer Packaging,1,0,0,0,0,1,0,0,2
+other,Other,packaging_and_retail,Packaging and Retail,retail_and_ecommerce,Retail and Ecommerce,0,1,0,0,0,0,1,0,2
+other,Other,general_strategy,General Strategy,market_research,Market Research,0,0,1,0,0,0,0,1,2

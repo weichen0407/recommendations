@@ -153,6 +153,63 @@ def test_validate_records_csv_scans_session_urls(tmp_path):
     assert records[1]["completionError"] == "bad artifact"
 
 
+def test_validate_records_csv_follows_stream_cursor_until_has_more_false(tmp_path):
+    records_path = tmp_path / "records.csv"
+    records_path.write_text(
+        "input,session_url,share_url\n"
+        "paged,https://eureka.patsnap.com/ai-search/sess_paged,https://share.test/paged\n",
+        encoding="utf-8",
+    )
+    client = FakePaginatedCompletionClient()
+    runtime = RuntimeDependencies(
+        settings=AppSettings(
+            openai=OpenAISettings(),
+            profile_gate=ProfileGateSettings(),
+            eureka=EurekaSettings(),
+        ),
+        eureka_client=client,
+    )
+
+    updates = validate_records_csv(str(records_path), runtime)
+
+    records = _read_csv(records_path)
+    assert client.calls == [
+        ("sess_paged", ""),
+        ("sess_paged", "archive:1789011848292-0"),
+    ]
+    assert len(updates) == 1
+    assert updates[0].status == "completed"
+    assert updates[0].is_complete is True
+    assert records[0]["isCompleted"] == "true"
+    assert records[0]["completionStatus"] == "completed"
+
+
+def test_validate_records_csv_reports_pagination_error_when_max_pages_is_exceeded(tmp_path):
+    records_path = tmp_path / "records.csv"
+    records_path.write_text(
+        "input,session_url,share_url\n"
+        "loop,https://eureka.patsnap.com/ai-search/sess_loop,https://share.test/loop\n",
+        encoding="utf-8",
+    )
+    runtime = RuntimeDependencies(
+        settings=AppSettings(
+            openai=OpenAISettings(),
+            profile_gate=ProfileGateSettings(),
+            eureka=EurekaSettings(),
+        ),
+        eureka_client=FakeAlwaysMoreCompletionClient(),
+    )
+
+    updates = validate_records_csv(str(records_path), runtime, max_pages=2)
+
+    records = _read_csv(records_path)
+    assert len(updates) == 1
+    assert updates[0].status == "http_error"
+    assert records[0]["isCompleted"] == "false"
+    assert records[0]["completionStatus"] == "http_error"
+    assert "exceeded --max-pages=2" in records[0]["completionError"]
+
+
 def test_validate_records_csv_migrates_legacy_completion_columns(tmp_path):
     records_path = tmp_path / "records.csv"
     records_path.write_text(
@@ -195,6 +252,56 @@ class FakeCompletionClient:
                     ]
                 }
             )
+        return CurlResult(payload={}, body=body, status_code=200, return_code=0)
+
+
+class FakePaginatedCompletionClient:
+    def __init__(self):
+        self.calls = []
+
+    def has_completion_endpoint(self):
+        return True
+
+    def get_completion_status(self, session_id, cursor=""):
+        self.calls.append((session_id, cursor))
+        if not cursor:
+            body = json.dumps(
+                {
+                    "events": [{"type": "answer_chunk", "status": "running"}],
+                    "has_more": True,
+                    "status": "running",
+                    "stream_cursor": "archive:1789011848292-0",
+                    "terminal": False,
+                }
+            )
+        else:
+            body = json.dumps(
+                {
+                    "events": [{"type": "answer_chunk", "status": "completed"}],
+                    "has_more": False,
+                    "status": "completed",
+                    "stream_cursor": "1789011948509-0",
+                    "terminal": True,
+                }
+            )
+        return CurlResult(payload={}, body=body, status_code=200, return_code=0)
+
+
+class FakeAlwaysMoreCompletionClient:
+    def has_completion_endpoint(self):
+        return True
+
+    def get_completion_status(self, session_id, cursor=""):
+        next_cursor = "archive:cursor-1" if not cursor else f"{cursor}-next"
+        body = json.dumps(
+            {
+                "events": [{"type": "answer_chunk", "session_id": session_id}],
+                "has_more": True,
+                "status": "running",
+                "stream_cursor": next_cursor,
+                "terminal": False,
+            }
+        )
         return CurlResult(payload={}, body=body, status_code=200, return_code=0)
 
 

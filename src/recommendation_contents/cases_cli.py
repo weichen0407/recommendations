@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import re
 import subprocess
 import sys
 import time
@@ -24,6 +25,7 @@ from .state import TopicWorkflowState
 
 DEFAULT_CASE_RECORDS_CSV = "outputs/case_workflow_records.csv"
 DEFAULT_CASE_RESULTS_JSON = "outputs/case_workflow_results.json"
+HTML_ARTIFACT_INSTRUCTION = "Use artifact-generator to generate the final result as HTML."
 
 
 def main() -> None:
@@ -39,6 +41,12 @@ def main() -> None:
     parser.add_argument("--env-file", default=".env", help="Path to dotenv file.")
     parser.add_argument("--limit", type=int, default=3, help="Maximum cases to process.")
     parser.add_argument("--offset", type=int, default=0, help="Number of cases to skip first.")
+    parser.add_argument(
+        "--mode",
+        choices=["report", "html"],
+        default="",
+        help="Generation mode. With a subject.json batch, this sets prompt style and default records path.",
+    )
     parser.add_argument(
         "--records-csv",
         default=DEFAULT_CASE_RECORDS_CSV,
@@ -93,14 +101,27 @@ def main() -> None:
         action="store_true",
         help="Allow refresh-token flow before curl. Disabled by default with --retry-on-auth-change.",
     )
+    parser.add_argument(
+        "--progress",
+        action=argparse.BooleanOptionalAction,
+        default=None,
+        help="Print per-case progress logs to stderr. Defaults to on for summary output.",
+    )
     parser.add_argument("--pretty", action="store_true", help="Pretty-print JSON output.")
     args = parser.parse_args()
+    apply_mode_defaults(args, sys.argv[1:])
 
     apply_env_file_to_process(args.env_file)
     settings = AppSettings.from_env_file(args.env_file)
     runtime = RuntimeDependencies(settings=settings)
     cases = load_case_items(args.cases_json, offset=args.offset, limit=args.limit)
+    if args.mode:
+        cases = [
+            (case_index, apply_generation_mode(item, args.mode))
+            for case_index, item in cases
+        ]
     allow_refresh = args.use_refresh or not args.retry_on_auth_change
+    log_progress = args.progress if args.progress is not None else args.output == "summary"
 
     if args.retry_on_auth_change and not allow_refresh:
         preflight = ensure_auth_ready(
@@ -108,13 +129,23 @@ def main() -> None:
             wait_on_401_seconds=args.wait_on_401,
             import_clipboard_on_401=args.import_clipboard_on_401,
             auth_poll_interval_seconds=args.auth_poll_interval,
-            log_progress=args.output == "summary",
+            log_progress=log_progress,
         )
         if not preflight["ready"]:
             raise SystemExit(_auth_preflight_error(preflight))
 
     results: list[dict[str, Any]] = []
-    for case_index, item in cases:
+    total = len(cases)
+    for progress_index, (case_index, item) in enumerate(cases, start=1):
+        _log_case_progress(
+            enabled=log_progress,
+            progress_index=progress_index,
+            total=total,
+            case_index=case_index,
+            item=item,
+            phase="start",
+            mode=args.mode,
+        )
         result = run_case_item(
             case_index=case_index,
             item=item,
@@ -125,10 +156,20 @@ def main() -> None:
             import_clipboard_on_401=args.import_clipboard_on_401,
             auth_poll_interval_seconds=args.auth_poll_interval,
             allow_refresh=allow_refresh,
-            log_progress=args.output == "summary",
+            log_progress=log_progress,
         )
         results.append(result)
         write_results_json(results=results, path=args.results_json)
+        _log_case_progress(
+            enabled=log_progress,
+            progress_index=progress_index,
+            total=total,
+            case_index=case_index,
+            item=item,
+            phase="done",
+            mode=args.mode,
+            result=result,
+        )
         if not result_has_required_urls(result):
             raise SystemExit(url_generation_error(result, args.results_json))
         if result.get("row"):
@@ -145,6 +186,7 @@ def main() -> None:
         "failed": sum(1 for item in results if not item.get("curl_success")),
         "records_csv": args.records_csv,
         "results_json": args.results_json,
+        "mode": args.mode,
         "results": results,
     }
     if args.records_md:
@@ -190,6 +232,103 @@ def case_index_from_item(item: dict[str, Any], fallback_index: int) -> int:
     if isinstance(value, str) and value.strip().isdigit():
         return int(value.strip())
     return fallback_index
+
+
+def apply_mode_defaults(args: argparse.Namespace, argv: list[str]) -> None:
+    if not getattr(args, "mode", ""):
+        return
+
+    batch_dir = Path(args.cases_json).parent
+    batch_name = batch_dir.name if str(batch_dir) not in ("", ".") else Path(args.cases_json).stem
+    mode = args.mode
+
+    if not _option_was_provided(argv, "--records-csv"):
+        args.records_csv = str(batch_dir / mode / f"recommend_content_{batch_name}_{mode}_records.csv")
+    if not _option_was_provided(argv, "--results-json"):
+        args.results_json = str(Path("/tmp") / f"recommend_content_{batch_name}_{mode}_results.json")
+
+
+def apply_generation_mode(item: dict[str, Any], mode: str) -> dict[str, Any]:
+    if mode not in {"report", "html"}:
+        return item
+
+    item_for_mode = dict(item)
+    prompt = _string(item_for_mode.get("output")) or _string(item_for_mode.get("prompt"))
+    if mode == "html":
+        prompt = _with_html_artifact_instruction(prompt)
+    else:
+        prompt = _without_html_artifact_instruction(prompt)
+    item_for_mode["output"] = prompt
+    item_for_mode["generation_mode"] = mode
+    return item_for_mode
+
+
+def _option_was_provided(argv: list[str], option: str) -> bool:
+    return any(arg == option or arg.startswith(f"{option}=") for arg in argv)
+
+
+def _with_html_artifact_instruction(prompt: str) -> str:
+    prompt = _without_html_artifact_instruction(prompt)
+    if not prompt:
+        return HTML_ARTIFACT_INSTRUCTION
+    return f"{prompt} {HTML_ARTIFACT_INSTRUCTION}"
+
+
+def _without_html_artifact_instruction(prompt: str) -> str:
+    cleaned = re.sub(
+        r"\s*Use artifact-generator to generate the final result as HTML\.?",
+        "",
+        prompt,
+        flags=re.IGNORECASE,
+    )
+    return cleaned.strip()
+
+
+def _log_case_progress(
+    enabled: bool,
+    progress_index: int,
+    total: int,
+    case_index: int,
+    item: dict[str, Any],
+    phase: str,
+    mode: str = "",
+    result: dict[str, Any] | None = None,
+) -> None:
+    if not enabled:
+        return
+
+    title = _string(item.get("title")) or _string(item.get("input"))
+    parts = [
+        f"[{progress_index}/{total}]",
+        phase,
+        "case-workflow",
+        f"case_index={case_index}",
+    ]
+    if mode:
+        parts.append(f"mode={mode}")
+    if title:
+        parts.append(f"title={_short_log_value(title)}")
+    if result:
+        status = "ok" if result.get("curl_success") else "failed"
+        parts.append(f"status={status}")
+        parts.append(f"session={_yes_no(result.get('session_url'))}")
+        parts.append(f"share={_yes_no(result.get('share_url'))}")
+        errors = result.get("errors") or []
+        if errors:
+            parts.append(f"error={_short_log_value(errors[0], limit=140)}")
+
+    print(" ".join(parts), file=sys.stderr, flush=True)
+
+
+def _short_log_value(value: Any, limit: int = 80) -> str:
+    text = str(value).replace("\n", " ").strip()
+    if len(text) <= limit:
+        return json.dumps(text, ensure_ascii=False)
+    return json.dumps(f"{text[: limit - 1]}…", ensure_ascii=False)
+
+
+def _yes_no(value: Any) -> str:
+    return "yes" if value else "no"
 
 
 def run_case_item(
@@ -445,7 +584,18 @@ def _string(value: Any) -> str:
 
 def _string_list(value: Any) -> list[str]:
     if isinstance(value, str):
-        value = [value]
+        text = value.strip()
+        if text.startswith("["):
+            try:
+                parsed = json.loads(text)
+            except json.JSONDecodeError:
+                parsed = None
+            if isinstance(parsed, list):
+                value = parsed
+            else:
+                value = [text]
+        else:
+            value = [text]
     if not isinstance(value, list):
         return []
     return [item.strip() for item in value if isinstance(item, str) and item.strip()]

@@ -1,0 +1,38 @@
+[
+  {
+    "event_ts": "2026-09-10",
+    "send_ts": "2026-09-10 01:45:24",
+    "event": "ss_plg_qa",
+    "user_id": "a34560aa5aab4285bff5d84b87ad1e49",
+    "btu_id": "83fd33bddee74b53814a6131921a8a76",
+    "company_id": "",
+    "company_name": "",
+    "patsnap_user_type": "FREE",
+    "eureka_user_type": "",
+    "source_type": "plg_click_rc",
+    "event_detail": "product=RD_PLG;ip,air;{\"share_id\":\"e63a4d6b2bc4aeb2632d3c053b048a32\",\"session_id\":\"sess_e1bb14217c1e4a14\"}",
+    "raw_session_id": "",
+    "resolved_session_id": "row|60129651304",
+    "other_param": "",
+    "region": "US",
+    "是否企业租户": "PLG用户"
+  },
+  {
+    "event_ts": "2026-09-10",
+    "send_ts": "2026-09-10 01:45:58",
+    "event": "ss_plg_qa",
+    "user_id": "a34560aa5aab4285bff5d84b87ad1e49",
+    "btu_id": "83fd33bddee74b53814a6131921a8a76",
+    "company_id": "",
+    "company_name": "",
+    "patsnap_user_type": "FREE",
+    "eureka_user_type": "",
+    "source_type": "plg_click_rc",
+    "event_detail": "product=RD_PLG;ip,air;{\"share_id\":\"e63a4d6b2bc4aeb2632d3c053b048a32\",\"session_id\":\"sess_6e05b306c0a4421c\"}",
+    "raw_session_id": "",
+    "resolved_session_id": "row|60129651293",
+    "other_param": "",
+    "region": "US",
+    "是否企业租户": "PLG用户"
+  }
+]

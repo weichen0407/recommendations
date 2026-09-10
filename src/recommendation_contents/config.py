@@ -182,8 +182,8 @@ class EurekaSettings:
     completion_endpoint: str = (
         "https://eureka-service.patsnap.com/api/eureka/share/sessions/{session_id}/events"
     )
-    completion_method: str = "GET"
-    completion_body: dict[str, Any] = field(default_factory=dict)
+    completion_method: str = "POST"
+    completion_body: dict[str, Any] = field(default_factory=lambda: {"limit": 500})
     completion_timeout_seconds: float = 600.0
     completion_poll_interval_seconds: float = 5.0
     authorization: str = ""
@@ -241,8 +241,9 @@ class EurekaSettings:
                 "EUREKA_COMPLETION_ENDPOINT",
                 "https://eureka-service.patsnap.com/api/eureka/share/sessions/{session_id}/events",
             ),
-            completion_method=env.get("EUREKA_COMPLETION_METHOD", "GET") or "GET",
-            completion_body=_json_env(env, "EUREKA_COMPLETION_BODY_JSON", {}) or {},
+            completion_method=env.get("EUREKA_COMPLETION_METHOD", "POST") or "POST",
+            completion_body=_json_env(env, "EUREKA_COMPLETION_BODY_JSON", {"limit": 500})
+            or {},
             completion_timeout_seconds=_float_env(env, "EUREKA_COMPLETION_TIMEOUT_SECONDS", 600.0),
             completion_poll_interval_seconds=_float_env(
                 env,

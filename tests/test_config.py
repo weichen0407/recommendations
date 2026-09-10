@@ -1,6 +1,11 @@
 import os
 
-from recommendation_contents.config import AppSettings, apply_env_file_to_process, load_env_file
+from recommendation_contents.config import (
+    AppSettings,
+    EurekaSettings,
+    apply_env_file_to_process,
+    load_env_file,
+)
 
 
 def test_load_env_file_parses_simple_dotenv(tmp_path):
@@ -112,3 +117,10 @@ def test_apply_env_file_to_process_does_not_override_process_env(tmp_path, monke
 
     assert os.environ["LANGSMITH_PROJECT"] == "from-shell"
     assert os.environ["LANGCHAIN_PROJECT"] == "from-shell"
+
+
+def test_eureka_completion_defaults_match_events_endpoint():
+    settings = EurekaSettings.from_env({})
+
+    assert settings.completion_method == "POST"
+    assert settings.completion_body == {"limit": 500}
