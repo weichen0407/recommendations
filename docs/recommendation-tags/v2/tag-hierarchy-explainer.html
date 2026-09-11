@@ -1,0 +1,853 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Question Tag Hierarchy · Taxonomy 2.2.0</title>
+  <style>
+    :root {
+      color-scheme: light dark;
+      --bg: #f4f6fb;
+      --surface: #ffffff;
+      --surface-2: #eef2f8;
+      --text: #172033;
+      --muted: #63708a;
+      --line: #d6ddea;
+      --blue: #3157d5;
+      --blue-soft: #e8edff;
+      --green: #14845f;
+      --green-soft: #e4f6ef;
+      --orange: #b85b16;
+      --orange-soft: #fff0e3;
+      --purple: #7652be;
+      --purple-soft: #f0eaff;
+      --shadow: 0 12px 32px rgba(29, 43, 76, .08);
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #10131b;
+        --surface: #181d29;
+        --surface-2: #222938;
+        --text: #edf1fa;
+        --muted: #aeb8cc;
+        --line: #343d51;
+        --blue: #9fb3ff;
+        --blue-soft: #27345f;
+        --green: #6fd6af;
+        --green-soft: #183c33;
+        --orange: #ffb77b;
+        --orange-soft: #4a2d1c;
+        --purple: #c2a9ff;
+        --purple-soft: #382a57;
+        --shadow: none;
+      }
+    }
+
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--text);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+      line-height: 1.55;
+    }
+    main { max-width: 1160px; margin: 0 auto; padding: 48px 28px 72px; }
+    h1, h2, h3, p { margin-top: 0; }
+    h1 { margin-bottom: 10px; font-size: clamp(30px, 5vw, 52px); line-height: 1.08; letter-spacing: -.035em; }
+    h2 { margin-bottom: 18px; font-size: 21px; }
+    h3 { margin-bottom: 6px; font-size: 15px; }
+    code { font-family: "SFMono-Regular", Consolas, monospace; font-size: .88em; }
+    .eyebrow { color: var(--blue); font-size: 13px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; }
+    .lead { max-width: 780px; color: var(--muted); font-size: 18px; }
+    .version { display: inline-block; margin-top: 8px; color: var(--muted); font-size: 13px; }
+
+    .counts {
+      display: grid;
+      grid-template-columns: repeat(5, minmax(120px, 1fr));
+      gap: 1px;
+      margin: 32px 0 42px;
+      overflow: hidden;
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      background: var(--line);
+    }
+    .count { padding: 16px; background: var(--surface); }
+    .count strong { display: block; font-size: 25px; line-height: 1.1; }
+    .count span { color: var(--muted); font-size: 12px; }
+
+    .toolbar { display: flex; flex-wrap: wrap; gap: 9px; margin-bottom: 24px; }
+    .preset {
+      min-height: 42px;
+      padding: 9px 14px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      background: var(--surface);
+      color: var(--text);
+      font: inherit;
+      cursor: pointer;
+    }
+    .preset[aria-pressed="true"] { border-color: var(--blue); background: var(--blue-soft); color: var(--blue); }
+    .preset:focus-visible { outline: 3px solid color-mix(in srgb, var(--blue) 35%, transparent); outline-offset: 2px; }
+
+    .panel {
+      margin-bottom: 28px;
+      padding: 24px;
+      border: 1px solid var(--line);
+      border-radius: 20px;
+      background: var(--surface);
+      box-shadow: var(--shadow);
+    }
+    .panel-head { display: flex; align-items: baseline; justify-content: space-between; gap: 16px; }
+    .panel-head p { color: var(--muted); font-size: 13px; }
+
+    .trees { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+    .tree { min-width: 0; }
+    .tree-role { --tree-color: var(--blue); --tree-soft: var(--blue-soft); }
+    .tree-industry { --tree-color: var(--green); --tree-soft: var(--green-soft); }
+    .tree-jtbd { --tree-color: var(--orange); --tree-soft: var(--orange-soft); }
+    .tree-label { margin-bottom: 12px; color: var(--tree-color); font-size: 12px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; }
+    .node {
+      min-height: 70px;
+      padding: 13px 14px;
+      border-left: 4px solid var(--tree-color);
+      border-radius: 10px;
+      background: var(--tree-soft);
+    }
+    .node small { display: block; margin-bottom: 3px; color: var(--muted); }
+    .node strong { display: block; overflow-wrap: anywhere; font-size: 15px; }
+    .node code { color: var(--tree-color); }
+    .arrow { height: 25px; margin-left: 19px; border-left: 2px solid var(--line); }
+    .empty-node { border-left-style: dashed; opacity: .68; }
+
+    .facets { display: grid; grid-template-columns: 1fr 1fr .8fr; gap: 16px; }
+    .facet { min-height: 112px; padding: 16px; border-radius: 14px; background: var(--surface-2); }
+    .facet small { display: block; margin-bottom: 10px; color: var(--muted); }
+    .facet strong { display: block; margin-bottom: 5px; color: var(--purple); overflow-wrap: anywhere; }
+    .facet p { margin: 0; color: var(--muted); font-size: 13px; }
+    .facet-link { position: relative; }
+    .facet-link::after { content: "Allowed combination →"; position: absolute; right: -57px; top: 44px; z-index: 2; color: var(--muted); font-size: 11px; }
+
+    .bundle {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 18px;
+    }
+    .tag { padding: 7px 10px; border-radius: 8px; background: var(--surface-2); color: var(--text); font-family: "SFMono-Regular", Consolas, monospace; font-size: 12px; }
+    .tag b { color: var(--muted); font-family: inherit; font-weight: 500; }
+    pre {
+      margin: 0;
+      padding: 16px;
+      overflow: auto;
+      border-radius: 12px;
+      background: #101827;
+      color: #dce6fa;
+      font-size: 12px;
+      line-height: 1.6;
+    }
+
+    .variants { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
+    .question { display: flex; gap: 12px; padding: 15px 0; border-top: 1px solid var(--line); }
+    .question:nth-child(-n+2) { border-top: 0; }
+    .question-index {
+      flex: 0 0 30px;
+      height: 30px;
+      border-radius: 50%;
+      background: var(--blue-soft);
+      color: var(--blue);
+      text-align: center;
+      line-height: 30px;
+      font-weight: 700;
+    }
+    .question p { margin: 3px 0 0; }
+    .question small { color: var(--muted); }
+    .inheritance { margin: 18px 0 0; padding-top: 14px; border-top: 1px solid var(--line); color: var(--muted); font-size: 13px; }
+    .inheritance strong { color: var(--text); }
+
+    .rule {
+      display: grid;
+      grid-template-columns: auto 1fr;
+      gap: 15px;
+      align-items: start;
+      padding: 19px 21px;
+      border-radius: 16px;
+      background: var(--purple-soft);
+    }
+    .rule-mark { color: var(--purple); font-size: 27px; line-height: 1; }
+    .rule p { margin: 3px 0 0; color: var(--muted); }
+
+    .catalog-explorer { margin-top: 42px; }
+    .catalog-tools {
+      display: grid;
+      grid-template-columns: minmax(240px, 1fr) auto;
+      gap: 12px;
+      align-items: end;
+      margin-bottom: 16px;
+    }
+    .search-label { display: grid; gap: 6px; color: var(--muted); font-size: 13px; }
+    .catalog-search {
+      width: 100%;
+      min-height: 44px;
+      padding: 10px 13px;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      background: var(--surface);
+      color: var(--text);
+      font: inherit;
+    }
+    .catalog-search:focus { outline: 3px solid color-mix(in srgb, var(--blue) 28%, transparent); border-color: var(--blue); }
+    .catalog-actions { display: flex; gap: 8px; }
+    .catalog-action {
+      min-height: 42px;
+      padding: 9px 12px;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      background: var(--surface);
+      color: var(--text);
+      font: inherit;
+      cursor: pointer;
+    }
+    .catalog-tabs { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 10px; }
+    .catalog-tab {
+      min-height: 40px;
+      padding: 8px 12px;
+      border: 0;
+      border-radius: 9px;
+      background: transparent;
+      color: var(--muted);
+      font: inherit;
+      cursor: pointer;
+    }
+    .catalog-tab[aria-pressed="true"] { background: var(--blue-soft); color: var(--blue); }
+    .catalog-status { min-height: 24px; margin: 0 0 16px; color: var(--muted); font-size: 13px; }
+    .catalog-section { margin-top: 28px; }
+    .catalog-section:first-child { margin-top: 0; }
+    .catalog-section-head { display: flex; flex-wrap: wrap; gap: 8px 18px; align-items: baseline; margin-bottom: 10px; }
+    .catalog-section-head h3 { margin: 0; font-size: 18px; }
+    .catalog-section-head span { color: var(--muted); font-size: 13px; }
+    .catalog-group {
+      margin: 0;
+      border-top: 1px solid var(--line);
+    }
+    .catalog-group:last-child { border-bottom: 1px solid var(--line); }
+    .catalog-group > summary {
+      display: grid;
+      grid-template-columns: minmax(220px, .8fr) minmax(220px, 1.2fr) auto;
+      gap: 14px;
+      align-items: center;
+      min-height: 54px;
+      padding: 10px 4px;
+      cursor: pointer;
+    }
+    .catalog-group > summary code { color: var(--blue); overflow-wrap: anywhere; }
+    .catalog-group > summary strong { font-size: 14px; }
+    .catalog-group > summary span { color: var(--muted); font-size: 12px; text-align: right; }
+    .catalog-group-body { padding: 2px 4px 20px 26px; }
+    .enum-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+    .enum-item { min-width: 0; padding: 12px 14px; border-radius: 10px; background: var(--surface-2); }
+    .enum-item code { display: block; margin-bottom: 3px; color: var(--green); overflow-wrap: anywhere; }
+    .enum-item strong { display: block; font-size: 13px; }
+    .enum-item p { margin: 5px 0 0; color: var(--muted); font-size: 12px; }
+    .relation-note { color: var(--muted); font-size: 11px; }
+    .subgroup { margin: 12px 0 0; padding-left: 14px; border-left: 2px solid var(--line); }
+    .subgroup:first-child { margin-top: 2px; }
+    .subgroup-head { margin-bottom: 8px; }
+    .subgroup-head code { color: var(--green); overflow-wrap: anywhere; }
+    .subgroup-head strong { margin-left: 8px; font-size: 13px; }
+    .subgroup-head p { margin: 4px 0 0; color: var(--muted); font-size: 12px; }
+    .enum-chips { display: flex; flex-wrap: wrap; gap: 7px; }
+    .enum-chip { padding: 6px 8px; border-radius: 7px; background: var(--surface-2); font-size: 12px; }
+    .enum-chip code { color: var(--orange); overflow-wrap: anywhere; }
+    .enum-chip span { margin-left: 5px; color: var(--muted); }
+    .constraint-block { margin-top: 26px; }
+    .constraint-block:first-of-type { margin-top: 8px; }
+    .constraint-head { margin-bottom: 8px; }
+    .constraint-head h4 { margin: 0 0 3px; font-size: 15px; }
+    .constraint-head p { margin: 0; color: var(--muted); font-size: 12px; }
+    .catalog-empty { padding: 28px 0; color: var(--muted); text-align: center; }
+
+    @media (max-width: 800px) {
+      main { padding: 30px 18px 52px; }
+      .counts { grid-template-columns: repeat(2, 1fr); }
+      .count:last-child { grid-column: 1 / -1; }
+      .trees, .facets, .variants { grid-template-columns: 1fr; }
+      .facet-link::after { content: "↓ Allowed combination"; position: static; display: block; margin-top: 15px; }
+      .question:nth-child(2) { border-top: 1px solid var(--line); }
+      .panel { padding: 19px; }
+      .catalog-tools { grid-template-columns: 1fr; }
+      .catalog-actions { flex-wrap: wrap; }
+      .catalog-group > summary { grid-template-columns: 1fr; gap: 3px; padding: 12px 4px; }
+      .catalog-group > summary span { text-align: left; }
+      .catalog-group-body { padding-left: 12px; }
+      .enum-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <header>
+      <div class="eyebrow">Recommendation Content Taxonomy</div>
+      <h1>One question can carry more than three dimensions</h1>
+      <p class="lead">Role, Industry, and JTBD define who the content is for and what job it helps them complete. Role narrows to a working perspective, Industry narrows to a segment, and JTBD narrows to a specific task and desired output. Topic, question intent, and scope then complete a fixed tag bundle.</p>
+      <span class="version">Catalog version 2.2.0</span>
+    </header>
+
+    <section class="counts" aria-label="Current enum counts">
+      <div class="count"><strong>6 → 18</strong><span>Role → Working perspective</span></div>
+      <div class="count"><strong>11 → 42</strong><span>Industry → Industry segment</span></div>
+      <div class="count"><strong>26 → 36 → 21</strong><span>JTBD → Specific task → Desired output</span></div>
+      <div class="count"><strong>16 → 12</strong><span>Topic theme → Allowed question intent</span></div>
+      <div class="count"><strong>2</strong><span>Scope levels</span></div>
+    </section>
+
+    <section aria-labelledby="scenario-title">
+      <div class="panel-head">
+        <h2 id="scenario-title">Explore how tags combine</h2>
+        <p>Each preset represents one fixed tag set</p>
+      </div>
+      <div class="toolbar" role="group" aria-label="Example tag sets">
+        <button class="preset" type="button" data-preset="industry-ai" aria-pressed="true">Industry level · AI applications</button>
+        <button class="preset" type="button" data-preset="segment-trend" aria-pressed="false">Industry segment · Trend scan</button>
+        <button class="preset" type="button" data-preset="segment-compare" aria-pressed="false">Industry segment · Approach comparison</button>
+      </div>
+    </section>
+
+    <section class="panel" aria-labelledby="trees-title">
+      <div class="panel-head">
+        <h2 id="trees-title">Three hierarchy paths</h2>
+        <p>Parent-child relationships define which enum values can appear together</p>
+      </div>
+      <div class="trees" id="trees"></div>
+    </section>
+
+    <section class="panel" aria-labelledby="facets-title">
+      <div class="panel-head">
+        <h2 id="facets-title">Reusable content facets and derived scope</h2>
+        <p>Themes and intents work across industries; scope follows the selected industry depth</p>
+      </div>
+      <div class="facets" id="facets"></div>
+    </section>
+
+    <section class="panel" aria-labelledby="bundle-title">
+      <div class="panel-head">
+        <h2 id="bundle-title">Fixed tag bundle</h2>
+        <p id="bundle-id"></p>
+      </div>
+      <div class="bundle" id="bundle" aria-live="polite"></div>
+      <pre><code id="bundle-json"></code></pre>
+    </section>
+
+    <section class="panel" aria-labelledby="questions-title">
+      <div class="panel-head">
+        <h2 id="questions-title">Multiple questions from the same bundle</h2>
+        <p>The wording changes while the tags remain fixed</p>
+      </div>
+      <div class="variants" id="questions" aria-live="polite"></div>
+      <p class="inheritance"><strong>Measurement:</strong> Record the same <code>tag_set_id</code> for every impression and click. Results can then be aggregated by any single tag or tag combination.</p>
+    </section>
+
+    <section class="catalog-explorer" aria-labelledby="catalog-title">
+      <div class="panel-head">
+        <div>
+          <h2 id="catalog-title">Complete enums and mapping relationships</h2>
+          <p>All hierarchy branches and facets are expanded by default. Search by English label, key, or definition.</p>
+        </div>
+        <p>Synced directly from taxonomy 2.2.0</p>
+      </div>
+      <div class="catalog-tools">
+        <label class="search-label" for="catalog-search">
+          Search all enums
+          <input class="catalog-search" id="catalog-search" type="search" placeholder="Try AI, semiconductor, risk, or solution" autocomplete="off">
+        </label>
+        <div class="catalog-actions" aria-label="Expansion controls">
+          <button class="catalog-action" id="expand-all" type="button">Expand all</button>
+          <button class="catalog-action" id="collapse-all" type="button">Collapse all</button>
+        </div>
+      </div>
+      <div class="catalog-tabs" role="group" aria-label="Enum dimensions">
+        <button class="catalog-tab" type="button" data-catalog-tab="all" aria-pressed="true">All</button>
+        <button class="catalog-tab" type="button" data-catalog-tab="roles" aria-pressed="false">Role</button>
+        <button class="catalog-tab" type="button" data-catalog-tab="industries" aria-pressed="false">Industry</button>
+        <button class="catalog-tab" type="button" data-catalog-tab="jtbds" aria-pressed="false">JTBD</button>
+        <button class="catalog-tab" type="button" data-catalog-tab="themes" aria-pressed="false">Themes and intents</button>
+        <button class="catalog-tab" type="button" data-catalog-tab="constraints" aria-pressed="false">Cross-axis constraints</button>
+        <button class="catalog-tab" type="button" data-catalog-tab="scopes" aria-pressed="false">Scope</button>
+      </div>
+      <p class="catalog-status" id="catalog-status" aria-live="polite"></p>
+      <div id="catalog-results"></div>
+    </section>
+
+    <aside class="rule">
+      <div class="rule-mark" aria-hidden="true">◎</div>
+      <div>
+        <h3>When should the taxonomy add a hierarchy level or a new facet?</h3>
+        <p>Add another hierarchy level when a value belongs to one parent, such as Electronics Manufacturing → Semiconductors. Create a separate facet when an angle can apply across industries, such as AI impact or risk assessment. Keep specific technologies, products, materials, companies, and temporary terms in the free-text <code>entities</code> and <code>keywords</code> fields.</p>
+      </div>
+    </aside>
+  </main>
+
+  <script>
+    const catalogData = {"taxonomy_version":"2.2.0","audience":{"role":[{"value":"rd_engineer","label_en":"R&D Engineer / Inventor"},{"value":"researcher","label_en":"Researcher / Scientist"},{"value":"innovation_product_strategy","label_en":"Innovation & Product Strategy"},{"value":"in_house_ip_legal","label_en":"In-house IP & Legal"},{"value":"patent_ip_services","label_en":"Patent & IP Services"},{"value":"other","label_en":"Other"}],"industry":[{"value":"medical_devices","label_en":"Medical Devices"},{"value":"materials","label_en":"Materials"},{"value":"automotive","label_en":"Automotive"},{"value":"electronics_manufacturing","label_en":"Electronics Manufacturing"},{"value":"engineering","label_en":"Engineering"},{"value":"biotech","label_en":"Biotechnology"},{"value":"food_farming_production","label_en":"Food / Farming Production"},{"value":"energy","label_en":"Energy"},{"value":"chemical","label_en":"Chemical"},{"value":"construction","label_en":"Construction"},{"value":"other","label_en":"Other"}],"jtbd":[{"value":"technical_solutions","label_en":"Find technical solutions"},{"value":"existing_technologies","label_en":"Explore existing technologies"},{"value":"product_ideas","label_en":"Generate product ideas"},{"value":"technical_feasibility","label_en":"Assess technical feasibility"},{"value":"patent_ip_risk","label_en":"Assess patent and IP risk"},{"value":"new_research_fields","label_en":"Explore new research fields"},{"value":"research_methods","label_en":"Find research methods"},{"value":"research_trends","label_en":"Track research trends"},{"value":"research_ideas","label_en":"Generate research ideas"},{"value":"patents_literature","label_en":"Search patents and literature"},{"value":"technology_competitors","label_en":"Track technologies and competitors"},{"value":"innovation_opportunities","label_en":"Identify innovation opportunities"},{"value":"rd_directions","label_en":"Evaluate R&D directions"},{"value":"patent_landscapes","label_en":"Explore patent landscapes"},{"value":"product_ip_risks","label_en":"Assess product IP risks"},{"value":"prior_art","label_en":"Search prior art, assess novelty"},{"value":"fto_design_risks","label_en":"Check FTO and design risks"},{"value":"draft_review_patents","label_en":"Draft and review patents"},{"value":"office_actions","label_en":"Respond to office actions"},{"value":"fto_searches","label_en":"Conduct FTO searches"},{"value":"draft_review_applications","label_en":"Draft and review applications"},{"value":"draft_refine_claims","label_en":"Draft and refine claims"},{"value":"technology_trends","label_en":"Track technology trends"},{"value":"ideas_concepts","label_en":"Generate ideas and concepts"},{"value":"search_draft_patents","label_en":"Search or draft patents"},{"value":"other","label_en":"Other"}]},"role_perspectives":[{"value":"product_design","label_en":"Product and component design","definition":"Frame judgments around responsibilities for product functions, structures, materials, and architecture.","boundary":"Includes design specifications and component trade-offs; assign production-batch control to process_engineering.","positive_example":"Compare component options that satisfy the same product specification.","negative_example":"Compare only production-line batch-control strategies.","source_role_ids":["R01"],"status":"active","introduced_in":"1.0.0","replaced_by":null},{"value":"process_engineering","label_en":"Process engineering","definition":"Frame judgments around manufacturing flows, process windows, yield, and scale-up responsibilities.","boundary":"Includes production consistency; assign discussions limited to component function or structure to product_design.","positive_example":"Compare process improvements that reduce interconnect manufacturing defects.","negative_example":"List product functions only.","source_role_ids":["R01","R03"],"status":"active","introduced_in":"1.0.0","replaced_by":null},{"value":"system_integration","label_en":"System integration","definition":"Frame judgments around interfaces, component coordination, and end-to-end system operation.","boundary":"Includes hardware-software compatibility and system validation; assign the lifetime of a single component to reliability_engineering.","positive_example":"Compare interface options between a sensor and a controller.","negative_example":"Review a single material mechanism without any system relationship.","source_role_ids":["R01"],"status":"active","introduced_in":"1.0.0","replaced_by":null},{"value":"reliability_engineering","label_en":"Reliability engineering","definition":"Frame judgments around failure, service life, environmental tolerance, and repeatable operation.","boundary":"Includes failure recovery and lifetime validation; assign purely scientific mechanism contributions to applied_research or scientific_contribution.","positive_example":"Compare connector-structure improvements for thermal-cycling failures.","negative_example":"Evaluate only the novelty of a research paper.","source_role_ids":["R01","R03"],"status":"active","introduced_in":"1.0.0","replaced_by":null},{"value":"invention_development","label_en":"Invention development","definition":"Frame judgments around the technical distinctions, prototypes, and disclosure evidence for an invention concept.","boundary":"May apply to employed engineers; it does not imply independent-inventor status or patentability.","positive_example":"Plan a minimum validation for a new sampling architecture.","negative_example":"Assert without evidence that the user is an independent inventor.","source_role_ids":["R02","R01"],"status":"active","introduced_in":"1.0.0","replaced_by":null},{"value":"applied_research","label_en":"Applied research","definition":"Frame judgments around whether mechanisms, materials, or methods can explain and improve a specific application.","boundary":"Focuses on translatable research evidence; do not infer employer type, and assign production-operations optimization to process_engineering.","positive_example":"Study how noise mechanisms affect imaging performance.","negative_example":"Create only a production scheduling plan.","source_role_ids":["R03"],"status":"active","introduced_in":"1.0.0","replaced_by":null},{"value":"scientific_contribution","label_en":"Scientific contribution","definition":"Frame judgments around research gaps, testable questions, and contributions relative to prior work.","boundary":"Do not infer an academic affiliation; assign work serving only product-function trade-offs to product_design.","positive_example":"Identify a testable gap in low-data reconstruction research.","negative_example":"Assume the user is a university researcher.","source_role_ids":["R04"],"status":"active","introduced_in":"1.0.0","replaced_by":null},{"value":"research_methodology","label_en":"Research methodology","definition":"Frame judgments around experimental design, measurement, benchmarks, and result reproducibility.","boundary":"Includes comparisons of research methods; frame product acceptance planning from a product or reliability perspective.","positive_example":"Compare experimental methods for testing a mechanistic hypothesis.","negative_example":"List only market-growth figures.","source_role_ids":["R03","R04"],"status":"active","introduced_in":"1.0.0","replaced_by":null},{"value":"technology_scouting","label_en":"Technology scouting","definition":"Frame judgments around external technology supply, maturity, and adoption conditions.","boundary":"Includes partnership candidates and pilot thresholds; assign customer positioning to product_strategy.","positive_example":"Screen packaging technology paths suitable for a pilot.","negative_example":"Design only advertising channels.","source_role_ids":["R05"],"status":"active","introduced_in":"1.0.0","replaced_by":null},{"value":"product_strategy","label_en":"Product strategy","definition":"Frame judgments around target customers, use cases, product positioning, and feature priorities.","boundary":"Includes market-entry paths; assign external technology-supplier screening to technology_scouting.","positive_example":"Compare initial use cases for launching a new detection platform.","negative_example":"Check only patent legal status.","source_role_ids":["R06"],"status":"active","introduced_in":"1.0.0","replaced_by":null},{"value":"competitive_intelligence","label_en":"Competitive intelligence","definition":"Frame judgments around competitor capabilities, technology changes, and relative positioning.","boundary":"May use technology or patent evidence; the focus is comparison among organizations rather than parameter trade-offs for one solution.","positive_example":"Track the packaging R&D directions of different companies.","negative_example":"Troubleshoot only an internal prototype.","source_role_ids":["R05","R06","R07"],"status":"active","introduced_in":"1.0.0","replaced_by":null},{"value":"ip_portfolio_management","label_en":"IP portfolio management","definition":"Frame judgments around the coverage, positioning, and maintenance of technology assets against business roadmaps.","boundary":"A specific portfolio analysis requires a defined asset scope; it is not an infringement assessment for a single product.","positive_example":"Relate a product technology roadmap to patent-topic coverage.","negative_example":"Conclude from patent counts alone that no infringement risk exists.","source_role_ids":["R07"],"status":"active","introduced_in":"1.0.0","replaced_by":null},{"value":"patent_risk_review","label_en":"Patent risk review","definition":"Frame risk questions around product implementation, claims, legal status, and applicable scope.","boundary":"General content may provide an evidence checklist; it must not treat search results as a definitive legal conclusion.","positive_example":"List the claim evidence needed to assess a design change.","negative_example":"Declare FTO clearance without defining the product and jurisdiction.","source_role_ids":["R08","R10"],"status":"active","introduced_in":"1.0.0","replaced_by":null},{"value":"commercial_legal_review","label_en":"Commercial legal review","definition":"Frame judgments around R&D collaboration, data use, ownership of results, and transaction responsibilities.","boundary":"Requires an explicit collaboration or contract context; do not treat every Legal user as a patent attorney.","positive_example":"Organize the business inputs needed to determine ownership of collaborative R&D results.","negative_example":"Present an ordinary technology-path comparison as contract review.","source_role_ids":["R09"],"status":"active","introduced_in":"1.0.0","replaced_by":null},{"value":"patent_evidence_analysis","label_en":"Patent evidence analysis","definition":"Frame judgments around search coverage, family dates, classifications, and feature-to-evidence mapping.","boundary":"The focus is auditable evidence; the perspective does not imply professional representative status or legal advice.","positive_example":"Design a reproducible patent-search strategy for microfluidic cartridges.","negative_example":"Treat a highly relevant result as proof of infringement.","source_role_ids":["R11","R07","R10"],"status":"active","introduced_in":"1.0.0","replaced_by":null},{"value":"patent_prosecution","label_en":"Patent prosecution","definition":"Frame judgments around disclosure support, application documents, claims, and office-action responses.","boundary":"When specific disclosure or prosecution materials are unavailable, generate a template only and do not invent application content.","positive_example":"Use a disclosure-support table to review draft claims.","negative_example":"Invent a specific office action from the industry name.","source_role_ids":["R13","R10","R08"],"status":"active","introduced_in":"1.0.0","replaced_by":null},{"value":"ip_commercialization","label_en":"IP commercialization","definition":"Frame judgments around matching technology assets with potential adopters, development gaps, and transaction readiness.","boundary":"Requires an explicit licensing, transfer, or inbound-adoption context; do not infer an active transaction from the user's role.","positive_example":"Identify licensing candidates and missing validation evidence.","negative_example":"Infer a realizable valuation from citation counts alone.","source_role_ids":["R12","R05"],"status":"active","introduced_in":"1.0.0","replaced_by":null},{"value":"task_exploration","label_en":"Task exploration","definition":"Help compare possible tasks and deliverables when the task remains unclear.","boundary":"Use only for task_clarification; it is not a catch-all tag for other well-defined tasks.","positive_example":"Explain the different needs addressed by solution comparison and feasibility assessment.","negative_example":"Label a clearly defined search task as unknown.","source_role_ids":["R00"],"status":"active","introduced_in":"1.0.0","replaced_by":null}],"industry_segments":[{"value":"medical_imaging","label_en":"Medical Imaging Equipment & Diagnostic Imaging Software","source_industry_id":"H01","source_anchor":"industry-h01","entry_industry":"medical_devices","definition":"CT, MRI, ultrasound, and software that directly performs image reconstruction or supports diagnosis.","boundary":"Hospital imaging services and general wellness applications are excluded; upstream detectors should also be associated with the Electronics industry.","source_technology_examples":"Detectors, imaging chains, reconstruction algorithms, and image interpretation workflows.","source_constraints":"Trade-offs among image quality, acquisition speed, and radiation dose; generalization across devices and patient populations.","status":"active","introduced_in":"1.0.0","replaced_by":null},{"value":"in_vitro_diagnostics","label_en":"In Vitro Diagnostics & Molecular Testing","source_industry_id":"H02","source_anchor":"industry-h02","entry_industry":"medical_devices","definition":"Clinical diagnostic reagents, instruments, molecular diagnostic systems, and at-home testing products.","boundary":"Research-use reagents belong to H13 Life Science Research Tools; hospital laboratory services are not medical-device manufacturing.","source_technology_examples":"Sample preparation, reagent systems, microfluidic cartridges, and signal detection.","source_constraints":"Balancing sensitivity, specificity, time to result, and tolerance for use by nonprofessionals.","status":"active","introduced_in":"1.0.0","replaced_by":null},{"value":"diabetes_monitoring_delivery","label_en":"Diabetes Monitoring & Insulin Delivery Devices","source_industry_id":"H03","source_anchor":"industry-h03","entry_industry":"medical_devices","definition":"Continuous glucose monitors, blood glucose meters, insulin pumps, and related closed-loop devices.","boundary":"Insulin drugs belong to Pharmaceuticals; nonmedical fitness wearables and general wellness software are excluded.","source_technology_examples":"Electrochemical sensors, skin interfaces, micropumps, and control and alert pathways.","source_constraints":"Sensor drift and wearability; transmission reliability, battery life, and validation of drug-delivery safety.","status":"active","introduced_in":"1.0.0","replaced_by":null},{"value":"surgical_robotics","label_en":"Surgical Robotics & Minimally Invasive Surgical Systems","source_industry_id":"H04","source_anchor":"industry-h04","entry_industry":"medical_devices","definition":"Surgical robots, endoscopic and interventional platforms, specialized instruments, and intraoperative navigation.","boundary":"General-purpose industrial robots belong to Industrial Automation; hospital surgical services are excluded.","source_technology_examples":"Robotic arms, flexible catheters, wristed instruments, visual navigation, and operator interfaces.","source_constraints":"Dexterity and precision in confined spaces; sterilizability, latency, and human-machine interaction safety.","status":"active","introduced_in":"1.0.0","replaced_by":null},{"value":"engineering_polymers_composites","label_en":"Engineering Polymers & Composites","source_industry_id":"M01","source_anchor":"industry-m01","entry_industry":"materials","definition":"Modified resins, engineering plastics, fiber-reinforced composites, and semi-finished materials; select this segment when the primary business is material supply.","boundary":"Coating and adhesive formulations belong to M10; finished automotive or electronic products belong to their respective end-use industries.","source_technology_examples":"Glass-fiber-reinforced thermoplastics, carbon-fiber composites, and low-loss polymers.","source_constraints":"Balancing strength, flame resistance, dielectric performance, processing window, and recyclability.","status":"active","introduced_in":"1.0.0","replaced_by":null},{"value":"specialty_metals_alloys","label_en":"Specialty Metals & Alloys","source_industry_id":"M02","source_anchor":"industry-m02","entry_industry":"materials","definition":"R&D and supply of nickel-based superalloys, titanium alloys, specialty steels, and metal powders.","boundary":"Commodity steel trading is not treated as a priority topic; finished aerospace or medical components belong to their end-use industries.","source_technology_examples":"Nickel-based alloys, titanium alloys, and metal powders for additive manufacturing.","source_constraints":"Creep and fatigue life, impurity control, and batch-to-batch consistency.","status":"active","introduced_in":"1.0.0","replaced_by":null},{"value":"technical_ceramics_glass","label_en":"Technical Ceramics & Specialty Glass","source_industry_id":"M03","source_anchor":"industry-m03","entry_industry":"materials","definition":"Electrically insulating and thermally conductive ceramics, ceramic fibers, fused silica, and functional glass.","boundary":"Construction cement belongs to M14; decorative ceramics and ordinary household glass are outside the current scope.","source_technology_examples":"Boron nitride fillers, low-dielectric glass, and technical ceramic substrates.","source_constraints":"Thermal conductivity, dielectric loss, thermal-expansion matching, and brittleness.","status":"active","introduced_in":"1.0.0","replaced_by":null},{"value":"battery_materials_recycling","label_en":"Battery Materials & Recycling","source_industry_id":"M04","source_anchor":"industry-m04","entry_industry":"materials","definition":"Cathode and anode active materials, electrolytes, separator materials, and recycled or regenerated materials.","boundary":"Cells, battery packs, and energy-storage systems belong to M05; mining is treated only as an upstream tag.","source_technology_examples":"LFP cathodes, silicon-based anodes, electrolytes, and recycled materials.","source_constraints":"Cycle stability, feedstock impurities, cost, and consistency in mass production.","status":"active","introduced_in":"1.0.0","replaced_by":null},{"value":"automotive_electrified_powertrains","label_en":"Automotive Electrified Powertrains","source_industry_id":"E05","source_anchor":"industry-e05","entry_industry":"automotive","definition":"Motors, inverters, electric drive axles, and hybrid coupling systems for BEVs, HEVs, and PHEVs.","boundary":"Battery-cell materials and standalone storage batteries belong to Energy or Materials; chassis and automated-driving systems are separate segments.","source_technology_examples":"Traction motors, inverters, transmissions, and electric-drive thermal management.","source_constraints":"Vehicle efficiency, cost, temperature rise, NVH, and compatibility across vehicle platforms.","status":"active","introduced_in":"1.0.0","replaced_by":null},{"value":"adas_automated_driving","label_en":"ADAS & Automated Driving Systems","source_industry_id":"E06","source_anchor":"industry-e06","entry_industry":"automotive","definition":"Perception fusion, driving decisions, control, safety validation, and in-vehicle computing integration.","boundary":"General-purpose sensor chips belong to Semiconductors; driver-assistance systems must not be treated as equivalent to fully autonomous driving.","source_technology_examples":"Fusion of vehicle cameras and radar, decision stacks, scenarios, and safety evidence.","source_constraints":"Long-tail scenarios, false negatives and false positives, real-time performance, driver takeover, and verifiability.","status":"active","introduced_in":"1.0.0","replaced_by":null},{"value":"automotive_chassis_body","label_en":"Automotive Chassis & Body Components","source_industry_id":"E07","source_anchor":"industry-e07","entry_industry":"automotive","definition":"Braking, steering, suspension, body structures, cabins, and automotive thermal-management components.","boundary":"Electric powertrains and ADAS algorithms are separate segments; raw materials belong to the Materials industry.","source_technology_examples":"Body joining, braking and suspension components, and thermal-management assemblies.","source_constraints":"Safety and durability, weight, noise and vibration, manufacturability, and supply cost.","status":"active","introduced_in":"1.0.0","replaced_by":null},{"value":"commercial_special_vehicles","label_en":"Commercial & Special-Purpose Vehicles","source_industry_id":"E08","source_anchor":"industry-e08","entry_industry":"automotive","definition":"Vehicle and systems engineering for road trucks, buses, commercial vans, and special-purpose vehicles.","boundary":"Passenger vehicles and fleet-operation services are excluded; off-road construction and agricultural machinery belong to their respective machinery industries.","source_technology_examples":"Vehicle architectures, body-equipment interfaces, power systems, and duty cycles.","source_constraints":"Payload, range or energy consumption, downtime, cost, and harsh operating conditions.","status":"active","introduced_in":"1.0.0","replaced_by":null},{"value":"semiconductors","label_en":"Semiconductors","source_industry_id":"E01","source_anchor":"industry-e01","entry_industry":"electronics_manufacturing","definition":"Chip design, wafer fabrication, packaging, and testing across logic, memory, analog, and power devices.","boundary":"Finished systems, PCBs, and standalone optical instruments are excluded; semiconductor equipment should be classified by its primary equipment-manufacturing activity.","source_technology_examples":"Chip architectures, interconnect packaging, wafer processes, and device reliability.","source_constraints":"Simultaneous constraints on performance, power, area, yield, thermal management, and mass-production cost.","status":"active","introduced_in":"1.0.0","replaced_by":null},{"value":"electronic_components_interconnects","label_en":"Electronic Components & Interconnects","source_industry_id":"E02","source_anchor":"industry-e02","entry_industry":"electronics_manufacturing","definition":"PCBs, connectors, passive components, and electronic assembly interconnects, including rigid-flex boards.","boundary":"Semiconductor chips, complete server systems, and complete optical systems are excluded.","source_technology_examples":"Multilayer boards, microvias, solder joints, connector contacts, and passive networks.","source_constraints":"High-frequency loss, heat dissipation, miniaturization, and long-term connection reliability.","status":"active","introduced_in":"1.0.0","replaced_by":null},{"value":"computing_network_hardware","label_en":"Computing & Network Hardware","source_industry_id":"E03","source_anchor":"industry-e03","entry_industry":"electronics_manufacturing","definition":"Hardware and systems integration for servers, storage systems, network switching, and communications equipment.","boundary":"Pure-software SaaS, chip design, and data-center power infrastructure are excluded.","source_technology_examples":"Server nodes, switches, rack interconnects, and hardware cooling.","source_constraints":"Compute density, communications bandwidth, power consumption, serviceability, and supply lead times.","status":"active","introduced_in":"1.0.0","replaced_by":null},{"value":"photonics_optical_sensing","label_en":"Photonics & Optical Sensing Systems","source_industry_id":"E04","source_anchor":"industry-e04","entry_industry":"electronics_manufacturing","definition":"Lasers, optical instruments, imaging and spectroscopic detection systems, and optical sensing modules.","boundary":"Chip-level semiconductor devices belong to E01; non-optical sensors should be classified by their actual end-use industry.","source_technology_examples":"Laser sources, optical paths, imaging or spectroscopic sensing, and calibration chains.","source_constraints":"Signal-to-noise ratio, resolution, environmental drift, size, and the cost of calibration at scale.","status":"active","introduced_in":"1.0.0","replaced_by":null},{"value":"industrial_robotics_automation","label_en":"Industrial Robotics & Automation","source_industry_id":"E09","source_anchor":"industry-e09","entry_industry":"engineering","definition":"Industrial robots, collaborative robots, machine-vision integration, and automated work cells.","boundary":"Consumer robots are excluded; standalone non-robotic processing equipment belongs to a separate segment.","source_technology_examples":"Robot bodies, end effectors, vision systems, and work-cell control.","source_constraints":"Cycle time, changeover, worker safety, precision, and the cost of custom integration.","status":"active","introduced_in":"1.0.0","replaced_by":null},{"value":"industrial_machinery","label_en":"Industrial Machinery & Production Equipment","source_industry_id":"E10","source_anchor":"industry-e10","entry_industry":"engineering","definition":"Metalworking machine tools, forming equipment, and specialized production equipment; add customer-specific tags for relevant machinery subdomains.","boundary":"Robotics and additive-manufacturing equipment are separate segments; civil construction services are excluded.","source_technology_examples":"Spindles, motion axes, cutting tools, and process control.","source_constraints":"Precision, cycle time, thermal drift, reliability, and energy consumption per unit of output.","status":"active","introduced_in":"1.0.0","replaced_by":null},{"value":"additive_manufacturing_systems","label_en":"Additive Manufacturing Equipment & Systems","source_industry_id":"E12","source_anchor":"industry-e12","entry_industry":"engineering","definition":"Industrial 3D printers, process monitoring, control systems, and equipment integration.","boundary":"Printing powders and resins belong to Materials; pure printing services should receive additional tags based on the customer's end-use industry.","source_technology_examples":"Printing equipment, powder spreading or energy input, in-process monitoring, and build processes.","source_constraints":"Batch-to-batch repeatability, defects, surface quality, throughput, and qualification cost.","status":"active","introduced_in":"1.0.0","replaced_by":null},{"value":"engineering_design_services","label_en":"Engineering Design & Technical Consulting Services","source_industry_id":"E13","source_anchor":"industry-e13","entry_industry":"engineering","definition":"Engineering analysis, design, technical consulting, and integration recommendations for facilities, systems, and products.","boundary":"Equipment manufacturing, construction contracting, general management consulting, and legal services are excluded.","source_technology_examples":"Facility or system concepts, computational models, interfaces, and engineering deliverables.","source_constraints":"Customer constraints, design assumptions, verifiability, multidisciplinary coordination, and delivery responsibility.","status":"active","introduced_in":"1.0.0","replaced_by":null},{"value":"antibody_protein_medicines","label_en":"Antibody & Therapeutic Protein Medicines","source_industry_id":"H05","source_anchor":"industry-h05","entry_industry":"biotech","definition":"Monoclonal antibodies, bispecific antibodies, antibody-drug conjugates, and other therapeutic proteins.","boundary":"Small-molecule drugs are excluded; contract manufacturing belongs to CDMO; cell and gene therapies are separate segments.","source_technology_examples":"Antibody sequences, binding structures, linkers and payloads, formulations, and analytical methods.","source_constraints":"In addition to potency and selectivity, aggregation, stability, manufacturability, and safety evidence must be addressed.","status":"active","introduced_in":"1.0.0","replaced_by":null},{"value":"cell_gene_therapies","label_en":"Cell & Gene Therapies","source_industry_id":"H06","source_anchor":"industry-h06","entry_industry":"biotech","definition":"Cell therapies such as CAR-T, in vivo and ex vivo gene therapies, and gene-editing therapies.","boundary":"Gene editing for nontherapeutic uses belongs to the relevant agricultural or industrial segment; general reagents and pure CDMO services are separate segments.","source_technology_examples":"Cell populations, vectors, editing systems, delivery, and potency assays.","source_constraints":"Consistency of cells or vectors, delivery efficiency, potency characterization, and batch scale-up.","status":"active","introduced_in":"1.0.0","replaced_by":null},{"value":"biologics_process_manufacturing","label_en":"Biologics Process Development & Contract Manufacturing","source_industry_id":"H07","source_anchor":"industry-h07","entry_industry":"biotech","definition":"Biologics CDMO, cell-line development, culture and purification, analytical testing, and technology-transfer services.","boundary":"Proprietary drug discovery belongs to the relevant medicines segment; general equipment sales may also be associated with Engineering.","source_technology_examples":"Cell lines, culture media, bioreactors, purification, and formulation processes.","source_constraints":"Scale-up comparability, contamination control, yield, batch consistency, and transfer across manufacturing sites.","status":"active","introduced_in":"1.0.0","replaced_by":null},{"value":"industrial_enzymes_microorganisms","label_en":"Industrial Enzymes & Microorganisms","source_industry_id":"H08","source_anchor":"industry-h08","entry_industry":"biotech","definition":"Enzymes, production microorganisms, and related formulations for cleaning, textiles, papermaking, and industrial bioprocessing.","boundary":"Food ingredients belong to the Food segment; finished renewable fuels belong to Chemical, with Energy used as an application tag; finished polymers belong to Materials.","source_technology_examples":"Enzyme sequences, production strains, fermentation processes, enzyme formulations, and application processes.","source_constraints":"Activity, stability under operating conditions, fermentation yield, and cost per unit of application.","status":"active","introduced_in":"1.0.0","replaced_by":null},{"value":"life_science_research_tools","label_en":"Life Science Research Tools & Laboratory Instruments","source_industry_id":"H13","source_anchor":"industry-h13","entry_industry":"biotech","definition":"Research-use sequencing, single-cell and multi-omics instruments, sample preparation, analytical reagents, and laboratory automation.","boundary":"Integrated IVD products for clinical diagnosis belong to H02; biologics CDMO belongs to H07; research use does not imply approval for clinical use.","source_technology_examples":"Sequencing and imaging platforms, microfluidics, reagent chemistry, sample preparation, and analytical workflows.","source_constraints":"Sensitivity, throughput, batch effects, sample consumption, and cost per usable result.","status":"active","introduced_in":"1.0.0","replaced_by":null},{"value":"agricultural_machinery_precision_farming","label_en":"Agricultural Machinery & Precision Farming Systems","source_industry_id":"H09","source_anchor":"industry-h09","entry_industry":"food_farming_production","definition":"Autonomous-guidance farm machinery, precision seeding, variable-rate application, sensing, and agricultural-operation systems.","boundary":"Businesses primarily focused on engineering and manufacturing may also be associated with Engineering; crop-production services are not equipment R&D.","source_technology_examples":"Agricultural-machine actuators, positioning and visual perception, operation control, and prescription maps.","source_constraints":"Robustness in field environments, positioning accuracy, interoperability among heterogeneous equipment, and investment cost.","status":"active","introduced_in":"1.0.0","replaced_by":null},{"value":"seeds_crop_breeding","label_en":"Seeds & Crop Breeding","source_industry_id":"H10","source_anchor":"industry-h10","entry_industry":"food_farming_production","definition":"Commercial seeds, seedlings, and crop-trait development through conventional and biotechnology-assisted breeding.","boundary":"Agricultural machinery belongs to the agricultural-equipment segment; pesticides and biological-control products are not separate segments in this version and may be supplemented with Other.","source_technology_examples":"Germplasm, molecular markers, breeding processes, crop traits, and field phenotyping.","source_constraints":"Trade-offs between trait performance and yield; genetic background, genotype-environment interactions, and stability across locations.","status":"active","introduced_in":"1.0.0","replaced_by":null},{"value":"frozen_prepared_foods","label_en":"Frozen & Prepared Foods","source_industry_id":"H11","source_anchor":"industry-h11","entry_industry":"food_farming_production","definition":"Manufacturing of frozen fruit and vegetables, frozen meals, and ready-to-eat convenience foods, with emphasis on processing and preservation.","boundary":"Dedicated food-machinery manufacturing may also be associated with Engineering; raw grains, beverages, and cold-chain transportation services are excluded.","source_technology_examples":"Food matrices, microbial control, heat and mass transfer, and freezing or drying processes.","source_constraints":"Trade-offs among safety, sensory quality, nutrient retention, energy consumption, and production-line throughput.","status":"active","introduced_in":"1.0.0","replaced_by":null},{"value":"food_ingredients_nutrition","label_en":"Food Ingredients & Nutritional Components","source_industry_id":"H12","source_anchor":"industry-h12","entry_industry":"food_farming_production","definition":"Proteins, dietary fibers, enzymes, microbial cultures, functional ingredients, and application formulations for food manufacturing.","boundary":"Therapeutic drugs belong to Biopharmaceuticals; industrial-use enzymes belong to Industrial Biotechnology; alternative protein does not represent the entire segment.","source_technology_examples":"Protein fractions, dietary fibers, fermentation cultures, food enzymes, and emulsification or gel systems.","source_constraints":"Taste and texture, solubility, nutritional composition, formulation stability, cost, and scalability.","status":"active","introduced_in":"1.0.0","replaced_by":null},{"value":"batteries_stationary_storage","label_en":"Batteries & Stationary Energy Storage","source_industry_id":"M05","source_anchor":"industry-m05","entry_industry":"energy","definition":"Battery-cell manufacturing, battery packs, battery-management systems, power-conversion systems, and commercial, industrial, or grid-scale storage integration.","boundary":"Active materials belong to M04; vehicle powertrains belong to Automotive; this segment does not encompass power generation in general.","source_technology_examples":"Battery cells, storage battery clusters, battery-management systems, and storage power-conversion systems.","source_constraints":"Trade-offs among service life, safety, usable capacity, and system economics.","status":"active","introduced_in":"1.0.0","replaced_by":null},{"value":"grid_power_equipment","label_en":"Grid & Power Equipment","source_industry_id":"M06","source_anchor":"industry-m06","entry_industry":"energy","definition":"Transformers, switchgear, cables, protection and control systems, and grid-enhancement technologies.","boundary":"Generation equipment belongs to its corresponding industry; electricity trading alone does not fit this R&D profile.","source_technology_examples":"Distribution transformers, switchgear cabinets, protection relays, and dynamic line-rating monitoring.","source_constraints":"Load growth, insulation aging, fault isolation, and delivery lead times.","status":"active","introduced_in":"1.0.0","replaced_by":null},{"value":"solar_photovoltaics","label_en":"Solar Photovoltaics","source_industry_id":"M07","source_anchor":"industry-m07","entry_industry":"energy","definition":"R&D and manufacturing of photovoltaic cells and modules, encapsulation, tracking structures, and inverters.","boundary":"General wafer-level semiconductors belong to Electronics; upstream resins and glass belong to Materials.","source_technology_examples":"Photovoltaic cells, encapsulated modules, tracking structures, and inverters.","source_constraints":"Conversion efficiency, long-term degradation, extreme weather, and levelized cost of electricity.","status":"active","introduced_in":"1.0.0","replaced_by":null},{"value":"hydrogen_fuel_cell_equipment","label_en":"Hydrogen & Fuel Cell Equipment","source_industry_id":"M08","source_anchor":"industry-m08","entry_industry":"energy","definition":"Electrolyzers, fuel-cell stacks, hydrogen compression and transport or storage equipment, and balance-of-plant systems.","boundary":"Commodity industrial hydrogen supply belongs to M11; hydrogen-derived fuel synthesis belongs to M12.","source_technology_examples":"PEM and alkaline electrolyzers, fuel-cell membrane-electrode assemblies, and balance-of-plant systems.","source_constraints":"Service life, intermittent-load operation, precious-metal usage, and hydrogen cost.","status":"active","introduced_in":"1.0.0","replaced_by":null},{"value":"electronic_chemicals","label_en":"Electronic Chemicals","source_industry_id":"M09","source_anchor":"industry-m09","entry_industry":"chemical","definition":"Photoresists, wet electronic chemicals, CMP slurries, electroplating additives, and deposition precursors.","boundary":"Commodity industrial gases belong to M11; wafer-device and packaging services belong to Electronics.","source_technology_examples":"Photoresists, CMP slurries, electronic-grade cleaning solutions, and electroplating additives.","source_constraints":"Nanoscale defects, metallic impurities, process compatibility, and batch stability.","status":"active","introduced_in":"1.0.0","replaced_by":null},{"value":"coatings_adhesives_sealants","label_en":"Coatings, Adhesives & Sealants","source_industry_id":"M10","source_anchor":"industry-m10","entry_industry":"chemical","definition":"R&D and manufacturing of industrial and functional coatings, structural adhesives, electronic adhesives, and construction sealants.","boundary":"Base-resin supply belongs to M01; application and installation businesses should receive an additional service-activity tag.","source_technology_examples":"Waterborne coatings, structural adhesives, thermally conductive adhesives, and weather-resistant sealants.","source_constraints":"Adhesion, curing speed, durability, emissions, and application window.","status":"active","introduced_in":"1.0.0","replaced_by":null},{"value":"industrial_specialty_gases","label_en":"Industrial & Specialty Gases","source_industry_id":"M11","source_anchor":"industry-m11","entry_industry":"chemical","definition":"High-purity and specialty gases, air separation, purification, gas distribution, and recovery supply systems.","boundary":"Hydrogen-energy equipment belongs to M08; catalysts should not be combined with gases as a single segment.","source_technology_examples":"Ultra-high-purity nitrogen and argon, electronic specialty gases, purifiers, and gas-supply systems.","source_constraints":"Trace impurities, continuity of supply, safety, and unit energy consumption.","status":"active","introduced_in":"1.0.0","replaced_by":null},{"value":"renewable_fuels","label_en":"Renewable Fuels","source_industry_id":"M12","source_anchor":"industry-m12","entry_industry":"chemical","definition":"Chemical-conversion production of sustainable aviation fuel, renewable diesel, bio-alcohols, and synthetic fuels.","boundary":"Fermentation-platform R&D belongs to Biotechnology with a cross-industry tag; hydrogen-production equipment belongs to M08.","source_technology_examples":"HEFA and alcohol-to-jet processes, catalysts, and renewable feedstocks.","source_constraints":"Carbon yield, hydrogen consumption, feedstock consistency, certification, and production cost.","status":"active","introduced_in":"1.0.0","replaced_by":null},{"value":"building_hvac_heat_pumps","label_en":"Building HVAC & Heat Pumps","source_industry_id":"M13","source_anchor":"industry-m13","entry_industry":"construction","definition":"R&D and manufacturing of heat pumps, air-conditioning and ventilation systems, water-heating equipment, and building controls.","boundary":"Construction and installation should receive an additional contractor or service tag; equipment manufacturers must not be treated as building contractors.","source_technology_examples":"Heat-pump compressors, heat exchangers, refrigerant circuits, and building controls.","source_constraints":"Low-temperature efficiency, defrosting, noise, installation cost, and occupant comfort.","status":"active","introduced_in":"1.0.0","replaced_by":null},{"value":"cement_concrete","label_en":"Cement & Concrete","source_industry_id":"M14","source_anchor":"industry-m14","entry_industry":"construction","definition":"Cement, binders, ready-mixed and precast concrete, with low-carbon technologies represented through tags.","boundary":"The primary activity is building-material supply or product R&D; on-site concrete contracting should receive a separate activity tag; this segment does not encompass all materials.","source_technology_examples":"Low-clinker binder systems, supplementary cementitious materials, and concrete mix designs.","source_constraints":"Early strength, long-term durability, workability, and embodied carbon.","status":"active","introduced_in":"1.0.0","replaced_by":null},{"value":"prefabricated_modular_buildings","label_en":"Prefabricated & Modular Buildings","source_industry_id":"M15","source_anchor":"industry-m15","entry_industry":"construction","definition":"Factory-produced modules and panel systems, structural connections, and integrated mechanical, electrical, and plumbing delivery.","boundary":"Distinguish factory manufacturing, design, and on-site installation as separate activities; this segment is not equivalent to property development or the entire construction industry.","source_technology_examples":"Building modules, wall panels, structural connectors, and mechanical, electrical, and plumbing interfaces.","source_constraints":"Transportation limits, interface tolerances, structural and fire performance, and installation cycle time.","status":"active","introduced_in":"1.0.0","replaced_by":null},{"value":"water_wastewater_infrastructure","label_en":"Water & Wastewater Infrastructure","source_industry_id":"M16","source_anchor":"industry-m16","entry_industry":"construction","definition":"Water-supply and drainage networks, treatment processes and equipment, water reuse, and infrastructure-renewal projects.","boundary":"Water-utility operations, engineering construction, and equipment R&D should receive separate activity tags; this segment does not encompass the entire environmental industry.","source_technology_examples":"Membrane treatment, adsorption media, aeration systems, and water-supply and drainage networks.","source_constraints":"Effluent quality, energy consumption, variation in contaminant loads, and continuous-operation reliability.","status":"active","introduced_in":"1.0.0","replaced_by":null},{"value":"aerospace_space","label_en":"Aerospace & Space","source_industry_id":"E11","source_anchor":"industry-e11","entry_industry":"other","definition":"Aircraft, aviation propulsion and avionics, satellites, and spacecraft components or systems; add this as a named industry under Other, and migrate legacy Engineering users based on their target product or system.","boundary":"Airline operations and tourism services are excluded; land and naval defense systems and pure cybersecurity are excluded.","source_technology_examples":"Aircraft structures, propulsion or avionics, satellite systems, and their environmental qualification.","source_constraints":"Mass and power budgets, reliability, traceability, certification, and supply lead times.","status":"active","introduced_in":"1.0.0","replaced_by":null}],"jtbd_tasks":[{"value":"solution_search","label_en":"Find technical solutions","definition":"Find adoptable technical solutions for a specified function or problem.","boundary":"Do not substitute a broad field survey for a problem-driven search.","allowed_outputs":["candidate_shortlist","evidence_table"],"allowed_perspectives":["product_design","process_engineering","system_integration","reliability_engineering","invention_development","applied_research","technology_scouting"],"source_jtbd_values":["technical_solutions"],"source_role_ids":["R01","R02","R03","R05"],"status":"active","introduced_in":"1.0.0","replaced_by":null},{"value":"solution_comparison","label_en":"Compare technical solutions","definition":"Compare identified approaches or solutions under shared constraints and evaluation criteria.","boundary":"This is distinct from finding solutions; use research_method_comparison for comparisons limited to research methods.","allowed_outputs":["comparison_matrix"],"allowed_perspectives":["product_design","process_engineering","system_integration","reliability_engineering","invention_development","applied_research","technology_scouting","product_strategy"],"source_jtbd_values":["technical_solutions","existing_technologies","rd_directions"],"source_role_ids":["R01","R02","R03","R05","R06"],"status":"active","introduced_in":"1.0.0","replaced_by":null},{"value":"failure_resolution","label_en":"Resolve technical failures","definition":"Start from a defined failure mode or performance failure to identify corrective actions and validation.","boundary":"The goal is to restore function; use evidence_synthesis when the goal is only to explain a scientific mechanism.","allowed_outputs":["improvement_plan","validation_plan"],"allowed_perspectives":["product_design","process_engineering","system_integration","reliability_engineering","applied_research"],"source_jtbd_values":["technical_solutions"],"source_role_ids":["R01","R03"],"status":"active","introduced_in":"1.0.0","replaced_by":null},{"value":"process_optimization","label_en":"Optimize processes","definition":"Adjust manufacturing or operating parameters and workflows to improve yield, consistency, or efficiency.","boundary":"Exclude work that changes only product positioning or a research question.","allowed_outputs":["improvement_plan","comparison_matrix"],"allowed_perspectives":["process_engineering","system_integration","reliability_engineering","applied_research"],"source_jtbd_values":["technical_solutions"],"source_role_ids":["R01","R03"],"status":"active","introduced_in":"1.0.0","replaced_by":null},{"value":"technology_landscape","label_en":"Map existing technologies","definition":"Organize evidence on existing approaches, technology categories, and maturity.","boundary":"Focuses on a static structure; use technology_trend_tracking for monitoring change over time.","allowed_outputs":["landscape_map","evidence_review"],"allowed_perspectives":["product_design","process_engineering","system_integration","invention_development","applied_research","technology_scouting","competitive_intelligence"],"source_jtbd_values":["existing_technologies","technology_competitors","technology_trends"],"source_role_ids":["R01","R02","R03","R05","R06","R07"],"status":"active","introduced_in":"1.0.0","replaced_by":null},{"value":"product_ideation","label_en":"Generate product concepts","definition":"Turn user problems and technical capabilities into a testable product or invention concept.","boundary":"Use research_ideation for questions about scientific contribution.","allowed_outputs":["concept_brief"],"allowed_perspectives":["product_design","invention_development","technology_scouting","product_strategy"],"source_jtbd_values":["product_ideas","ideas_concepts"],"source_role_ids":["R01","R02","R05","R06"],"status":"active","introduced_in":"1.0.0","replaced_by":null},{"value":"feasibility_assessment","label_en":"Assess technical feasibility","definition":"Determine whether a solution has sufficient basis for implementation under specified conditions and identify evidence gaps.","boundary":"When conditions are missing, state conditional judgments; use validation_planning to design the validation work.","allowed_outputs":["assessment_brief","comparison_matrix"],"allowed_perspectives":["product_design","process_engineering","system_integration","reliability_engineering","invention_development","applied_research","technology_scouting","product_strategy"],"source_jtbd_values":["technical_feasibility","rd_directions"],"source_role_ids":["R01","R02","R03","R05","R06"],"status":"active","introduced_in":"1.0.0","replaced_by":null},{"value":"validation_planning","label_en":"Plan validation","definition":"Design an experiment, prototype, or test path for evaluating a hypothesis or solution.","boundary":"Do not claim that experiments have been completed; use research_method_search when the task is to find a research method.","allowed_outputs":["validation_plan"],"allowed_perspectives":["product_design","process_engineering","system_integration","reliability_engineering","invention_development","applied_research","scientific_contribution","research_methodology"],"source_jtbd_values":["technical_feasibility","research_methods"],"source_role_ids":["R01","R02","R03","R04"],"status":"active","introduced_in":"1.0.0","replaced_by":null},{"value":"research_field_exploration","label_en":"Explore research fields","definition":"Map the core questions, research paths, and foundational knowledge needed to enter a new field.","boundary":"Do not replace the problem structure with a popularity ranking.","allowed_outputs":["landscape_map","evidence_review"],"allowed_perspectives":["applied_research","scientific_contribution","research_methodology","technology_scouting"],"source_jtbd_values":["new_research_fields"],"source_role_ids":["R03","R04","R05"],"status":"active","introduced_in":"1.0.0","replaced_by":null},{"value":"research_gap_identification","label_en":"Identify research gaps","definition":"Use existing evidence and limitations to identify unresolved, researchable questions.","boundary":"Failure to retrieve evidence does not prove absence; use research_ideation to formulate a specific research project.","allowed_outputs":["research_agenda","evidence_review"],"allowed_perspectives":["applied_research","scientific_contribution","research_methodology"],"source_jtbd_values":["new_research_fields","research_ideas"],"source_role_ids":["R03","R04"],"status":"active","introduced_in":"1.0.0","replaced_by":null},{"value":"research_method_search","label_en":"Find research methods","definition":"Find measurement, experimental, or analytical methods for a research question.","boundary":"Do not treat a product-manufacturing process as a research method without justification.","allowed_outputs":["candidate_shortlist","evidence_table"],"allowed_perspectives":["applied_research","scientific_contribution","research_methodology"],"source_jtbd_values":["research_methods"],"source_role_ids":["R03","R04"],"status":"active","introduced_in":"1.0.0","replaced_by":null},{"value":"research_method_comparison","label_en":"Compare research methods","definition":"Compare the assumptions, sample requirements, applicability, and limitations of research methods.","boundary":"Use solution_comparison for product technology paths.","allowed_outputs":["comparison_matrix"],"allowed_perspectives":["applied_research","scientific_contribution","research_methodology"],"source_jtbd_values":["research_methods"],"source_role_ids":["R03","R04"],"status":"active","introduced_in":"1.0.0","replaced_by":null},{"value":"research_ideation","label_en":"Generate research ideas","definition":"Turn research gaps into hypotheses, research topics, and testable paths.","boundary":"Do not merely list broad research directions; use product_ideation for concepts driven by product needs.","allowed_outputs":["research_agenda","concept_brief"],"allowed_perspectives":["applied_research","scientific_contribution","research_methodology","invention_development"],"source_jtbd_values":["research_ideas","ideas_concepts"],"source_role_ids":["R01","R02","R03","R04"],"status":"active","introduced_in":"1.0.0","replaced_by":null},{"value":"evidence_search","label_en":"Search patents and literature","definition":"Build an auditable source set around a defined topic and explain relevance.","boundary":"Use specialized tasks for prior-art or FTO searches; state the source types in the search scope.","allowed_outputs":["evidence_table"],"allowed_perspectives":["product_design","invention_development","applied_research","scientific_contribution","research_methodology","technology_scouting","patent_evidence_analysis"],"source_jtbd_values":["existing_technologies","patents_literature","search_draft_patents"],"source_role_ids":["R01","R02","R03","R04","R05","R07","R10","R11"],"status":"active","introduced_in":"1.0.0","replaced_by":null},{"value":"evidence_synthesis","label_en":"Synthesize research evidence","definition":"Explain common findings, disagreements, and applicability limits across multiple studies.","boundary":"Do not treat patent publications as experimental validation; use evidence_search for a search-results list.","allowed_outputs":["evidence_review"],"allowed_perspectives":["applied_research","scientific_contribution","research_methodology","reliability_engineering","technology_scouting","patent_evidence_analysis"],"source_jtbd_values":["research_trends","patents_literature"],"source_role_ids":["R01","R03","R04","R05","R07","R10","R11"],"status":"active","introduced_in":"1.0.0","replaced_by":null},{"value":"research_trend_tracking","label_en":"Track research trends","definition":"Observe changes over time in scientific questions, research methods, or findings.","boundary":"Use technology_trend_tracking when commercialization and industry adoption are the main focus.","allowed_outputs":["trend_brief","landscape_map"],"allowed_perspectives":["applied_research","scientific_contribution","research_methodology","technology_scouting"],"source_jtbd_values":["research_trends"],"source_role_ids":["R03","R04","R05"],"status":"active","introduced_in":"1.0.0","replaced_by":null},{"value":"technology_trend_tracking","label_en":"Track technology trends","definition":"Track technology paths, performance advances, and adoption evidence over time.","boundary":"Use technology_landscape for a static inventory and research_trend_tracking for purely academic evolution.","allowed_outputs":["trend_brief"],"allowed_perspectives":["product_design","process_engineering","system_integration","technology_scouting","product_strategy","competitive_intelligence"],"source_jtbd_values":["technology_competitors","technology_trends"],"source_role_ids":["R01","R03","R05","R06","R07"],"status":"active","introduced_in":"1.0.0","replaced_by":null},{"value":"competitor_tracking","label_en":"Track competitors","definition":"Track changes in the capabilities, R&D, and products of specified organizations or organization types.","boundary":"When no organizations are provided, explain the screening method rather than inventing the user's competitors.","allowed_outputs":["trend_brief","comparison_matrix","landscape_map"],"allowed_perspectives":["competitive_intelligence","technology_scouting","product_strategy","ip_portfolio_management"],"source_jtbd_values":["technology_competitors"],"source_role_ids":["R05","R06","R07"],"status":"active","introduced_in":"1.0.0","replaced_by":null},{"value":"innovation_opportunity_identification","label_en":"Identify innovation opportunities","definition":"Screen opportunities from unmet needs, technical capabilities, and application gaps.","boundary":"Use licensing_opportunity_assessment when a specific licensing transaction is the goal.","allowed_outputs":["candidate_shortlist","assessment_brief"],"allowed_perspectives":["technology_scouting","product_strategy","competitive_intelligence","invention_development"],"source_jtbd_values":["product_ideas","innovation_opportunities","ideas_concepts"],"source_role_ids":["R01","R02","R05","R06","R07"],"status":"active","introduced_in":"1.0.0","replaced_by":null},{"value":"rd_direction_prioritization","label_en":"Prioritize R&D directions","definition":"Weigh R&D directions by value, evidence, maturity, and resource requirements.","boundary":"Do not invent actual company scores when resource constraints and budgets are unavailable.","allowed_outputs":["priority_matrix","comparison_matrix"],"allowed_perspectives":["technology_scouting","product_strategy","applied_research","scientific_contribution"],"source_jtbd_values":["rd_directions"],"source_role_ids":["R03","R04","R05","R06"],"status":"active","introduced_in":"1.0.0","replaced_by":null},{"value":"patent_landscape_analysis","label_en":"Analyze patent landscapes","definition":"Organize patent-positioning evidence by topic, organization, time, and family.","boundary":"A patent landscape is not product FTO; use ip_portfolio_planning for decisions about owned assets.","allowed_outputs":["landscape_map","evidence_table"],"allowed_perspectives":["patent_evidence_analysis","ip_portfolio_management","competitive_intelligence","technology_scouting","patent_risk_review"],"source_jtbd_values":["patent_landscapes"],"source_role_ids":["R05","R06","R07","R08","R10","R11"],"status":"active","introduced_in":"1.0.0","replaced_by":null},{"value":"prior_art_search","label_en":"Search prior art","definition":"Locate relevant earlier public evidence for defined technical features and a stated search purpose.","boundary":"State the search date range; do not automatically draw a novelty conclusion.","allowed_outputs":["evidence_table"],"allowed_perspectives":["invention_development","patent_evidence_analysis","patent_prosecution","patent_risk_review"],"source_jtbd_values":["patent_ip_risk","prior_art","search_draft_patents"],"source_role_ids":["R01","R02","R07","R08","R10","R11","R13"],"status":"active","introduced_in":"1.0.0","replaced_by":null},{"value":"novelty_comparison","label_en":"Compare novelty-related features","definition":"Compare specified technical features item by item with earlier evidence and identify gaps.","boundary":"A technical distinction is not a patentability conclusion; provide a comparison method when disclosure is missing.","allowed_outputs":["comparison_matrix","evidence_table","document_template"],"allowed_perspectives":["invention_development","patent_evidence_analysis","patent_prosecution","patent_risk_review"],"source_jtbd_values":["prior_art"],"source_role_ids":["R01","R02","R07","R08","R10","R11","R13"],"status":"active","introduced_in":"1.0.0","replaced_by":null},{"value":"fto_evidence_search","label_en":"Search FTO evidence","definition":"Collect claims and legal-status signals around a product implementation, target scope, and time frame.","boundary":"This differs from a prior-art search; when scope is missing, provide a search framework without declaring clearance.","allowed_outputs":["evidence_table","document_template"],"allowed_perspectives":["patent_evidence_analysis","patent_risk_review"],"source_jtbd_values":["patent_ip_risk","product_ip_risks","fto_design_risks","fto_searches"],"source_role_ids":["R07","R08","R10","R11"],"status":"active","introduced_in":"1.0.0","replaced_by":null},{"value":"design_risk_analysis","label_en":"Analyze design-related patent risk","definition":"Compare a design implementation or change with relevant claim evidence and identify issues requiring review.","boundary":"Design-around assumptions require validation; when scope is missing, limit the output to a method and risk checklist.","allowed_outputs":["risk_register","comparison_matrix","document_template"],"allowed_perspectives":["patent_risk_review","patent_evidence_analysis","product_design","system_integration"],"source_jtbd_values":["patent_ip_risk","product_ip_risks","fto_design_risks"],"source_role_ids":["R01","R07","R08","R10","R11"],"status":"active","introduced_in":"1.0.0","replaced_by":null},{"value":"ip_risk_identification","label_en":"Identify IP risk issues","definition":"Organize evidence gaps and action items related to technology use, patents, or ownership.","boundary":"Do not automatically expand into contract negotiation or definitive legal advice; use collaboration_terms_review for a specific contract.","allowed_outputs":["risk_register","document_template"],"allowed_perspectives":["patent_risk_review","ip_portfolio_management","patent_evidence_analysis","invention_development","product_strategy"],"source_jtbd_values":["patent_ip_risk","product_ip_risks"],"source_role_ids":["R01","R02","R06","R07","R08","R10","R11"],"status":"active","introduced_in":"1.0.0","replaced_by":null},{"value":"application_drafting","label_en":"Draft patent applications","definition":"Organize patent-application documents and their support relationships from a technical disclosure.","boundary":"Do not invent technical features; provide a template when only the three profile inputs are available.","allowed_outputs":["application_draft","document_template"],"allowed_perspectives":["patent_prosecution","invention_development"],"source_jtbd_values":["draft_review_patents","draft_review_applications","search_draft_patents"],"source_role_ids":["R01","R02","R08","R10","R13"],"status":"active","introduced_in":"1.0.0","replaced_by":null},{"value":"application_review","label_en":"Review patent applications","definition":"Review a supplied document for technical support, wording consistency, and required revisions.","boundary":"A document to review is required; otherwise provide a review template.","allowed_outputs":["review_notes","document_template"],"allowed_perspectives":["patent_prosecution","patent_risk_review"],"source_jtbd_values":["draft_review_patents","draft_review_applications"],"source_role_ids":["R08","R10","R13"],"status":"active","introduced_in":"1.0.0","replaced_by":null},{"value":"claims_drafting","label_en":"Draft patent claims","definition":"Organize core features and a claim hierarchy from a technical disclosure.","boundary":"Do not invent invention features from an industry name; use a template when disclosure is unavailable.","allowed_outputs":["claims_draft","document_template"],"allowed_perspectives":["patent_prosecution","invention_development"],"source_jtbd_values":["draft_review_patents","draft_refine_claims","search_draft_patents"],"source_role_ids":["R01","R02","R08","R10","R13"],"status":"active","introduced_in":"1.0.0","replaced_by":null},{"value":"claims_refinement","label_en":"Refine patent claims","definition":"Recommend scope, dependency, and wording changes to existing claims and supporting materials.","boundary":"Provide only a template when the original claims and supporting materials are unavailable.","allowed_outputs":["review_notes","comparison_matrix","document_template"],"allowed_perspectives":["patent_prosecution","patent_risk_review"],"source_jtbd_values":["draft_review_patents","draft_refine_claims"],"source_role_ids":["R08","R10","R13"],"status":"active","introduced_in":"1.0.0","replaced_by":null},{"value":"office_action_analysis","label_en":"Analyze office actions","definition":"Map supplied objections and cited references to the application's supporting materials and identify response issues.","boundary":"Do not infer office-action content or deadlines from an industry; use a template when materials are missing.","allowed_outputs":["evidence_table","review_notes","document_template"],"allowed_perspectives":["patent_prosecution","patent_evidence_analysis","patent_risk_review"],"source_jtbd_values":["office_actions"],"source_role_ids":["R07","R08","R10","R11","R13"],"status":"active","introduced_in":"1.0.0","replaced_by":null},{"value":"office_action_response","label_en":"Prepare office action responses","definition":"Organize a response and amendment support from a supplied office action and application materials.","boundary":"Provide only a response-structure template when specific materials are missing.","allowed_outputs":["response_outline","document_template"],"allowed_perspectives":["patent_prosecution","patent_risk_review"],"source_jtbd_values":["office_actions"],"source_role_ids":["R08","R10","R13"],"status":"active","introduced_in":"1.0.0","replaced_by":null},{"value":"licensing_opportunity_assessment","label_en":"Assess licensing opportunities","definition":"Relate technology assets, application evidence, and adopter needs to identify transaction-readiness gaps.","boundary":"Requires a licensing, transfer, or inbound-adoption context; do not invent expressions of partner interest.","allowed_outputs":["transaction_brief","candidate_shortlist","document_template"],"allowed_perspectives":["ip_commercialization","technology_scouting"],"source_jtbd_values":["innovation_opportunities"],"source_role_ids":["R05","R12"],"status":"active","introduced_in":"1.0.0","replaced_by":null},{"value":"collaboration_terms_review","label_en":"Review collaboration and ownership issues","definition":"Map collaboration goals, results, and data use to contractual business issues that require discussion.","boundary":"Requires a collaboration or contract context; do not enable it automatically because the role is Legal.","allowed_outputs":["risk_register","document_template"],"allowed_perspectives":["commercial_legal_review","ip_commercialization"],"source_jtbd_values":["product_ip_risks"],"source_role_ids":["R05","R09","R12"],"status":"active","introduced_in":"1.0.0","replaced_by":null},{"value":"ip_portfolio_planning","label_en":"Plan IP portfolios","definition":"Plan technology-asset coverage, business priorities, and maintenance directions.","boundary":"A specific plan requires an asset scope; otherwise provide only a planning-method template.","allowed_outputs":["portfolio_plan","priority_matrix","document_template"],"allowed_perspectives":["ip_portfolio_management","patent_evidence_analysis"],"source_jtbd_values":["patent_landscapes"],"source_role_ids":["R07","R10","R11"],"status":"active","introduced_in":"1.0.0","replaced_by":null},{"value":"task_clarification","label_en":"Clarify the current task","definition":"Help distinguish among tasks, required materials, and corresponding deliverables.","boundary":"Do not use it in place of an already well-defined task.","allowed_outputs":["task_menu"],"allowed_perspectives":["task_exploration"],"source_jtbd_values":["other"],"source_role_ids":["R00"],"status":"active","introduced_in":"1.0.0","replaced_by":null}],"desired_outputs":[{"value":"candidate_shortlist","label_en":"Candidate shortlist","definition":"List candidates, screening criteria, and applicable conditions.","boundary":"Do more than list names; prefer comparison_matrix when candidates can be compared on a common basis.","status":"active","introduced_in":"1.0.0","replaced_by":null},{"value":"comparison_matrix","label_en":"Comparison matrix","definition":"Compare multiple options using consistent metrics, conditions, and evidence standards.","boundary":"Do not directly rank values measured under different conditions; use assessment_brief for the feasibility of one solution.","status":"active","introduced_in":"1.0.0","replaced_by":null},{"value":"improvement_plan","label_en":"Improvement plan","definition":"State the problem, proposed improvements, rationale, and validation method.","boundary":"Do more than explain the failure mechanism; use validation_plan when the deliverable consists only of validation steps.","status":"active","introduced_in":"1.0.0","replaced_by":null},{"value":"landscape_map","label_en":"Landscape map","definition":"Organize field coverage and relationships by topic, technology path, or organization.","boundary":"Distinguish technology and patent landscapes by task; use trend_brief when change over time is the focus.","status":"active","introduced_in":"1.0.0","replaced_by":null},{"value":"concept_brief","label_en":"Concept brief","definition":"Describe the problem, the concept's distinctions, its rationale, and minimum validation.","boundary":"Do not claim that experiments are complete or patent novelty is established.","status":"active","introduced_in":"1.0.0","replaced_by":null},{"value":"assessment_brief","label_en":"Assessment brief","definition":"Organize conditions, evidence, gaps, and the basis for further judgment on a defined question.","boundary":"Do not present unconditional feasibility or clearance; use comparison_matrix to compare multiple options.","status":"active","introduced_in":"1.0.0","replaced_by":null},{"value":"validation_plan","label_en":"Validation plan","definition":"Specify the hypothesis, samples or operating conditions, methods, metrics, and decision rules.","boundary":"Do not present a plan as completed experimental results.","status":"active","introduced_in":"1.0.0","replaced_by":null},{"value":"research_agenda","label_en":"Research agenda","definition":"Present research gaps, specific questions, rationale, and testable paths.","boundary":"Use concept_brief for product concepts, and do more than list popular keywords.","status":"active","introduced_in":"1.0.0","replaced_by":null},{"value":"evidence_table","label_en":"Evidence table","definition":"Map sources and locations to supported technical features or conclusions.","boundary":"Do not invent literature or patents; use evidence_review when synthesis is the main purpose.","status":"active","introduced_in":"1.0.0","replaced_by":null},{"value":"evidence_review","label_en":"Evidence review","definition":"Synthesize multiple sources, disagreements, and limitations.","boundary":"Do more than list search results; use trend_brief when dynamic tracking is the main purpose.","status":"active","introduced_in":"1.0.0","replaced_by":null},{"value":"trend_brief","label_en":"Trend brief","definition":"Describe changes, evidence, and implications within a defined time window.","boundary":"Do not replace temporal change with a static landscape or present a forecast as an observed event.","status":"active","introduced_in":"1.0.0","replaced_by":null},{"value":"priority_matrix","label_en":"Priority matrix","definition":"Prioritize candidates against objectives, evaluation dimensions, and evidence.","boundary":"Explain trade-offs and uncertainty; do not create a definitive ranking from arbitrary scores.","status":"active","introduced_in":"1.0.0","replaced_by":null},{"value":"risk_register","label_en":"Risk register","definition":"Record risk issues, applicable scope, evidence gaps, and required actions.","boundary":"This is not a legal conclusion without a defined scope; use evidence_table for factual retrieval alone.","status":"active","introduced_in":"1.0.0","replaced_by":null},{"value":"application_draft","label_en":"Application draft","definition":"Organize a specification, embodiments, and related patent-application sections from a supplied technical disclosure.","boundary":"Disclosure materials are required; otherwise use document_template.","status":"active","introduced_in":"1.0.0","replaced_by":null},{"value":"review_notes","label_en":"Review notes","definition":"Identify issues, rationale, and recommended revisions item by item in an existing document.","boundary":"Text to review is required; otherwise use document_template.","status":"active","introduced_in":"1.0.0","replaced_by":null},{"value":"claims_draft","label_en":"Claims draft","definition":"Organize a claim hierarchy and supporting basis from a defined technical disclosure.","boundary":"Do not invent technical features; use document_template when disclosure materials are unavailable.","status":"active","introduced_in":"1.0.0","replaced_by":null},{"value":"response_outline","label_en":"Office action response outline","definition":"Organize a response structure and supporting evidence from a supplied office action and application materials.","boundary":"Use document_template when the specific office action and related documents are unavailable.","status":"active","introduced_in":"1.0.0","replaced_by":null},{"value":"transaction_brief","label_en":"Transaction brief","definition":"Relate technology assets, adopter needs, development gaps, and transaction readiness.","boundary":"Do not invent transaction interest or valuations; use candidate_shortlist for a simple technology list.","status":"active","introduced_in":"1.0.0","replaced_by":null},{"value":"portfolio_plan","label_en":"Portfolio plan","definition":"Relate a defined asset scope to business and technology priorities and propose maintenance or coverage directions.","boundary":"A portfolio or asset scope is required; use document_template for a general planning method.","status":"active","introduced_in":"1.0.0","replaced_by":null},{"value":"task_menu","label_en":"Task menu","definition":"Help distinguish possible tasks, prerequisites, and corresponding deliverables.","boundary":"Do not present it as a user requirement that has already been established.","status":"active","introduced_in":"1.0.0","replaced_by":null},{"value":"document_template","label_en":"Working document template","definition":"Provide fields, structure, completion guidance, and a list of missing materials.","boundary":"Do not present assumptions or placeholders in the template as actual user materials or completed conclusions.","status":"active","introduced_in":"1.0.0","replaced_by":null}],"role_preferred_perspectives":{"rd_engineer":["product_design","process_engineering","system_integration","reliability_engineering","invention_development"],"researcher":["applied_research","scientific_contribution","research_methodology"],"innovation_product_strategy":["technology_scouting","product_strategy","competitive_intelligence"],"in_house_ip_legal":["ip_portfolio_management","patent_risk_review","patent_evidence_analysis","patent_prosecution","commercial_legal_review"],"patent_ip_services":["patent_evidence_analysis","patent_prosecution","patent_risk_review","ip_commercialization"],"other":["task_exploration"]},"role_allowed_jtbd":{"rd_engineer":["technical_solutions","existing_technologies","product_ideas","technical_feasibility","patent_ip_risk","other"],"researcher":["new_research_fields","research_methods","research_trends","research_ideas","patents_literature","other"],"innovation_product_strategy":["technology_competitors","innovation_opportunities","rd_directions","patent_landscapes","product_ip_risks","other"],"in_house_ip_legal":["prior_art","fto_design_risks","patent_landscapes","draft_review_patents","office_actions","other"],"patent_ip_services":["prior_art","fto_searches","draft_review_applications","draft_refine_claims","office_actions","other"],"other":["technical_solutions","technology_trends","ideas_concepts","technical_feasibility","search_draft_patents","other"]},"topic_themes":[{"value":"ai_impact","label_en":"AI impact and enablement","definition":"AI applications, value, impact, adoption conditions, and technical challenges in the industry."},{"value":"technology_trends","label_en":"Technology and research trends","definition":"Recent technical advances, research directions, and evolutionary trends in the industry."},{"value":"technology_explainer","label_en":"Technology explainer","definition":"Explain what a technology is, how it is classified, and the problems it commonly addresses."},{"value":"industry_landscape","label_en":"Industry technology landscape","definition":"The industry's main technology areas, system components, or research landscape."},{"value":"technical_challenges","label_en":"Industry technical challenges","definition":"Shared technical bottlenecks, scaling barriers, and unresolved problems in the industry."},{"value":"performance_improvement","label_en":"Performance and efficiency improvement","definition":"Major paths for improving performance, quality, or efficiency without assuming product-specific parameters."},{"value":"solution_comparison","label_en":"Solution comparison","definition":"Compare technology paths, methods, or solution categories using industry-wide criteria."},{"value":"innovation_opportunities","label_en":"Emerging applications and innovation opportunities","definition":"Identify emerging technologies, new applications, alternative paths, and future innovation opportunities."},{"value":"feasibility_validation","label_en":"Feasibility and validation","definition":"Industry-level technical feasibility, evaluation dimensions, and validation frameworks."},{"value":"research_methods","label_en":"Research methods","definition":"Research, experimental, measurement, and evidence-synthesis methods applicable to the field."},{"value":"sustainability","label_en":"Sustainability","definition":"Energy efficiency, emissions reduction, circularity, sustainable materials, and environmental impact."},{"value":"safety_reliability","label_en":"Safety and reliability","definition":"Industry-level safety, reliability, quality assurance, and risk control."},{"value":"competitive_landscape","label_en":"Competitive landscape","definition":"Key participants, technology paths, competitive changes, and differentiation directions."},{"value":"patent_landscape","label_en":"Patent landscape","definition":"Patent activity, technology clusters, filing trends, and the landscape of major rights holders."},{"value":"ip_risk","label_en":"IP risk","definition":"Prior art, FTO, design-arounds, ownership, and other intellectual-property risks."},{"value":"patent_prosecution","label_en":"Patent drafting and prosecution","definition":"General methods for patent applications, claims, and office-action handling."}],"question_intents":[{"value":"explain_concept","label_en":"Explain a concept","definition":"Explain what a technology or method is, how it is classified, and the problems it commonly addresses."},{"value":"scan_trends","label_en":"Scan trends","definition":"Understand recent changes, major directions, maturity, and likely next developments."},{"value":"identify_applications","label_en":"Identify applications","definition":"Identify the main uses and applicable scenarios for a technology in the target industry."},{"value":"identify_opportunities","label_en":"Identify opportunities","definition":"Find emerging directions, unmet needs, or value spaces worth exploring."},{"value":"identify_challenges","label_en":"Identify challenges","definition":"Organize shared bottlenecks, adoption barriers, evidence gaps, and unresolved problems."},{"value":"compare_approaches","label_en":"Compare approaches","definition":"Compare technology paths, methods, or solution approaches using shared dimensions."},{"value":"evaluate_feasibility","label_en":"Evaluate feasibility","definition":"Determine whether a direction warrants further validation under technical, implementation, and evidence constraints."},{"value":"improve_performance","label_en":"Improve performance","definition":"Identify major paths for improving performance, quality, efficiency, or reliability."},{"value":"assess_risks","label_en":"Assess risks","definition":"Identify technical, safety, intellectual-property, or adoption risks."},{"value":"track_competitors","label_en":"Track competitors","definition":"Monitor major participants, technology bets, product directions, and competitive moves."},{"value":"plan_validation","label_en":"Plan validation","definition":"Define the hypotheses, evidence, evaluation dimensions, and next checks required for validation."},{"value":"support_decision","label_en":"Support a decision","definition":"Organize evidence, trade-offs, and watch points to support a subsequent choice."}],"scope_levels":[{"value":"industry","label_en":"Industry","definition":"The question covers the entire onboarding industry and does not require a specific segment."},{"value":"industry_segment","label_en":"Industry segment","definition":"The question is limited to one application segment in the catalog without assuming a specific product or component."}],"topic_theme_allowed_question_intents":{"ai_impact":["identify_applications","scan_trends","identify_opportunities","identify_challenges","assess_risks"],"technology_trends":["scan_trends","identify_opportunities","support_decision"],"technology_explainer":["explain_concept","identify_applications"],"industry_landscape":["scan_trends","identify_applications","support_decision"],"technical_challenges":["identify_challenges","improve_performance","support_decision"],"performance_improvement":["improve_performance","compare_approaches","support_decision"],"solution_comparison":["compare_approaches","evaluate_feasibility","support_decision"],"innovation_opportunities":["identify_opportunities","identify_applications","support_decision"],"feasibility_validation":["evaluate_feasibility","plan_validation","support_decision"],"research_methods":["compare_approaches","plan_validation","support_decision"],"sustainability":["identify_opportunities","identify_challenges","improve_performance","assess_risks"],"safety_reliability":["assess_risks","improve_performance","plan_validation"],"competitive_landscape":["track_competitors","scan_trends","support_decision"],"patent_landscape":["scan_trends","track_competitors","support_decision"],"ip_risk":["assess_risks","support_decision"],"patent_prosecution":["support_decision","plan_validation"]},"jtbd_allowed_topic_themes":{"technical_solutions":["ai_impact","technical_challenges","performance_improvement","solution_comparison","sustainability","safety_reliability"],"existing_technologies":["technology_trends","technology_explainer","industry_landscape","ai_impact","solution_comparison"],"product_ideas":["ai_impact","innovation_opportunities","technology_trends","sustainability","industry_landscape"],"technical_feasibility":["feasibility_validation","technical_challenges","solution_comparison","safety_reliability"],"patent_ip_risk":["ip_risk","patent_landscape","competitive_landscape","ai_impact"],"new_research_fields":["technology_trends","industry_landscape","innovation_opportunities","ai_impact","sustainability"],"research_methods":["research_methods","technology_trends","ai_impact","solution_comparison"],"research_trends":["technology_trends","ai_impact","industry_landscape","sustainability"],"research_ideas":["innovation_opportunities","ai_impact","technology_trends","research_methods"],"patents_literature":["patent_landscape","technology_trends","research_methods","industry_landscape"],"technology_competitors":["competitive_landscape","technology_trends","ai_impact","patent_landscape","industry_landscape"],"innovation_opportunities":["innovation_opportunities","ai_impact","sustainability","competitive_landscape","technology_trends"],"rd_directions":["technology_trends","industry_landscape","innovation_opportunities","feasibility_validation","technical_challenges","ai_impact"],"patent_landscapes":["patent_landscape","competitive_landscape","technology_trends","ai_impact"],"product_ip_risks":["ip_risk","patent_landscape","competitive_landscape","ai_impact"],"prior_art":["ip_risk","patent_landscape","technology_explainer"],"fto_design_risks":["ip_risk","patent_landscape","solution_comparison"],"draft_review_patents":["patent_prosecution","ip_risk","technology_explainer"],"office_actions":["patent_prosecution","ip_risk","patent_landscape"],"fto_searches":["ip_risk","patent_landscape","industry_landscape"],"draft_review_applications":["patent_prosecution","technology_explainer","ip_risk"],"draft_refine_claims":["patent_prosecution","technology_explainer","ip_risk"],"technology_trends":["technology_trends","ai_impact","industry_landscape","sustainability"],"ideas_concepts":["innovation_opportunities","ai_impact","technology_trends","sustainability"],"search_draft_patents":["patent_landscape","patent_prosecution","ip_risk","technology_explainer"],"other":["industry_landscape","technology_trends","technology_explainer","technical_challenges","ai_impact"]},"jtbd_allowed_tasks":{"technical_solutions":["solution_search","solution_comparison","failure_resolution","process_optimization"],"existing_technologies":["technology_landscape","solution_comparison","evidence_search"],"product_ideas":["product_ideation","innovation_opportunity_identification"],"technical_feasibility":["feasibility_assessment","validation_planning"],"patent_ip_risk":["ip_risk_identification","prior_art_search","fto_evidence_search","design_risk_analysis"],"new_research_fields":["research_field_exploration","research_gap_identification"],"research_methods":["research_method_search","research_method_comparison","validation_planning"],"research_trends":["research_trend_tracking","evidence_synthesis"],"research_ideas":["research_ideation","research_gap_identification"],"patents_literature":["evidence_search","evidence_synthesis"],"technology_competitors":["technology_trend_tracking","competitor_tracking","technology_landscape"],"innovation_opportunities":["innovation_opportunity_identification","licensing_opportunity_assessment"],"rd_directions":["rd_direction_prioritization","feasibility_assessment","solution_comparison"],"patent_landscapes":["patent_landscape_analysis","ip_portfolio_planning"],"product_ip_risks":["ip_risk_identification","design_risk_analysis","fto_evidence_search","collaboration_terms_review"],"prior_art":["prior_art_search","novelty_comparison"],"fto_design_risks":["fto_evidence_search","design_risk_analysis"],"draft_review_patents":["application_drafting","application_review","claims_drafting","claims_refinement"],"office_actions":["office_action_analysis","office_action_response"],"fto_searches":["fto_evidence_search"],"draft_review_applications":["application_drafting","application_review"],"draft_refine_claims":["claims_drafting","claims_refinement"],"technology_trends":["technology_trend_tracking","technology_landscape"],"ideas_concepts":["product_ideation","research_ideation","innovation_opportunity_identification"],"search_draft_patents":["prior_art_search","evidence_search","application_drafting","claims_drafting"],"other":["task_clarification"]}};
+
+    const presets = {
+      "industry-ai": {
+        id: "rd_engineer__electronics_manufacturing__technical_solutions__d3c57624011e",
+        role: [
+          ["Role", "rd_engineer", "R&D Engineer / Inventor"],
+          ["Role perspective", "product_design", "Product and component design"]
+        ],
+        industry: [
+          ["Industry", "electronics_manufacturing", "Electronics Manufacturing"],
+          ["Industry segment", null, "No segment selected"]
+        ],
+        jtbd: [
+          ["JTBD", "technical_solutions", "Find technical solutions"],
+          ["JTBD task", "solution_comparison", "Compare technical solutions"],
+          ["Desired output", "comparison_matrix", "Comparison matrix"]
+        ],
+        theme: ["ai_impact", "AI impact and enablement"],
+        intent: ["identify_applications", "Identify applications"],
+        scope: ["industry", "Industry"],
+        questions: [
+          "Where is AI already creating measurable value across electronics manufacturing?",
+          "How is AI changing product design and solution evaluation in electronics manufacturing?",
+          "Which parts of the electronics manufacturing workflow are common entry points for AI adoption?",
+          "Which AI-enabled opportunities should electronics manufacturing R&D teams continue to watch?"
+        ]
+      },
+      "segment-trend": {
+        id: "researcher__medical_devices__research_trends__591b42fd733e",
+        role: [
+          ["Role", "researcher", "Researcher / Scientist"],
+          ["Role perspective", "applied_research", "Applied research"]
+        ],
+        industry: [
+          ["Industry", "medical_devices", "Medical Devices"],
+          ["Industry segment", "medical_imaging", "Medical Imaging Equipment & Diagnostic Imaging Software"]
+        ],
+        jtbd: [
+          ["JTBD", "research_trends", "Track research trends"],
+          ["JTBD task", "research_trend_tracking", "Track research trends"],
+          ["Desired output", "trend_brief", "Trend brief"]
+        ],
+        theme: ["technology_trends", "Technology and research trends"],
+        intent: ["scan_trends", "Scan trends"],
+        scope: ["industry_segment", "Industry segment"],
+        questions: [
+          "Which research trends in medical imaging equipment deserve attention now?",
+          "How are the main research directions in medical imaging changing?",
+          "Which emerging technologies are influencing the development path of medical imaging equipment?",
+          "Which areas are likely to shape medical imaging R&D over the next few years?"
+        ]
+      },
+      "segment-compare": {
+        id: "rd_engineer__electronics_manufacturing__technical_solutions__3aed2d480e36",
+        role: [
+          ["Role", "rd_engineer", "R&D Engineer / Inventor"],
+          ["Role perspective", "product_design", "Product and component design"]
+        ],
+        industry: [
+          ["Industry", "electronics_manufacturing", "Electronics Manufacturing"],
+          ["Industry segment", "semiconductors", "Semiconductors"]
+        ],
+        jtbd: [
+          ["JTBD", "technical_solutions", "Find technical solutions"],
+          ["JTBD task", "solution_comparison", "Compare technical solutions"],
+          ["Desired output", "comparison_matrix", "Comparison matrix"]
+        ],
+        theme: ["solution_comparison", "Solution comparison"],
+        intent: ["compare_approaches", "Compare approaches"],
+        scope: ["industry_segment", "Industry segment"],
+        questions: [
+          "How do the main semiconductor technology approaches trade off performance, manufacturing maturity, and cost?",
+          "Which application needs and production conditions suit different semiconductor manufacturing and packaging approaches?",
+          "Which shared criteria should teams use when evaluating semiconductor technology approaches?",
+          "What advantages and constraints might emerging semiconductor approaches have relative to mature options?"
+        ]
+      }
+    };
+
+    const labels = {
+      role_perspective: "Perspective",
+      industry_segment: "Industry segment",
+      jtbd_task: "Task",
+      desired_output: "Output",
+      topic_theme: "Theme",
+      question_intent: "Intent",
+      scope_level: "Scope"
+    };
+
+    function pathValue(path, index) {
+      return path[index] && path[index][1];
+    }
+
+    function makeTree(cssClass, label, rows) {
+      const tree = document.createElement("div");
+      tree.className = `tree ${cssClass}`;
+      tree.innerHTML = `<div class="tree-label">${label}</div>`;
+      rows.forEach((row, index) => {
+        const node = document.createElement("div");
+        node.className = `node${row[1] === null ? " empty-node" : ""}`;
+        node.innerHTML = `<small>${row[0]}</small><strong>${row[1] === null ? row[2] : `<code>${row[1]}</code><br>${row[2]}`}</strong>`;
+        tree.appendChild(node);
+        if (index < rows.length - 1) {
+          const arrow = document.createElement("div");
+          arrow.className = "arrow";
+          tree.appendChild(arrow);
+        }
+      });
+      return tree;
+    }
+
+    function render(name) {
+      const item = presets[name];
+      document.querySelectorAll(".preset").forEach(button => {
+        button.setAttribute("aria-pressed", String(button.dataset.preset === name));
+      });
+
+      const trees = document.getElementById("trees");
+      trees.replaceChildren(
+        makeTree("tree-role", "Role path", item.role),
+        makeTree("tree-industry", "Industry path", item.industry),
+        makeTree("tree-jtbd", "JTBD path", item.jtbd)
+      );
+
+      document.getElementById("facets").innerHTML = `
+        <div class="facet facet-link"><small>Topic theme · What angle to explore</small><strong><code>${item.theme[0]}</code></strong><p>${item.theme[1]}</p></div>
+        <div class="facet"><small>Question intent · What the reader should learn</small><strong><code>${item.intent[0]}</code></strong><p>${item.intent[1]}</p></div>
+        <div class="facet"><small>Scope level · Derived from selected depth</small><strong><code>${item.scope[0]}</code></strong><p>${item.scope[1]}</p></div>
+      `;
+
+      const bundle = {
+        role_perspective: pathValue(item.role, 1),
+        industry_segment: pathValue(item.industry, 1),
+        jtbd_task: pathValue(item.jtbd, 1),
+        desired_output: pathValue(item.jtbd, 2),
+        topic_theme: item.theme[0],
+        question_intent: item.intent[0],
+        scope_level: item.scope[0]
+      };
+      const bundleEl = document.getElementById("bundle");
+      bundleEl.replaceChildren();
+      Object.entries(bundle).forEach(([key, value]) => {
+        const tag = document.createElement("span");
+        tag.className = "tag";
+        const display = Array.isArray(value) ? (value.length ? value.join(", ") : "[]") : (value ?? "null");
+        tag.innerHTML = `<b>${labels[key]}</b> · ${display}`;
+        bundleEl.appendChild(tag);
+      });
+      document.getElementById("bundle-json").textContent = JSON.stringify(bundle, null, 2);
+      document.getElementById("bundle-id").textContent = `tag_set_id: ${item.id}`;
+
+      const questions = document.getElementById("questions");
+      questions.replaceChildren();
+      item.questions.forEach((text, index) => {
+        const row = document.createElement("div");
+        row.className = "question";
+        row.innerHTML = `<div class="question-index">${index + 1}</div><div><small>Question variant ${index + 1}</small><p>${text}</p></div>`;
+        questions.appendChild(row);
+      });
+    }
+
+    const byValue = rows => new Map(rows.map(row => [row.value, row]));
+    const perspectiveByValue = byValue(catalogData.role_perspectives);
+    const taskByValue = byValue(catalogData.jtbd_tasks);
+    const outputByValue = byValue(catalogData.desired_outputs);
+    const intentByValue = byValue(catalogData.question_intents);
+    const jtbdByValue = byValue(catalogData.audience.jtbd);
+    const themeByValue = byValue(catalogData.topic_themes);
+    const catalogState = { tab: "all", query: "" };
+
+    function el(tag, className, text) {
+      const node = document.createElement(tag);
+      if (className) node.className = className;
+      if (text !== undefined) node.textContent = text;
+      return node;
+    }
+
+    function displayLabel(row) {
+      return row.label_en || row.value;
+    }
+
+    function matches(row, query) {
+      if (!query) return true;
+      return JSON.stringify(row).toLocaleLowerCase().includes(query);
+    }
+
+    function makeSection(title, meta) {
+      const section = el("section", "catalog-section");
+      const head = el("div", "catalog-section-head");
+      head.append(el("h3", "", title), el("span", "", meta));
+      section.appendChild(head);
+      return section;
+    }
+
+    function makeGroup(parent, countText) {
+      const details = el("details", "catalog-group");
+      details.open = true;
+      const summary = el("summary");
+      summary.append(
+        el("code", "", parent.value),
+        el("strong", "", displayLabel(parent)),
+        el("span", "", countText)
+      );
+      const body = el("div", "catalog-group-body");
+      details.append(summary, body);
+      return { details, body };
+    }
+
+    function makeEnumItem(row, note) {
+      const item = el("article", "enum-item");
+      item.dataset.enumValue = row.value;
+      item.append(el("code", "", row.value), el("strong", "", displayLabel(row)));
+      if (row.definition) item.appendChild(el("p", "", row.definition));
+      if (note) item.appendChild(el("div", "relation-note", note));
+      return item;
+    }
+
+    function makeChip(row, note) {
+      const chip = el("span", "enum-chip");
+      chip.dataset.enumValue = row.value;
+      const code = el("code", "", row.value);
+      const label = el("span", "", row.label_en || row.value);
+      chip.append(code, label);
+      if (note) chip.setAttribute("aria-label", `${row.value}, ${displayLabel(row)}, ${note}`);
+      return chip;
+    }
+
+    function renderRoles(query) {
+      const parents = catalogData.audience.role;
+      const section = makeSection(
+        "Role → Working perspective",
+        `${parents.length} roles · ${catalogData.role_perspectives.length} perspectives; this mapping expresses preferred perspectives, not identity restrictions`
+      );
+      let groups = 0;
+      parents.forEach(parent => {
+        const children = (catalogData.role_preferred_perspectives[parent.value] || [])
+          .map(value => perspectiveByValue.get(value)).filter(Boolean);
+        const parentHit = matches(parent, query);
+        const visible = parentHit ? children : children.filter(row => matches(row, query));
+        if (query && !parentHit && visible.length === 0) return;
+        const group = makeGroup(parent, `${children.length} preferred perspectives`);
+        const grid = el("div", "enum-grid");
+        visible.forEach(row => grid.appendChild(makeEnumItem(row)));
+        group.body.appendChild(grid);
+        section.appendChild(group.details);
+        groups += 1;
+      });
+      return groups ? section : null;
+    }
+
+    function renderIndustries(query) {
+      const parents = catalogData.audience.industry;
+      const section = makeSection(
+        "Industry → Industry segment",
+        `${parents.length} industries · ${catalogData.industry_segments.length} segments; specific technologies, products, and materials belong in the free-text entities and keywords fields`
+      );
+      let groups = 0;
+      parents.forEach(parent => {
+        const segments = catalogData.industry_segments.filter(row => row.entry_industry === parent.value);
+        const parentHit = matches(parent, query);
+        const visibleSegments = parentHit ? segments : segments.filter(row => matches(row, query));
+        if (query && !parentHit && visibleSegments.length === 0) return;
+        const group = makeGroup(parent, `${segments.length} industry segments`);
+        if (parent.value === "other") {
+          group.body.appendChild(el(
+            "p",
+            "relation-note",
+            "The other industry includes the explicit aerospace_space enum. This differs from industry_segment=null, which means the catalog does not cover a more specific segment."
+          ));
+        }
+        const grid = el("div", "enum-grid");
+        visibleSegments.forEach(segment => grid.appendChild(makeEnumItem(segment)));
+        group.body.appendChild(grid);
+        section.appendChild(group.details);
+        groups += 1;
+      });
+      return groups ? section : null;
+    }
+
+    function renderJtbds(query) {
+      const parents = catalogData.audience.jtbd;
+      const section = makeSection(
+        "JTBD → Specific task → Desired output",
+        `${parents.length} JTBD values · ${catalogData.jtbd_tasks.length} tasks · ${catalogData.desired_outputs.length} outputs`
+      );
+      let groups = 0;
+      parents.forEach(parent => {
+        const tasks = (catalogData.jtbd_allowed_tasks[parent.value] || [])
+          .map(value => taskByValue.get(value)).filter(Boolean);
+        const parentHit = matches(parent, query);
+        const visibleTasks = [];
+        tasks.forEach(task => {
+          const outputs = task.allowed_outputs.map(value => outputByValue.get(value)).filter(Boolean);
+          const taskHit = matches(task, query);
+          const visibleOutputs = parentHit || taskHit ? outputs : outputs.filter(row => matches(row, query));
+          if (!query || parentHit || taskHit || visibleOutputs.length) {
+            visibleTasks.push({ task, outputs, visibleOutputs });
+          }
+        });
+        if (query && !parentHit && visibleTasks.length === 0) return;
+        const group = makeGroup(parent, `${tasks.length} specific tasks`);
+        visibleTasks.forEach(({ task, visibleOutputs }) => {
+          const subgroup = el("div", "subgroup");
+          const head = el("div", "subgroup-head");
+          head.append(el("code", "", task.value), el("strong", "", displayLabel(task)));
+          if (task.definition) head.appendChild(el("p", "", task.definition));
+          subgroup.appendChild(head);
+          const chips = el("div", "enum-chips");
+          visibleOutputs.forEach(row => chips.appendChild(makeChip(row)));
+          subgroup.appendChild(chips);
+          group.body.appendChild(subgroup);
+        });
+        section.appendChild(group.details);
+        groups += 1;
+      });
+      return groups ? section : null;
+    }
+
+    function renderThemes(query) {
+      const section = makeSection(
+        "Topic theme → Allowed question intent",
+        `${catalogData.topic_themes.length} themes · ${catalogData.question_intents.length} intents; the mapping is many-to-many`
+      );
+      let groups = 0;
+      catalogData.topic_themes.forEach(parent => {
+        const intents = (catalogData.topic_theme_allowed_question_intents[parent.value] || [])
+          .map(value => intentByValue.get(value)).filter(Boolean);
+        const parentHit = matches(parent, query);
+        const visible = parentHit ? intents : intents.filter(row => matches(row, query));
+        if (query && !parentHit && visible.length === 0) return;
+        const group = makeGroup(parent, `${intents.length} allowed intents`);
+        if (parent.definition) group.body.appendChild(el("p", "relation-note", parent.definition));
+        const grid = el("div", "enum-grid");
+        visible.forEach(row => grid.appendChild(makeEnumItem(row)));
+        group.body.appendChild(grid);
+        section.appendChild(group.details);
+        groups += 1;
+      });
+      return groups ? section : null;
+    }
+
+    function appendCompatibilityBlock(section, title, description, parents, childRows, query) {
+      const block = el("div", "constraint-block");
+      const head = el("div", "constraint-head");
+      head.append(el("h4", "", title), el("p", "", description));
+      block.appendChild(head);
+      let groups = 0;
+      parents.forEach(parent => {
+        const children = childRows(parent).filter(Boolean);
+        const parentHit = matches(parent, query);
+        const visible = parentHit ? children : children.filter(row => matches(row, query));
+        if (query && !parentHit && visible.length === 0) return;
+        const group = makeGroup(parent, `${children.length} allowed values`);
+        const chips = el("div", "enum-chips");
+        visible.forEach(row => chips.appendChild(makeChip(row)));
+        group.body.appendChild(chips);
+        block.appendChild(group.details);
+        groups += 1;
+      });
+      if (groups) section.appendChild(block);
+      return groups;
+    }
+
+    function renderConstraints(query) {
+      const section = makeSection(
+        "Cross-axis compatibility constraints",
+        "Role, JTBD, Theme, Task, and Perspective cannot be combined as an unrestricted Cartesian product"
+      );
+      let groups = 0;
+      groups += appendCompatibilityBlock(
+        section,
+        "Role → Allowed JTBD",
+        "36 enabled relationships; every fixed audience triple must pass this check.",
+        catalogData.audience.role,
+        parent => (catalogData.role_allowed_jtbd[parent.value] || []).map(value => jtbdByValue.get(value)),
+        query
+      );
+      groups += appendCompatibilityBlock(
+        section,
+        "JTBD → Allowed topic theme",
+        "107 compatibility relationships; the theme must support the selected JTBD.",
+        catalogData.audience.jtbd,
+        parent => (catalogData.jtbd_allowed_topic_themes[parent.value] || []).map(value => themeByValue.get(value)),
+        query
+      );
+      groups += appendCompatibilityBlock(
+        section,
+        "JTBD task → Allowed role perspective",
+        "147 compatibility relationships; a role’s preferred perspective must also be compatible with the specific task.",
+        catalogData.jtbd_tasks,
+        parent => parent.allowed_perspectives.map(value => perspectiveByValue.get(value)),
+        query
+      );
+      return groups ? section : null;
+    }
+
+    function renderScopes(query) {
+      const rows = catalogData.scope_levels.filter(row => matches(row, query));
+      if (!rows.length) return null;
+      const section = makeSection(
+        "Scope level",
+        `${catalogData.scope_levels.length} derived states; scope is industry when no segment is selected and industry_segment when one is selected`
+      );
+      const grid = el("div", "enum-grid");
+      rows.forEach(row => grid.appendChild(makeEnumItem(row)));
+      section.appendChild(grid);
+      return section;
+    }
+
+    function renderCatalog() {
+      const query = catalogState.query.trim().toLocaleLowerCase();
+      const renderers = {
+        roles: renderRoles,
+        industries: renderIndustries,
+        jtbds: renderJtbds,
+        themes: renderThemes,
+        constraints: renderConstraints,
+        scopes: renderScopes
+      };
+      const selected = catalogState.tab === "all" ? Object.keys(renderers) : [catalogState.tab];
+      const results = document.getElementById("catalog-results");
+      results.replaceChildren();
+      selected.forEach(key => {
+        const section = renderers[key](query);
+        if (section) results.appendChild(section);
+      });
+      if (!results.children.length) results.appendChild(el("div", "catalog-empty", "No matching enums or relationships"));
+      const groups = results.querySelectorAll(".catalog-group").length;
+      const relations = results.querySelectorAll("[data-enum-value]").length;
+      document.getElementById("catalog-status").textContent = query
+        ? `"${catalogState.query.trim()}" matches ${groups} parent or theme groups and ${relations} enum relationship items.`
+        : `Showing ${groups} parent or theme groups and ${relations} enum relationship items. Many-to-many enum values appear under each relevant parent.`;
+    }
+
+    document.querySelectorAll(".catalog-tab").forEach(button => {
+      button.addEventListener("click", () => {
+        catalogState.tab = button.dataset.catalogTab;
+        document.querySelectorAll(".catalog-tab").forEach(peer => {
+          peer.setAttribute("aria-pressed", String(peer === button));
+        });
+        renderCatalog();
+      });
+    });
+    document.getElementById("catalog-search").addEventListener("input", event => {
+      catalogState.query = event.target.value;
+      renderCatalog();
+    });
+    document.getElementById("expand-all").addEventListener("click", () => {
+      document.querySelectorAll(".catalog-group").forEach(group => { group.open = true; });
+    });
+    document.getElementById("collapse-all").addEventListener("click", () => {
+      document.querySelectorAll(".catalog-group").forEach(group => { group.open = false; });
+    });
+
+    document.querySelectorAll(".preset").forEach(button => {
+      button.addEventListener("click", () => render(button.dataset.preset));
+    });
+    render("industry-ai");
+    renderCatalog();
+  </script>
+</body>
+</html>

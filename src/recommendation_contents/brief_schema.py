@@ -6,7 +6,7 @@ import json
 from pathlib import Path
 from typing import Any
 
-SCHEMA_VERSION = "1.0.0"
+SCHEMA_VERSION = "2.0.0"
 CATALOG_PATH = Path(__file__).parent / "data" / "content_brief_catalog.json"
 LANGUAGES = ("zh-CN", "en")
 MAX_BRIEFS = 10
@@ -65,7 +65,6 @@ def build_brief_schema(
                 {
                     "role_perspective": _enum(catalog["role_perspectives"]),
                     "industry_segment": segment,
-                    "technology_object": _array(_enum(catalog["technology_objects"]), 0, 2),
                     "jtbd_task": _enum(catalog["jtbd_tasks"]),
                     "desired_output": _enum(catalog["desired_outputs"]),
                 }
@@ -76,10 +75,6 @@ def build_brief_schema(
                     "industry_status": {
                         "type": "string",
                         "enum": catalog["classification_statuses"]["industry"],
-                    },
-                    "object_status": {
-                        "type": "string",
-                        "enum": catalog["classification_statuses"]["objects"],
                     },
                 }
             ),
@@ -150,7 +145,6 @@ def validate_briefs(
     if errors:
         return errors
     segments = {row["value"]: row for row in catalog["industry_segments"]}
-    objects = {row["value"]: row for row in catalog["technology_objects"]}
     tasks = {row["value"]: row for row in catalog["jtbd_tasks"]}
     descriptions: set[str] = set()
     for i, brief in enumerate(payload["briefs"]):
@@ -167,26 +161,11 @@ def validate_briefs(
         if segment is None:
             if classification["industry_status"] == "classified":
                 errors.append(f"{path}: null industry_segment cannot be classified")
-            if (
-                tags["technology_object"]
-                or classification["object_status"] != "industry_unresolved"
-            ):
-                errors.append(
-                    f"{path}: unresolved industry requires [] objects and industry_unresolved"
-                )
         else:
             if classification["industry_status"] != "classified":
                 errors.append(f"{path}: non-null industry_segment requires classified status")
             if audience["industry"] != segments[segment]["entry_industry"]:
                 errors.append(f"{path}: audience.industry must match industry_segment parent")
-            for obj in tags["technology_object"]:
-                if segment not in objects[obj]["allowed_segments"]:
-                    errors.append(f"{path}: technology_object {obj} is incompatible with segment")
-            expected = (
-                {"classified"} if tags["technology_object"] else {"broad_scope", "not_in_catalog"}
-            )
-            if classification["object_status"] not in expected:
-                errors.append(f"{path}: object_status is inconsistent with technology_object")
         normalized = " ".join(brief["description"].casefold().split())
         if normalized in descriptions:
             errors.append(f"{path}: duplicate description in this batch")

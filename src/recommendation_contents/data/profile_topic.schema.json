@@ -1,7 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "title": "Operations content brief model response",
-  "description": "Stage 1 only. Audience labels are outputs, not user inputs. Also apply the catalog combination rules and semantic editorial review.",
+  "title": "Fixed-profile Node 1 topic response",
+  "description": "Stage 1 for one fixed audience and one fixed seven-facet tag bundle. Every brief must preserve both inputs and its title must be a displayable question. Cross-field compatibility rules are defined by the taxonomy catalog and runtime validator.",
   "type": "object",
   "properties": {
     "briefs": {
@@ -253,13 +253,61 @@
                   "task_menu",
                   "document_template"
                 ]
+              },
+              "topic_theme": {
+                "type": "string",
+                "enum": [
+                  "ai_impact",
+                  "technology_trends",
+                  "technology_explainer",
+                  "industry_landscape",
+                  "technical_challenges",
+                  "performance_improvement",
+                  "solution_comparison",
+                  "innovation_opportunities",
+                  "feasibility_validation",
+                  "research_methods",
+                  "sustainability",
+                  "safety_reliability",
+                  "competitive_landscape",
+                  "patent_landscape",
+                  "ip_risk",
+                  "patent_prosecution"
+                ]
+              },
+              "question_intent": {
+                "type": "string",
+                "enum": [
+                  "explain_concept",
+                  "scan_trends",
+                  "identify_applications",
+                  "identify_opportunities",
+                  "identify_challenges",
+                  "compare_approaches",
+                  "evaluate_feasibility",
+                  "improve_performance",
+                  "assess_risks",
+                  "track_competitors",
+                  "plan_validation",
+                  "support_decision"
+                ]
+              },
+              "scope_level": {
+                "type": "string",
+                "enum": [
+                  "industry",
+                  "industry_segment"
+                ]
               }
             },
             "required": [
               "role_perspective",
               "industry_segment",
               "jtbd_task",
-              "desired_output"
+              "desired_output",
+              "topic_theme",
+              "question_intent",
+              "scope_level"
             ],
             "additionalProperties": false
           },
@@ -318,5 +366,8 @@
   "required": [
     "briefs"
   ],
-  "additionalProperties": false
+  "additionalProperties": false,
+  "x-schema-version": "2.0.0",
+  "x-taxonomy-version": "2.2.0",
+  "x-catalog-file": "content_brief_catalog.json"
 }

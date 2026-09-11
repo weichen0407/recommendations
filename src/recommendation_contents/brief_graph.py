@@ -14,6 +14,8 @@ from .llm import create_chat_model
 class BriefInput(TypedDict, total=False):
     idea: str
     audience: dict[str, str]
+    tag_bundle: dict[str, Any]
+    tag_overrides: dict[str, Any]
     language: str
     count: int
 

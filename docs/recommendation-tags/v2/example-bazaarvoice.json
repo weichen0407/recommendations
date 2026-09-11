@@ -20,14 +20,12 @@
       "tags": {
         "role_perspective": "competitive_intelligence",
         "industry_segment": null,
-        "technology_object": [],
         "jtbd_task": "competitor_tracking",
         "desired_output": "trend_brief"
       },
       "classification": {
-        "rationale": "面向负责创新与产品战略的竞争情报读者；SaaS 公司研究目前没有对应的细分行业与对象枚举，保留名称与主题词供后续补充。",
-        "industry_status": "not_in_catalog",
-        "object_status": "industry_unresolved"
+        "rationale": "面向负责创新与产品战略的竞争情报读者；SaaS 公司研究目前没有对应的细分行业枚举，保留公司名称与主题词供后续研究。",
+        "industry_status": "not_in_catalog"
       },
       "assumptions": [
         "依据“Bazaarvoice, Inc. / SaaS”线索选择竞争动态观察切口；具体公司信息待后续研究核实。"

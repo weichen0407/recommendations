@@ -1,5 +1,6 @@
 import copy
 import json
+import re
 from pathlib import Path
 
 import pytest
@@ -49,7 +50,7 @@ def test_idea_only_classifies_an_audience_without_eureka(payload, monkeypatch):
     assert result["input"] == {"idea": "芯片互连", "language": "zh-CN", "count": 1}
     assert result["briefs"][0]["audience"]["role"] == "rd_engineer"
     assert result["briefs"][0]["brief_id"]
-    assert result["taxonomy_version"] == "2.0.0"
+    assert result["taxonomy_version"] == "2.2.0"
     assert result["attempts"] == 1
     assert len(model.messages) == 1
     assert "call_curl_task" not in graph.get_graph().nodes
@@ -113,10 +114,9 @@ def test_provider_failure_stops_without_exposing_credentials():
         (("audience", "industry"), "automotive", "must match"),
         (("audience", "jtbd"), "office_actions", "incompatible with audience.jtbd"),
         (("tags", "role_perspective"), "patent_prosecution", "role_perspective is incompatible"),
-        (("tags", "technology_object"), ["imaging_detector"], "incompatible with segment"),
-        (("tags", "technology_object"), ["chip_interconnect", "chip_interconnect"], "duplicate"),
+        (("tags", "technology_object"), [], "unexpected field technology_object"),
         (("tags", "industry_segment"), None, "cannot be classified"),
-        (("classification", "object_status"), "not_in_catalog", "inconsistent"),
+        (("classification", "object_status"), "not_in_catalog", "unexpected field object_status"),
         (("tags", "desired_output"), "HTML", "allowed enum"),
         (("audience", "role"), ["rd_engineer"], "expected string"),
     ],
@@ -173,23 +173,50 @@ def test_catalog_keeps_onboarding_keys_and_all_references_valid():
     for key in [
         "role_perspectives",
         "industry_segments",
-        "technology_objects",
         "jtbd_tasks",
         "desired_outputs",
+        "topic_themes",
+        "question_intents",
+        "scope_levels",
     ]:
         assert len(values(key)) == len(catalog[key])
     industries = {row["value"] for row in catalog["audience"]["industry"]}
     for row in catalog["industry_segments"]:
         assert row["entry_industry"] in industries
         assert "selection_requirement" not in row
-    for row in catalog["technology_objects"]:
-        assert set(row["allowed_segments"]) <= values("industry_segments")
     for row in catalog["jtbd_tasks"]:
         assert set(row["allowed_perspectives"]) <= values("role_perspectives")
         assert set(row["allowed_outputs"]) <= values("desired_outputs")
         assert "context_requirement" not in row
     for tasks in catalog["jtbd_allowed_tasks"].values():
         assert set(tasks) <= values("jtbd_tasks")
+    for themes in catalog["jtbd_allowed_topic_themes"].values():
+        assert set(themes) <= values("topic_themes")
+    assert set(catalog["topic_theme_allowed_question_intents"]) == values("topic_themes")
+    for intents in catalog["topic_theme_allowed_question_intents"].values():
+        assert set(intents) <= values("question_intents")
+
+
+def test_machine_rule_artifacts_are_english_except_source_paths():
+    catalog = load_brief_catalog()
+    cjk = re.compile(r"[\u3400-\u9fff]")
+    violations = []
+
+    def walk(value, path="$"):
+        if isinstance(value, dict):
+            assert "label_zh" not in value
+            for key, item in value.items():
+                walk(item, f"{path}.{key}")
+        elif isinstance(value, list):
+            for index, item in enumerate(value):
+                walk(item, f"{path}[{index}]")
+        elif isinstance(value, str) and cjk.search(value) and not path.endswith(".path"):
+            violations.append(path)
+
+    walk(catalog)
+    assert violations == []
+    schema = (ROOT / "src/recommendation_contents/data/profile_topic.schema.json").read_text()
+    assert cjk.search(schema) is None
 
 
 def test_duplicate_json_keys_and_surrounding_prose_are_rejected():

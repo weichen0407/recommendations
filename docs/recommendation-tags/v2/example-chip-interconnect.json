@@ -20,16 +20,12 @@
       "tags": {
         "role_perspective": "product_design",
         "industry_segment": "semiconductors",
-        "technology_object": [
-          "chip_interconnect"
-        ],
         "jtbd_task": "solution_comparison",
         "desired_output": "comparison_matrix"
       },
       "classification": {
         "rationale": "主要工作是为芯片设计选择互连方案，面向研发工程师的技术方案需求；功耗、带宽和成本作为比较维度。",
-        "industry_status": "classified",
-        "object_status": "classified"
+        "industry_status": "classified"
       },
       "assumptions": [
         "将“芯片互连”扩展为方案选型切口，并选取功耗、带宽和制造成本作为比较维度。"

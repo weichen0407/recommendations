@@ -20,16 +20,12 @@
       "tags": {
         "role_perspective": "product_design",
         "industry_segment": "semiconductors",
-        "technology_object": [
-          "chip_interconnect"
-        ],
         "jtbd_task": "solution_comparison",
         "desired_output": "comparison_matrix"
       },
       "classification": {
         "rationale": "主要工作是为芯片设计选择互连方案，面向研发工程师的技术方案需求；功耗、带宽和成本作为比较维度。",
-        "industry_status": "classified",
-        "object_status": "classified"
+        "industry_status": "classified"
       },
       "assumptions": [
         "将“芯片互连”扩展为方案选型切口，并选取功耗、带宽和制造成本作为比较维度。"
@@ -55,16 +51,12 @@
       "tags": {
         "role_perspective": "reliability_engineering",
         "industry_segment": "semiconductors",
-        "technology_object": [
-          "chip_interconnect"
-        ],
         "jtbd_task": "failure_resolution",
         "desired_output": "improvement_plan"
       },
       "classification": {
         "rationale": "这条内容帮助研发人员处理互连失效问题，主要产出是改进方案，验证要点是支撑内容。",
-        "industry_status": "classified",
-        "object_status": "classified"
+        "industry_status": "classified"
       },
       "assumptions": [
         "将“芯片互连”扩展为一般失效分析场景，没有指定某款芯片的真实失效事件。"

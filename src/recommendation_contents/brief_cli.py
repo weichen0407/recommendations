@@ -19,21 +19,34 @@ from .config import apply_env_file_to_process
 
 
 def main(argv: list[str] | None = None) -> int:
-    parser = argparse.ArgumentParser(description="运营 idea → 内容描述、目标受众和标签")
-    parser.add_argument("idea", nargs="?", help="主题词、趋势词、实体名称或简短想法")
+    parser = argparse.ArgumentParser(
+        description="Operations idea to content description, target audience, and tags"
+    )
+    parser.add_argument("idea", nargs="?", help="Topic, trend, entity name, or short idea")
     parser.add_argument("--language", choices=LANGUAGES, default="zh-CN")
     parser.add_argument("--count", type=int, choices=range(1, MAX_BRIEFS + 1), default=1)
     parser.add_argument("--env-file", default=".env")
-    parser.add_argument("--output-file", type=Path, help="将 JSON 保存到文件；默认输出到终端")
+    parser.add_argument("--output-file", type=Path, help="Save JSON to a file; default: stdout")
     inspect = parser.add_mutually_exclusive_group()
-    inspect.add_argument("--schema", action="store_true", help="仅导出模型响应 schema，不调用 LLM")
-    inspect.add_argument("--validate-file", type=Path, help="离线校验模型响应或保存结果中的选题")
+    inspect.add_argument("--schema", action="store_true", help="Export response schema without LLM")
+    inspect.add_argument(
+        "--profile-schema",
+        action="store_true",
+        help="Export the fixed-profile Node 1 seven-facet schema without LLM",
+    )
+    inspect.add_argument(
+        "--validate-file", type=Path, help="Validate a model response or saved topics offline"
+    )
     args = parser.parse_args(argv)
-    if args.idea is not None and (args.schema or args.validate_file):
-        parser.error("idea cannot be combined with --schema or --validate-file")
+    if args.idea is not None and (args.schema or args.profile_schema or args.validate_file):
+        parser.error("idea cannot be combined with schema export or --validate-file")
     exit_code = 0
     if args.schema:
         data = build_brief_schema()
+    elif args.profile_schema:
+        from .profile_topic_generation import build_profile_topic_schema
+
+        data = build_profile_topic_schema()
     elif args.validate_file:
         try:
             payload = parse_brief_response(args.validate_file.read_text(encoding="utf-8"))
@@ -61,7 +74,9 @@ def main(argv: list[str] | None = None) -> int:
         exit_code = 1 if errors else 0
     else:
         if args.idea is None:
-            parser.error("idea is required unless --schema or --validate-file is used")
+            parser.error(
+                "idea is required unless --schema, --profile-schema or --validate-file is used"
+            )
         from .brief_graph import build_brief_graph
 
         apply_env_file_to_process(args.env_file)

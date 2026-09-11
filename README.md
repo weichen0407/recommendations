@@ -6,7 +6,7 @@
 输入 → generate_topic → generate_summary → call_curl_task → 结果
 ```
 
-- `generate_topic`：idea → 完整选题描述、目标受众、五维标签。
+- `generate_topic`：idea → 完整选题描述、目标受众和受控标签。
 - `generate_summary`：基于已校验的选题生成研究执行要求，输出完整的 Eureka prompt；继承原标签。
 - `call_curl_task`：内部处理鉴权、提交、分享、完成状态查询与执行记录，返回每条内容的结果。
 
@@ -87,18 +87,18 @@ uv run content-brief-workflow --validate-file \
 
 ### 按目标受众三元组批量生成节点 1
 
-下面的命令按当前 role–JTBD 关联覆盖全部 11 个行业：396 个三元组，每组生成 10 个问题，共 3,960 行。它只运行 `generate_topic`，不生成 summary，也不执行 Eureka：
+下面的命令按当前 role–JTBD 关联覆盖全部 11 个行业：396 个三元组。程序先为每个三元组确定一个固定标签组合，再从同一组合生成 10 个问题，共 3,960 行。所有问题都继承固定的工作视角、行业层级、具体任务、预期产出、主题、问题意图和范围；`keywords` 仍是自由检索词。它只运行 `generate_topic`，不生成 summary，也不执行 Eureka：
 
 ```bash
-uv run profile-topic-node1 --cases-per-triple 10 --workers 4 \
-  --output-json outputs/profile_topics/node1_topics.json \
-  --output-csv outputs/profile_topics/node1_topics.csv
+uv run profile-topic-node1 --cases-per-tag-set 10 --workers 4 \
+  --output-json outputs/profile_topics/node1_topics_v4.json \
+  --output-csv outputs/profile_topics/node1_topics_v4.csv
 ```
 
 运行中断或部分三元组失败后，用相同参数加 `--resume`。程序会跳过已经成功的三元组，继续保存 JSON 和 CSV：
 
 ```bash
-uv run profile-topic-node1 --cases-per-triple 10 --workers 4 --resume
+uv run profile-topic-node1 --cases-per-tag-set 10 --workers 4 --resume
 ```
 
 先试一组三元组时，可传入三个筛选条件，并使用单独的预览文件：
@@ -108,12 +108,27 @@ uv run profile-topic-node1 \
   --role rd_engineer \
   --industry electronics_manufacturing \
   --jtbd technical_solutions \
-  --cases-per-triple 10 \
-  --output-json outputs/profile_topics/node1_preview.json \
-  --output-csv outputs/profile_topics/node1_preview.csv
+  --role-perspective product_design \
+  --jtbd-task solution_comparison \
+  --desired-output comparison_matrix \
+  --topic-theme ai_impact \
+  --question-intent identify_applications \
+  --scope-level industry \
+  --cases-per-tag-set 10 \
+  --output-json outputs/profile_topics/node1_preview_v4.json \
+  --output-csv outputs/profile_topics/node1_preview_v4.csv
 ```
 
-CSV 一行对应一个问题，保留固定三元组、问题、描述、五维标签、分类依据和 ID。`summary`、`content_category`、`generated_prompt`、执行状态及链接列由后续节点填写。JSON 保留每次模型调用的完整 generation result，供节点 2 批量读取。
+未指定二级枚举时，程序会产生一个可复现的泛行业默认组合；显式参数会覆盖其中对应字段。行业标签只保留 `industry → industry_segment` 两级：选择 `--industry-segment` 时范围会自动变成 `industry_segment`，仍可用 `--scope-level` 显式检查。具体技术、产品、材料和部件名称保存在自由文本 `entities` / `keywords` 中。
+
+机器读取的完整枚举与组合映射在 `src/recommendation_contents/data/content_brief_catalog.json`；固定画像节点 1 的七维输出结构在 `src/recommendation_contents/data/profile_topic.schema.json`。重新导出 Schema：
+
+```bash
+uv run content-brief-workflow --profile-schema \
+  --output-file src/recommendation_contents/data/profile_topic.schema.json
+```
+
+CSV 一行对应一个问题，并保存 `tag_set_id`。同一个 `tag_set_id` 下的问题具有完全相同的七维标签；`summary`、`content_category`、`generated_prompt`、执行状态及链接列由后续节点填写。JSON 保留每次模型调用的完整 generation result，供节点 2 批量读取。旧参数 `--cases-per-triple` 仍可作为兼容别名使用。
 
 ## 推荐内容批量生成
 
@@ -620,6 +635,7 @@ src/recommendation_contents/
   services/eureka_token.py   # Eureka token 检查和刷新
   state.py                  # 兼容批处理工具的状态定义
   data/content_brief_catalog.json  # 当前标签定义与映射
+  data/profile_topic.schema.json   # 固定画像节点 1 的响应结构
 ```
 
 根目录的 XLSX 和行业角色分析 MD 是规则来源；`cases/` 保存批处理输入和原始字段映射；`docs/` 保存当前规则契约与示例；`outputs/`、`visualization/` 保存业务产出和分析数据。

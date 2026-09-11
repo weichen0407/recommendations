@@ -1,4 +1,4 @@
-"""Batch node-one generation for fixed role, industry and JTBD triples."""
+"""Batch node-one generation for fixed audience and multidimensional tag sets."""
 
 from __future__ import annotations
 
@@ -12,32 +12,34 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
-from .brief_schema import load_brief_catalog
+from .brief_schema import SCHEMA_VERSION, load_brief_catalog
 from .config import apply_env_file_to_process
 from .profile_topic_generation import all_profile_triples, triple_id
 
-DEFAULT_JSON = Path("outputs/profile_topics/node1_topics.json")
-DEFAULT_CSV = Path("outputs/profile_topics/node1_topics.csv")
+DEFAULT_JSON = Path("outputs/profile_topics/node1_topics_v4.json")
+DEFAULT_CSV = Path("outputs/profile_topics/node1_topics_v4.csv")
 
 CSV_COLUMNS = [
     "row_no",
     "triple_id",
+    "tag_set_id",
     "case_no",
     "role",
     "industry",
     "jtbd",
     "question",
     "description",
+    "topic_theme",
+    "question_intent",
+    "scope_level",
     "role_perspective",
     "industry_segment",
-    "technology_object",
     "jtbd_task",
     "desired_output",
     "entities",
     "keywords",
     "classification_rationale",
     "industry_status",
-    "object_status",
     "assumptions",
     "summary",
     "content_category",
@@ -55,14 +57,36 @@ CSV_COLUMNS = [
 def main(argv: list[str] | None = None) -> int:
     catalog = load_brief_catalog()
     parser = argparse.ArgumentParser(
-        description="Node 1: generate questions for fixed role × industry × JTBD triples."
+        description="Node 1: generate question variants for fixed multidimensional tag sets."
     )
-    parser.add_argument("--cases-per-triple", type=int, choices=range(1, 11), default=10)
+    parser.add_argument(
+        "--cases-per-tag-set",
+        "--cases-per-triple",
+        dest="cases_per_tag_set",
+        type=int,
+        choices=range(1, 11),
+        default=10,
+    )
     parser.add_argument("--language", choices=["zh-CN", "en"], default="zh-CN")
     parser.add_argument("--workers", type=int, choices=range(1, 17), default=4)
     parser.add_argument("--role", choices=_values(catalog, "role"))
     parser.add_argument("--industry", choices=_values(catalog, "industry"))
     parser.add_argument("--jtbd", choices=_values(catalog, "jtbd"))
+    parser.add_argument(
+        "--role-perspective", choices=_catalog_values(catalog, "role_perspectives")
+    )
+    parser.add_argument(
+        "--industry-segment", choices=_catalog_values(catalog, "industry_segments")
+    )
+    parser.add_argument("--jtbd-task", choices=_catalog_values(catalog, "jtbd_tasks"))
+    parser.add_argument(
+        "--desired-output", choices=_catalog_values(catalog, "desired_outputs")
+    )
+    parser.add_argument("--topic-theme", choices=_catalog_values(catalog, "topic_themes"))
+    parser.add_argument(
+        "--question-intent", choices=_catalog_values(catalog, "question_intents")
+    )
+    parser.add_argument("--scope-level", choices=_catalog_values(catalog, "scope_levels"))
     parser.add_argument("--limit-triples", type=int, default=0)
     parser.add_argument("--output-json", type=Path, default=DEFAULT_JSON)
     parser.add_argument("--output-csv", type=Path, default=DEFAULT_CSV)
@@ -77,6 +101,7 @@ def main(argv: list[str] | None = None) -> int:
         parser.error("--resume and --overwrite cannot be combined")
     if args.limit_triples < 0:
         parser.error("--limit-triples must be non-negative")
+    tag_overrides = _tag_overrides(args)
 
     triples = _select_triples(catalog, args.role, args.industry, args.jtbd)
     if args.limit_triples:
@@ -89,8 +114,10 @@ def main(argv: list[str] | None = None) -> int:
         conflicts = [str(path) for path in (args.output_json, args.output_csv) if path.exists()]
         if conflicts:
             parser.error("Output exists; use --resume or --overwrite: " + ", ".join(conflicts))
-    document = _new_document(catalog, triples, args) if existing is None else existing
-    _validate_resume(document, catalog, args)
+    document = (
+        _new_document(catalog, triples, args, tag_overrides) if existing is None else existing
+    )
+    _validate_resume(document, catalog, args, tag_overrides)
     successful = {
         triple_id(item["input"]["audience"])
         for item in document["generations"]
@@ -98,7 +125,7 @@ def main(argv: list[str] | None = None) -> int:
     }
     pending = [audience for audience in triples if triple_id(audience) not in successful]
     document["scope"]["selected_triples"] = len(triples)
-    document["scope"]["expected_rows"] = len(triples) * args.cases_per_triple
+    document["scope"]["expected_rows"] = len(triples) * args.cases_per_tag_set
     _save(document, args.output_json, args.output_csv)
 
     print(
@@ -106,8 +133,9 @@ def main(argv: list[str] | None = None) -> int:
             {
                 "node": "generate_topic",
                 "triples": len(triples),
-                "cases_per_triple": args.cases_per_triple,
-                "expected_rows": len(triples) * args.cases_per_triple,
+                "cases_per_tag_set": args.cases_per_tag_set,
+                "tag_overrides": tag_overrides,
+                "expected_rows": len(triples) * args.cases_per_tag_set,
                 "already_succeeded": len(triples) - len(pending),
                 "pending": len(pending),
                 "model_calls": 0 if args.dry_run else len(pending),
@@ -132,8 +160,9 @@ def main(argv: list[str] | None = None) -> int:
         return local.graph.invoke(
             {
                 "audience": audience,
+                "tag_overrides": tag_overrides,
                 "language": args.language,
-                "count": args.cases_per_triple,
+                "count": args.cases_per_tag_set,
             },
             config={"run_name": "profile_topic_node1", "tags": ["node1", triple_id(audience)]},
         )["result"]
@@ -164,6 +193,26 @@ def _values(catalog: dict[str, Any], dimension: str) -> list[str]:
     return [row["value"] for row in catalog["audience"][dimension]]
 
 
+def _catalog_values(catalog: dict[str, Any], key: str) -> list[str]:
+    return [row["value"] for row in catalog[key]]
+
+
+def _tag_overrides(args) -> dict[str, Any]:
+    values = {
+        "role_perspective": args.role_perspective,
+        "industry_segment": args.industry_segment,
+        "jtbd_task": args.jtbd_task,
+        "desired_output": args.desired_output,
+        "topic_theme": args.topic_theme,
+        "question_intent": args.question_intent,
+        "scope_level": args.scope_level,
+    }
+    result = {key: value for key, value in values.items() if value is not None}
+    if "scope_level" not in result and result.get("industry_segment"):
+        result["scope_level"] = "industry_segment"
+    return result
+
+
 def _select_triples(catalog, role, industry, jtbd):
     return [
         audience
@@ -174,9 +223,9 @@ def _select_triples(catalog, role, industry, jtbd):
     ]
 
 
-def _new_document(catalog, triples, args):
+def _new_document(catalog, triples, args, tag_overrides):
     return {
-        "workflow_version": "profile-topic-node1/1.0.0",
+        "workflow_version": "profile-topic-node1/4.0.0",
         "stage": "generate_topic",
         "created_at": datetime.now(timezone.utc).isoformat(),
         "updated_at": datetime.now(timezone.utc).isoformat(),
@@ -184,8 +233,9 @@ def _new_document(catalog, triples, args):
         "scope": {
             "selection": "role_allowed_jtbd × selected industries",
             "selected_triples": len(triples),
-            "cases_per_triple": args.cases_per_triple,
-            "expected_rows": len(triples) * args.cases_per_triple,
+            "cases_per_tag_set": args.cases_per_tag_set,
+            "tag_overrides": tag_overrides,
+            "expected_rows": len(triples) * args.cases_per_tag_set,
             "language": args.language,
         },
         "progress": {},
@@ -203,29 +253,32 @@ def _load_existing(path: Path) -> dict[str, Any]:
     return value
 
 
-def _validate_resume(document, catalog, args):
-    if document.get("workflow_version") != "profile-topic-node1/1.0.0":
+def _validate_resume(document, catalog, args, tag_overrides):
+    if document.get("workflow_version") != "profile-topic-node1/4.0.0":
         raise SystemExit("Unsupported node-one output version.")
     if document.get("taxonomy_version") != catalog["taxonomy_version"]:
         raise SystemExit("Node-one output uses a different taxonomy version.")
     scope = document.get("scope") or {}
-    if scope.get("cases_per_triple") != args.cases_per_triple:
-        raise SystemExit("--cases-per-triple must match the resume file.")
+    if scope.get("cases_per_tag_set") != args.cases_per_tag_set:
+        raise SystemExit("--cases-per-tag-set must match the resume file.")
     if scope.get("language") != args.language:
         raise SystemExit("--language must match the resume file.")
+    if scope.get("tag_overrides") != tag_overrides:
+        raise SystemExit("Tag enum selections must match the resume file.")
 
 
 def _failed_generation(audience, args, exc):
     return {
         "status": "failed",
-        "schema_version": "1.0.0",
+        "schema_version": SCHEMA_VERSION,
         "taxonomy_version": load_brief_catalog()["taxonomy_version"],
         "generation_id": "",
         "generated_at": datetime.now(timezone.utc).isoformat(),
         "input": {
             "audience": audience,
+            "tag_overrides": _tag_overrides(args),
             "language": args.language,
-            "count": args.cases_per_triple,
+            "count": args.cases_per_tag_set,
         },
         "attempts": 0,
         "briefs": [],
@@ -268,20 +321,22 @@ def _rows(document):
             yield {
                 "row_no": row_no,
                 "triple_id": triple_id(audience),
+                "tag_set_id": generation["tag_set_id"],
                 "case_no": case_no,
                 **audience,
                 "question": brief["title"],
                 "description": brief["description"],
+                "topic_theme": tags["topic_theme"],
+                "question_intent": tags["question_intent"],
+                "scope_level": tags["scope_level"],
                 "role_perspective": tags["role_perspective"],
                 "industry_segment": tags["industry_segment"] or "",
-                "technology_object": _json_cell(tags["technology_object"]),
                 "jtbd_task": tags["jtbd_task"],
                 "desired_output": tags["desired_output"],
                 "entities": _json_cell(brief["entities"]),
                 "keywords": _json_cell(brief["keywords"]),
                 "classification_rationale": classification["rationale"],
                 "industry_status": classification["industry_status"],
-                "object_status": classification["object_status"],
                 "assumptions": _json_cell(brief["assumptions"]),
                 "summary": "",
                 "content_category": "",
