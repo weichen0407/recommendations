@@ -7,6 +7,7 @@ import csv
 import json
 import os
 import threading
+import time
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from datetime import datetime, timezone
 from pathlib import Path
@@ -169,6 +170,10 @@ def main(argv: list[str] | None = None) -> int:
 
     by_id = {triple_id(item["input"]["audience"]): item for item in document["generations"]}
     completed = 0
+    succeeded_this_run = 0
+    failed_this_run = 0
+    already_succeeded = len(triples) - len(pending)
+    started_at = time.monotonic()
     with ThreadPoolExecutor(max_workers=args.workers) as executor:
         futures = {executor.submit(generate, audience): audience for audience in pending}
         for future in as_completed(futures):
@@ -179,11 +184,25 @@ def main(argv: list[str] | None = None) -> int:
                 generation = _failed_generation(audience, args, exc)
             by_id[triple_id(audience)] = generation
             completed += 1
+            if generation["status"] == "succeeded":
+                succeeded_this_run += 1
+            else:
+                failed_this_run += 1
             document["generations"] = [by_id[key] for key in sorted(by_id)]
             _update_progress(document)
             _save(document, args.output_json, args.output_csv)
-            print(
-                f"[{completed}/{len(pending)}] {triple_id(audience)}: {generation['status']}",
+            print(  # one durable log line per completed model call
+                _progress_line(
+                    total=len(triples),
+                    already_succeeded=already_succeeded,
+                    completed_this_run=completed,
+                    succeeded_this_run=succeeded_this_run,
+                    failed_this_run=failed_this_run,
+                    generated_rows=document["progress"]["generated_rows"],
+                    elapsed_seconds=time.monotonic() - started_at,
+                    current_id=triple_id(audience),
+                    current_status=generation["status"],
+                ),
                 flush=True,
             )
     return 0 if document["progress"]["failed_triples"] == 0 else 1
@@ -294,6 +313,42 @@ def _update_progress(document):
         "failed_triples": sum(item.get("status") != "succeeded" for item in generations),
         "generated_rows": sum(len(item.get("briefs") or []) for item in generations),
     }
+
+
+def _progress_line(
+    *,
+    total: int,
+    already_succeeded: int,
+    completed_this_run: int,
+    succeeded_this_run: int,
+    failed_this_run: int,
+    generated_rows: int,
+    elapsed_seconds: float,
+    current_id: str,
+    current_status: str,
+) -> str:
+    processed = already_succeeded + completed_this_run
+    percent = 100 * processed / total if total else 100.0
+    remaining = max(total - processed, 0)
+    eta_seconds = (
+        elapsed_seconds * remaining / completed_this_run if completed_this_run else None
+    )
+    succeeded = already_succeeded + succeeded_this_run
+    return (
+        f"[{processed}/{total} | {percent:5.1f}%] "
+        f"succeeded={succeeded} failed={failed_this_run} rows={generated_rows} "
+        f"elapsed={_format_duration(elapsed_seconds)} eta={_format_duration(eta_seconds)} "
+        f"{current_id}: {current_status}"
+    )
+
+
+def _format_duration(seconds: float | None) -> str:
+    if seconds is None:
+        return "--:--"
+    value = max(0, round(seconds))
+    hours, remainder = divmod(value, 3600)
+    minutes, seconds = divmod(remainder, 60)
+    return f"{hours:d}:{minutes:02d}:{seconds:02d}" if hours else f"{minutes:02d}:{seconds:02d}"
 
 
 def _save(document: dict[str, Any], json_path: Path, csv_path: Path) -> None:

@@ -101,6 +101,12 @@ uv run profile-topic-node1 --cases-per-tag-set 10 --workers 4 \
 uv run profile-topic-node1 --cases-per-tag-set 10 --workers 4 --resume
 ```
 
+运行时每完成一次模型调用都会打印整体进度、成功/失败数、已生成行数、耗时和预计剩余时间，同时立即更新 JSON 和 CSV 检查点：
+
+```text
+[42/396 |  10.6%] succeeded=41 failed=1 rows=410 elapsed=08:17 eta=1:09:50 rd_engineer__energy__technical_solutions: succeeded
+```
+
 先试一组三元组时，可传入三个筛选条件，并使用单独的预览文件：
 
 ```bash
