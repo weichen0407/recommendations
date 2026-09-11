@@ -45,6 +45,7 @@ class TopicWorkflowState(TypedDict, total=False):
     session_link: str
     share_id: str
     share_link: str
+    format: str
     completion_required: bool
     completion_checked: bool
     isCompleted: bool

@@ -781,7 +781,8 @@ def _with_completion_fields(fieldnames: list[str], after: str) -> list[str]:
         return fieldnames
     removable = set(COMPLETION_RECORD_FIELDS) | set(LEGACY_COMPLETION_RECORD_FIELDS)
     reordered = [field for field in fieldnames if field not in removable]
-    insert_at = reordered.index(after) + 1 if after in reordered else len(reordered)
+    anchor = "format" if after == "share_url" and "format" in reordered else after
+    insert_at = reordered.index(anchor) + 1 if anchor in reordered else len(reordered)
     return reordered[:insert_at] + COMPLETION_RECORD_FIELDS + reordered[insert_at:]
 
 

@@ -11,6 +11,7 @@ RECORD_HEADERS = [
     "generated_prompt",
     "session_url",
     "share_url",
+    "format",
     "isCompleted",
     "completionStatus",
     "completionError",
@@ -94,6 +95,8 @@ def _normalize_legacy_row(row: dict[str, str]) -> dict[str, str]:
     for legacy_header, current_header in LEGACY_HEADER_MAP.items():
         if not normalized[current_header] and row.get(legacy_header):
             normalized[current_header] = row[legacy_header]
+    if not normalized["format"]:
+        normalized["format"] = row.get("generation_mode") or row.get("mode") or ""
     if not normalized["isCompleted"]:
         normalized["isCompleted"] = row.get("isCompletion") or row.get("isComplete") or ""
     return normalized

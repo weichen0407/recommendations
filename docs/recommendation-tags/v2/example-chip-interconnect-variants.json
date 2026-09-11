@@ -1,0 +1,74 @@
+{
+  "briefs": [
+    {
+      "title": "芯片互连方案的功耗、带宽与成本取舍",
+      "description": "从产品设计视角比较芯片互连方案在功耗、带宽与制造成本上的取舍，形成支持方案选择的对比矩阵。",
+      "entities": [
+        "芯片互连"
+      ],
+      "keywords": [
+        "芯片互连",
+        "功耗",
+        "带宽",
+        "制造成本"
+      ],
+      "audience": {
+        "role": "rd_engineer",
+        "industry": "electronics_manufacturing",
+        "jtbd": "technical_solutions"
+      },
+      "tags": {
+        "role_perspective": "product_design",
+        "industry_segment": "semiconductors",
+        "technology_object": [
+          "chip_interconnect"
+        ],
+        "jtbd_task": "solution_comparison",
+        "desired_output": "comparison_matrix"
+      },
+      "classification": {
+        "rationale": "主要工作是为芯片设计选择互连方案，面向研发工程师的技术方案需求；功耗、带宽和成本作为比较维度。",
+        "industry_status": "classified",
+        "object_status": "classified"
+      },
+      "assumptions": [
+        "将“芯片互连”扩展为方案选型切口，并选取功耗、带宽和制造成本作为比较维度。"
+      ]
+    },
+    {
+      "title": "芯片互连的失效路径与改进方向",
+      "description": "从可靠性工程视角梳理芯片互连的典型失效路径与影响因素，形成包含验证要点的改进方案。",
+      "entities": [
+        "芯片互连"
+      ],
+      "keywords": [
+        "芯片互连",
+        "失效分析",
+        "可靠性",
+        "验证"
+      ],
+      "audience": {
+        "role": "rd_engineer",
+        "industry": "electronics_manufacturing",
+        "jtbd": "technical_solutions"
+      },
+      "tags": {
+        "role_perspective": "reliability_engineering",
+        "industry_segment": "semiconductors",
+        "technology_object": [
+          "chip_interconnect"
+        ],
+        "jtbd_task": "failure_resolution",
+        "desired_output": "improvement_plan"
+      },
+      "classification": {
+        "rationale": "这条内容帮助研发人员处理互连失效问题，主要产出是改进方案，验证要点是支撑内容。",
+        "industry_status": "classified",
+        "object_status": "classified"
+      },
+      "assumptions": [
+        "将“芯片互连”扩展为一般失效分析场景，没有指定某款芯片的真实失效事件。"
+      ]
+    }
+  ]
+}

@@ -1,7 +1,8 @@
 {
   "dependencies": ["."],
   "graphs": {
-    "topic_workflow": "recommendation_contents.graph:build_graph"
+    "topic_workflow": "recommendation_contents.graph:build_graph",
+    "content_brief_workflow": "recommendation_contents.brief_graph:build_graph"
   },
   "env": ".env"
 }

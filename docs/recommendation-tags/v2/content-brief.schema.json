@@ -1,0 +1,467 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Operations content brief model response",
+  "description": "Stage 1 only. Audience labels are outputs, not user inputs. Also apply the catalog combination rules and semantic editorial review.",
+  "type": "object",
+  "properties": {
+    "briefs": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 160
+          },
+          "description": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 1600
+          },
+          "entities": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 200
+            },
+            "minItems": 0,
+            "maxItems": 10,
+            "uniqueItems": true
+          },
+          "keywords": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 100
+            },
+            "minItems": 1,
+            "maxItems": 12,
+            "uniqueItems": true
+          },
+          "audience": {
+            "type": "object",
+            "properties": {
+              "role": {
+                "type": "string",
+                "enum": [
+                  "rd_engineer",
+                  "researcher",
+                  "innovation_product_strategy",
+                  "in_house_ip_legal",
+                  "patent_ip_services",
+                  "other"
+                ]
+              },
+              "industry": {
+                "type": "string",
+                "enum": [
+                  "medical_devices",
+                  "materials",
+                  "automotive",
+                  "electronics_manufacturing",
+                  "engineering",
+                  "biotech",
+                  "food_farming_production",
+                  "energy",
+                  "chemical",
+                  "construction",
+                  "other"
+                ]
+              },
+              "jtbd": {
+                "type": "string",
+                "enum": [
+                  "technical_solutions",
+                  "existing_technologies",
+                  "product_ideas",
+                  "technical_feasibility",
+                  "patent_ip_risk",
+                  "new_research_fields",
+                  "research_methods",
+                  "research_trends",
+                  "research_ideas",
+                  "patents_literature",
+                  "technology_competitors",
+                  "innovation_opportunities",
+                  "rd_directions",
+                  "patent_landscapes",
+                  "product_ip_risks",
+                  "prior_art",
+                  "fto_design_risks",
+                  "draft_review_patents",
+                  "office_actions",
+                  "fto_searches",
+                  "draft_review_applications",
+                  "draft_refine_claims",
+                  "technology_trends",
+                  "ideas_concepts",
+                  "search_draft_patents",
+                  "other"
+                ]
+              }
+            },
+            "required": [
+              "role",
+              "industry",
+              "jtbd"
+            ],
+            "additionalProperties": false
+          },
+          "tags": {
+            "type": "object",
+            "properties": {
+              "role_perspective": {
+                "type": "string",
+                "enum": [
+                  "product_design",
+                  "process_engineering",
+                  "system_integration",
+                  "reliability_engineering",
+                  "invention_development",
+                  "applied_research",
+                  "scientific_contribution",
+                  "research_methodology",
+                  "technology_scouting",
+                  "product_strategy",
+                  "competitive_intelligence",
+                  "ip_portfolio_management",
+                  "patent_risk_review",
+                  "commercial_legal_review",
+                  "patent_evidence_analysis",
+                  "patent_prosecution",
+                  "ip_commercialization",
+                  "task_exploration"
+                ]
+              },
+              "industry_segment": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "enum": [
+                  "medical_imaging",
+                  "in_vitro_diagnostics",
+                  "diabetes_monitoring_delivery",
+                  "surgical_robotics",
+                  "engineering_polymers_composites",
+                  "specialty_metals_alloys",
+                  "technical_ceramics_glass",
+                  "battery_materials_recycling",
+                  "automotive_electrified_powertrains",
+                  "adas_automated_driving",
+                  "automotive_chassis_body",
+                  "commercial_special_vehicles",
+                  "semiconductors",
+                  "electronic_components_interconnects",
+                  "computing_network_hardware",
+                  "photonics_optical_sensing",
+                  "industrial_robotics_automation",
+                  "industrial_machinery",
+                  "additive_manufacturing_systems",
+                  "engineering_design_services",
+                  "antibody_protein_medicines",
+                  "cell_gene_therapies",
+                  "biologics_process_manufacturing",
+                  "industrial_enzymes_microorganisms",
+                  "life_science_research_tools",
+                  "agricultural_machinery_precision_farming",
+                  "seeds_crop_breeding",
+                  "frozen_prepared_foods",
+                  "food_ingredients_nutrition",
+                  "batteries_stationary_storage",
+                  "grid_power_equipment",
+                  "solar_photovoltaics",
+                  "hydrogen_fuel_cell_equipment",
+                  "electronic_chemicals",
+                  "coatings_adhesives_sealants",
+                  "industrial_specialty_gases",
+                  "renewable_fuels",
+                  "building_hvac_heat_pumps",
+                  "cement_concrete",
+                  "prefabricated_modular_buildings",
+                  "water_wastewater_infrastructure",
+                  "aerospace_space",
+                  null
+                ]
+              },
+              "technology_object": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "enum": [
+                    "imaging_detector",
+                    "image_reconstruction",
+                    "imaging_acquisition_chain",
+                    "microfluidic_cartridge",
+                    "diagnostic_reagent_system",
+                    "sample_preparation",
+                    "glucose_sensor",
+                    "insulin_delivery_pump",
+                    "wearable_skin_interface",
+                    "surgical_manipulator",
+                    "flexible_surgical_catheter",
+                    "surgical_navigation",
+                    "engineering_polymer",
+                    "fiber_composite",
+                    "polymer_molding",
+                    "high_performance_alloy",
+                    "metal_am_powder",
+                    "alloy_heat_treatment",
+                    "technical_ceramic",
+                    "specialty_glass",
+                    "thermal_filler",
+                    "battery_electrode_material",
+                    "battery_electrolyte",
+                    "battery_material_recovery",
+                    "traction_motor",
+                    "traction_inverter",
+                    "electric_drive_assembly",
+                    "automotive_sensor_fusion",
+                    "automated_driving_control",
+                    "driving_scenario_validation",
+                    "vehicle_body_joint",
+                    "braking_suspension_component",
+                    "automotive_thermal_assembly",
+                    "commercial_vehicle_architecture",
+                    "vocational_body_interface",
+                    "vehicle_duty_cycle",
+                    "chip_interconnect",
+                    "semiconductor_packaging",
+                    "wafer_fabrication",
+                    "printed_circuit_board",
+                    "connector_contact",
+                    "solder_joint",
+                    "server_node",
+                    "network_switch",
+                    "rack_cooling",
+                    "laser_source",
+                    "optical_sensing_chain",
+                    "optical_calibration",
+                    "industrial_robot",
+                    "end_effector",
+                    "automation_cell_control",
+                    "machine_spindle",
+                    "motion_axis",
+                    "machining_process",
+                    "powder_energy_delivery",
+                    "am_in_process_monitoring",
+                    "engineering_system_design",
+                    "engineering_simulation_model",
+                    "multidisciplinary_interface",
+                    "therapeutic_antibody",
+                    "adc_linker_payload",
+                    "protein_formulation",
+                    "therapeutic_cell",
+                    "gene_delivery_vector",
+                    "gene_editing_system",
+                    "bioreactor_process",
+                    "biologics_purification",
+                    "production_cell_media",
+                    "industrial_enzyme",
+                    "production_microorganism",
+                    "industrial_fermentation",
+                    "research_sequencing_imaging",
+                    "agricultural_vision",
+                    "precision_application_control",
+                    "agricultural_equipment_interface",
+                    "crop_germplasm",
+                    "molecular_breeding_marker",
+                    "field_phenotyping",
+                    "food_matrix",
+                    "food_thermal_processing",
+                    "food_freezing_drying",
+                    "food_protein_fiber",
+                    "food_emulsion_gel",
+                    "food_enzyme_fermentation",
+                    "battery_cell",
+                    "storage_battery_cluster",
+                    "battery_management_system",
+                    "distribution_transformer",
+                    "switchgear_protection",
+                    "grid_condition_monitoring",
+                    "photovoltaic_cell",
+                    "photovoltaic_module",
+                    "photovoltaic_inverter",
+                    "electrolyzer",
+                    "fuel_cell_membrane_electrode",
+                    "hydrogen_balance_of_plant",
+                    "photoresist",
+                    "cmp_slurry",
+                    "electronic_cleaning_plating",
+                    "coating_formulation",
+                    "adhesive_formulation",
+                    "sealant_formulation",
+                    "specialty_process_gas",
+                    "gas_purification",
+                    "gas_supply_system",
+                    "renewable_fuel_feedstock",
+                    "fuel_conversion_catalyst",
+                    "renewable_fuel_process",
+                    "heat_pump_compressor",
+                    "hvac_heat_exchanger",
+                    "refrigerant_control_loop",
+                    "low_clinker_binder",
+                    "supplementary_cementitious_material",
+                    "concrete_mix",
+                    "building_module",
+                    "modular_structural_connection",
+                    "modular_mep_interface",
+                    "water_treatment_membrane",
+                    "water_adsorption_media",
+                    "aeration_system",
+                    "aerospace_structure",
+                    "aerospace_propulsion_avionics",
+                    "satellite_system"
+                  ]
+                },
+                "minItems": 0,
+                "maxItems": 2,
+                "uniqueItems": true
+              },
+              "jtbd_task": {
+                "type": "string",
+                "enum": [
+                  "solution_search",
+                  "solution_comparison",
+                  "failure_resolution",
+                  "process_optimization",
+                  "technology_landscape",
+                  "product_ideation",
+                  "feasibility_assessment",
+                  "validation_planning",
+                  "research_field_exploration",
+                  "research_gap_identification",
+                  "research_method_search",
+                  "research_method_comparison",
+                  "research_ideation",
+                  "evidence_search",
+                  "evidence_synthesis",
+                  "research_trend_tracking",
+                  "technology_trend_tracking",
+                  "competitor_tracking",
+                  "innovation_opportunity_identification",
+                  "rd_direction_prioritization",
+                  "patent_landscape_analysis",
+                  "prior_art_search",
+                  "novelty_comparison",
+                  "fto_evidence_search",
+                  "design_risk_analysis",
+                  "ip_risk_identification",
+                  "application_drafting",
+                  "application_review",
+                  "claims_drafting",
+                  "claims_refinement",
+                  "office_action_analysis",
+                  "office_action_response",
+                  "licensing_opportunity_assessment",
+                  "collaboration_terms_review",
+                  "ip_portfolio_planning",
+                  "task_clarification"
+                ]
+              },
+              "desired_output": {
+                "type": "string",
+                "enum": [
+                  "candidate_shortlist",
+                  "comparison_matrix",
+                  "improvement_plan",
+                  "landscape_map",
+                  "concept_brief",
+                  "assessment_brief",
+                  "validation_plan",
+                  "research_agenda",
+                  "evidence_table",
+                  "evidence_review",
+                  "trend_brief",
+                  "priority_matrix",
+                  "risk_register",
+                  "application_draft",
+                  "review_notes",
+                  "claims_draft",
+                  "response_outline",
+                  "transaction_brief",
+                  "portfolio_plan",
+                  "task_menu",
+                  "document_template"
+                ]
+              }
+            },
+            "required": [
+              "role_perspective",
+              "industry_segment",
+              "technology_object",
+              "jtbd_task",
+              "desired_output"
+            ],
+            "additionalProperties": false
+          },
+          "classification": {
+            "type": "object",
+            "properties": {
+              "rationale": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 1000
+              },
+              "industry_status": {
+                "type": "string",
+                "enum": [
+                  "classified",
+                  "broad_scope",
+                  "not_in_catalog"
+                ]
+              },
+              "object_status": {
+                "type": "string",
+                "enum": [
+                  "classified",
+                  "broad_scope",
+                  "not_in_catalog",
+                  "industry_unresolved"
+                ]
+              }
+            },
+            "required": [
+              "rationale",
+              "industry_status",
+              "object_status"
+            ],
+            "additionalProperties": false
+          },
+          "assumptions": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 400
+            },
+            "minItems": 0,
+            "maxItems": 8,
+            "uniqueItems": true
+          }
+        },
+        "required": [
+          "title",
+          "description",
+          "entities",
+          "keywords",
+          "audience",
+          "tags",
+          "classification",
+          "assumptions"
+        ],
+        "additionalProperties": false
+      },
+      "minItems": 1,
+      "maxItems": 10,
+      "uniqueItems": true
+    }
+  },
+  "required": [
+    "briefs"
+  ],
+  "additionalProperties": false
+}

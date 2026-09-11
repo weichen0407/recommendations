@@ -1,0 +1,24 @@
+[
+  {
+    "btu_id": "430a1abdf48c4ee9967d58b97fba2214",
+    "product_line": "Engineering",
+    "product_agent": "SuperAgent",
+    "resolved_session_id": "sess_64c448dab585481c",
+    "session_date": "2026-09-09",
+    "first_activation_date": "2026-09-09",
+    "first_activation_time": "2026-09-09 13:34:48",
+    "is_true_activation_session": "1",
+    "full_query_with_round": "[2] 概述一下"
+  },
+  {
+    "btu_id": "430a1abdf48c4ee9967d58b97fba2214",
+    "product_line": "Engineering",
+    "product_agent": "SuperAgent",
+    "resolved_session_id": "sess_5927f1b4966246e6",
+    "session_date": "2026-09-10",
+    "first_activation_date": "2026-09-10",
+    "first_activation_time": "2026-09-10 07:09:44",
+    "is_true_activation_session": "1",
+    "full_query_with_round": ""
+  }
+]

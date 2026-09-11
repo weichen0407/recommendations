@@ -1,0 +1,57 @@
+{
+  "generated_at": "2026-09-10",
+  "date_range": ["2026-09-09", "2026-09-10"],
+  "metrics": [
+    {
+      "scope": "recommendation_events",
+      "date": "2026-09-09",
+      "metric": "plg_show_rc",
+      "label": "推荐板块展开",
+      "pv": 14,
+      "uv": 10
+    },
+    {
+      "scope": "recommendation_events",
+      "date": "2026-09-09",
+      "metric": "plg_click_rc",
+      "label": "RD Home 触发对话",
+      "pv": 6,
+      "uv": 1
+    },
+    {
+      "scope": "recommendation_events",
+      "date": "2026-09-10",
+      "metric": "plg_show_rc",
+      "label": "推荐板块展开",
+      "pv": 42,
+      "uv": 22
+    },
+    {
+      "scope": "recommendation_events",
+      "date": "2026-09-10",
+      "metric": "plg_click_rc",
+      "label": "RD Home 触发对话",
+      "pv": 2,
+      "uv": 1
+    },
+    {
+      "scope": "recommendation_events",
+      "date": "total",
+      "metric": "plg_show_rc",
+      "label": "推荐板块展开",
+      "pv": 56,
+      "uv": 32
+    },
+    {
+      "scope": "recommendation_events",
+      "date": "total",
+      "metric": "plg_click_rc",
+      "label": "RD Home 触发对话",
+      "pv": 8,
+      "uv": 2
+    }
+  ],
+  "notes": {
+    "recommendation_uv": "有效访客口径：优先 user_id，其次 btu_id、event_detail.session_id、raw_session_id，最后 resolved_session_id 行级兜底。"
+  }
+}

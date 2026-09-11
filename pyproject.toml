@@ -26,14 +26,19 @@ dev = [
 [project.scripts]
 recommendation-graph = "recommendation_contents.main:main"
 topic-workflow = "recommendation_contents.main:main"
+content-brief-workflow = "recommendation_contents.brief_cli:main"
 eureka-token = "recommendation_contents.token_cli:main"
 eureka-auth-watcher = "recommendation_contents.auth_watcher:main"
 eureka-completion = "recommendation_contents.completion_cli:main"
 case-workflow = "recommendation_contents.cases_cli:main"
 industry-case-workflow = "recommendation_contents.industry_cases_cli:main"
+records-to-plg = "recommendation_contents.plg_cli:main"
 
 [tool.setuptools.packages.find]
 where = ["src"]
+
+[tool.setuptools.package-data]
+recommendation_contents = ["data/*.json"]
 
 [tool.pytest.ini_options]
 pythonpath = ["src"]

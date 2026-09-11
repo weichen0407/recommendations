@@ -260,6 +260,7 @@ def apply_generation_mode(item: dict[str, Any], mode: str) -> dict[str, Any]:
         prompt = _without_html_artifact_instruction(prompt)
     item_for_mode["output"] = prompt
     item_for_mode["generation_mode"] = mode
+    item_for_mode["format"] = mode
     return item_for_mode
 
 
@@ -402,6 +403,9 @@ def run_case_item(
         )
 
     row = (state.get("result_table_rows") or [{}])[0]
+    generation_format = state.get("format", "") or _string(item.get("format")) or _string(
+        item.get("generation_mode")
+    )
 
     return {
         "case_index": case_index,
@@ -412,6 +416,7 @@ def run_case_item(
         "share_url": state.get("share_link", ""),
         "session_id": state.get("session_id", ""),
         "share_id": state.get("share_id", ""),
+        "format": generation_format,
         "isCompleted": "",
         "completion_checked": False,
         "completion_status": "",
@@ -493,6 +498,7 @@ def _run_case_once(
 def case_state_from_item(item: dict[str, Any], case_index: int = 0) -> TopicWorkflowState:
     title = _string(item.get("title")) or f"case-{case_index + 1}"
     generated_prompt = _string(item.get("output"))
+    generation_format = _string(item.get("format")) or _string(item.get("generation_mode"))
     return {
         "topic": title,
         "generated_prompt": generated_prompt,
@@ -505,6 +511,7 @@ def case_state_from_item(item: dict[str, Any], case_index: int = 0) -> TopicWork
         "jtbd": _string_list(item.get("jtbd")),
         "date": _string(item.get("date")),
         "sub_industry": _string_list(item.get("sub_industry")),
+        "format": generation_format,
         "errors": [] if generated_prompt else ["case output is empty"],
         "debug": {
             "case_index": case_index,

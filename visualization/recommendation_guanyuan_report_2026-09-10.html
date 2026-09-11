@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>推荐系统 Guanyuan 数据 - 2026-09-09 至 2026-09-10</title>
+  <title>推荐系统 Guanyuan 数据 - 2026-09-09 至 2026-09-11</title>
   <style>
     :root {
       color-scheme: light;
@@ -166,6 +166,10 @@
       color: #9a3412;
     }
 
+    .activation-row td {
+      background: #f7fef9;
+    }
+
     .panel {
       padding: 20px;
       overflow: hidden;
@@ -290,6 +294,7 @@
       padding: 2px 5px;
       border-radius: 5px;
       white-space: normal;
+      overflow-wrap: anywhere;
       word-break: break-word;
     }
 
@@ -382,56 +387,50 @@
   <main class="page">
     <header>
       <div class="eyebrow">Guanyuan 数据快看</div>
-      <h1>推荐系统两日埋点对比</h1>
+      <h1>推荐展开与推荐点击</h1>
       <div class="meta">
-        日期：2026-09-09 至 2026-09-10。筛选字段为 <code>event_ts</code> 和 <code>source_type</code>，其中 <code>source_type=plg_show_rc</code> 表示推荐板块展开，<code>source_type=plg_click_rc</code> 表示 RD Home 触发对话。
+        日期：2026-09-09 至 2026-09-11。<br>
+        只看推荐板块展开 <code>plg_show_rc</code>，以及推荐点击 / 触发对话 <code>plg_click_rc</code>。<br>
+        9 月 11 日数据截至数据集更新 <code>2026-09-11 11:09:18+0800</code>。
       </div>
     </header>
 
-    <section class="grid cards" aria-label="两日合计指标">
+    <section class="grid cards" aria-label="三日合计指标">
       <article class="card">
         <div>
-          <div class="label">推荐板块展开，两日合计</div>
-          <div class="metric"><span class="number">56</span><span class="unit">PV</span></div>
+          <div class="label">推荐板块展开，三日合计</div>
+          <div class="metric"><span class="number">101</span><span class="unit">PV</span></div>
         </div>
-        <div class="subline"><span class="tag">plg_show_rc</span> 有效 UV 32</div>
+        <div class="subline"><span class="tag">plg_show_rc</span> 有效 UV 53</div>
       </article>
 
       <article class="card">
         <div>
-          <div class="label">RD Home 触发对话，两日合计</div>
-          <div class="metric"><span class="number">8</span><span class="unit">PV</span></div>
+          <div class="label">RD Home 触发对话，三日合计</div>
+          <div class="metric"><span class="number">12</span><span class="unit">PV</span></div>
         </div>
-        <div class="subline"><span class="tag">plg_click_rc</span> 有效 UV 2</div>
+        <div class="subline"><span class="tag">plg_click_rc</span> 有效 UV 5</div>
       </article>
 
       <article class="card">
         <div>
           <div class="label">点击 / 展开转化</div>
-          <div class="metric"><span class="number">14.29%</span><span class="unit">PV</span></div>
+          <div class="metric"><span class="number">11.88%</span><span class="unit">PV</span></div>
         </div>
-        <div class="subline">有效 UV 转化 6.25%</div>
+        <div class="subline">有效 UV 转化 9.43%</div>
       </article>
 
       <article class="card">
         <div>
-          <div class="label">点击后的 share/session</div>
-          <div class="metric"><span class="number">6</span><span class="unit">share_id</span></div>
+          <div class="label">点击事件 share_id</div>
+          <div class="metric"><span class="number">9</span><span class="unit">share_id</span></div>
         </div>
-        <div class="subline">7 个 session_id，1 条点击未传 session_id</div>
-      </article>
-
-      <article class="card">
-        <div>
-          <div class="label">真激活率</div>
-          <div class="metric"><span class="number">14.29%</span><span class="unit">session</span></div>
-        </div>
-        <div class="subline">1 / 7 个可判定推荐点击会话为真激活</div>
+        <div class="subline">共 12 次点击，11 个 session_id；真激活 session 2 个</div>
       </article>
     </section>
 
     <section class="panel">
-      <h2>两日总览</h2>
+      <h2>推荐展开 / 点击总览</h2>
       <table>
         <thead>
           <tr>
@@ -443,8 +442,7 @@
             <th>PV 转化</th>
             <th>share_id</th>
             <th>session_id</th>
-            <th>真激活</th>
-            <th>真激活率</th>
+            <th>真激活 session</th>
             <th>未传 session</th>
           </tr>
         </thead>
@@ -458,8 +456,7 @@
             <td>42.86%</td>
             <td>5</td>
             <td>5</td>
-            <td>1</td>
-            <td>20.00%</td>
+            <td>2</td>
             <td>1</td>
           </tr>
           <tr>
@@ -472,26 +469,64 @@
             <td>1</td>
             <td>2</td>
             <td>0</td>
-            <td>0.00%</td>
+            <td>0</td>
+          </tr>
+          <tr>
+            <td>2026-09-11</td>
+            <td>45</td>
+            <td>21</td>
+            <td>4</td>
+            <td>3</td>
+            <td>8.89%</td>
+            <td>3</td>
+            <td>4</td>
+            <td>0</td>
             <td>0</td>
           </tr>
           <tr>
             <td><strong>合计</strong></td>
-            <td><strong>56</strong></td>
-            <td><strong>32</strong></td>
-            <td><strong>8</strong></td>
+            <td><strong>101</strong></td>
+            <td><strong>53</strong></td>
+            <td><strong>12</strong></td>
+            <td><strong>5</strong></td>
+            <td><strong>11.88%</strong></td>
+            <td><strong>9</strong></td>
+            <td><strong>11</strong></td>
             <td><strong>2</strong></td>
-            <td><strong>14.29%</strong></td>
-            <td><strong>6</strong></td>
-            <td><strong>7</strong></td>
-            <td><strong>1</strong></td>
-            <td><strong>14.29%</strong></td>
             <td><strong>1</strong></td>
           </tr>
         </tbody>
       </table>
       <div class="note">
-        真激活率按“有 session_id 的推荐点击会话”计算：1 / 7 = 14.29%。如果按全部点击 PV 计算，则为 1 / 8 = 12.50%。9 月 9 日点击转化更高：6 / 14 = 42.86%；9 月 10 日展开量更大，但点击只有 2 次。
+        9 月 9 日点击转化最高：6 / 14 = 42.86%。当前 11 个已传 session_id 中有 2 个命中真激活，均来自 9 月 9 日推荐点击。
+      </div>
+    </section>
+
+    <section class="panel section-gap">
+      <h2>PV / UV 记录</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>日期</th>
+            <th>指标</th>
+            <th>PV</th>
+            <th>UV</th>
+            <th>口径</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td>2026-09-09</td><td>推荐板块展开</td><td>14</td><td>10</td><td><code>source_type=plg_show_rc</code></td></tr>
+          <tr><td>2026-09-09</td><td>RD Home 触发对话</td><td>6</td><td>1</td><td><code>source_type=plg_click_rc</code></td></tr>
+          <tr><td>2026-09-10</td><td>推荐板块展开</td><td>42</td><td>22</td><td><code>source_type=plg_show_rc</code></td></tr>
+          <tr><td>2026-09-10</td><td>RD Home 触发对话</td><td>2</td><td>1</td><td><code>source_type=plg_click_rc</code></td></tr>
+          <tr><td>2026-09-11</td><td>推荐板块展开</td><td>45</td><td>21</td><td><code>source_type=plg_show_rc</code></td></tr>
+          <tr><td>2026-09-11</td><td>RD Home 触发对话</td><td>4</td><td>3</td><td><code>source_type=plg_click_rc</code></td></tr>
+          <tr><td><strong>合计</strong></td><td><strong>推荐板块展开</strong></td><td><strong>101</strong></td><td><strong>53</strong></td><td>三日合并去重 UV</td></tr>
+          <tr><td><strong>合计</strong></td><td><strong>RD Home 触发对话</strong></td><td><strong>12</strong></td><td><strong>5</strong></td><td>三日合并去重 UV</td></tr>
+        </tbody>
+      </table>
+      <div class="note">
+        UV 使用有效访客口径：优先非空且非 <code>0000000000000000</code> 的 <code>user_id</code>，其次使用 <code>btu_id</code>、点击里的 <code>session_id</code> 等兜底。
       </div>
     </section>
 
@@ -501,23 +536,33 @@
         <div class="funnel">
           <div class="funnel-row">
             <div><strong>9/9 展开</strong><br><span class="subline">plg_show_rc</span></div>
-            <div class="bar-track"><div class="bar" style="width: 33.3%"></div></div>
+            <div class="bar-track"><div class="bar" style="width: 31.1%"></div></div>
             <div class="right">14</div>
           </div>
           <div class="funnel-row">
             <div><strong>9/9 触发</strong><br><span class="subline">plg_click_rc</span></div>
-            <div class="bar-track"><div class="bar click" style="width: 14.3%"></div></div>
+            <div class="bar-track"><div class="bar click" style="width: 13.3%"></div></div>
             <div class="right">6</div>
           </div>
           <div class="funnel-row">
             <div><strong>9/10 展开</strong><br><span class="subline">plg_show_rc</span></div>
-            <div class="bar-track"><div class="bar" style="width: 100%"></div></div>
+            <div class="bar-track"><div class="bar" style="width: 93.3%"></div></div>
             <div class="right">42</div>
           </div>
           <div class="funnel-row">
             <div><strong>9/10 触发</strong><br><span class="subline">plg_click_rc</span></div>
-            <div class="bar-track"><div class="bar click" style="width: 4.8%"></div></div>
+            <div class="bar-track"><div class="bar click" style="width: 4.4%"></div></div>
             <div class="right">2</div>
+          </div>
+          <div class="funnel-row">
+            <div><strong>9/11 展开</strong><br><span class="subline">plg_show_rc</span></div>
+            <div class="bar-track"><div class="bar" style="width: 100%"></div></div>
+            <div class="right">45</div>
+          </div>
+          <div class="funnel-row">
+            <div><strong>9/11 触发</strong><br><span class="subline">plg_click_rc</span></div>
+            <div class="bar-track"><div class="bar click" style="width: 8.9%"></div></div>
+            <div class="right">4</div>
           </div>
         </div>
       </article>
@@ -531,37 +576,10 @@
           <tbody>
             <tr><td>2026-09-09</td><td>13 点 5；14 点 3；15 点 3；17/19/20 点各 1</td><td>13 点 3；14 点 3</td></tr>
             <tr><td>2026-09-10</td><td>01 点 22；02 点 20</td><td>01 点 2</td></tr>
+            <tr><td>2026-09-11</td><td>00 点 2；01 点 6；02 点 37</td><td>01 点 2；02 点 2</td></tr>
           </tbody>
         </table>
-        <div class="section-gap subline">两天导出均未触达 60,000 行预览上限。</div>
-      </article>
-    </section>
-
-    <section class="grid split section-gap">
-      <article class="panel">
-        <h2>用户类型</h2>
-        <table>
-          <thead>
-            <tr><th>日期</th><th>展开 PLG</th><th>展开游客</th><th>触发 PLG</th><th>触发游客</th></tr>
-          </thead>
-          <tbody>
-            <tr><td>2026-09-09</td><td>14</td><td>0</td><td>6</td><td>0</td></tr>
-            <tr><td>2026-09-10</td><td>26</td><td>16</td><td>2</td><td>0</td></tr>
-          </tbody>
-        </table>
-      </article>
-
-      <article class="panel">
-        <h2>地区</h2>
-        <table>
-          <thead>
-            <tr><th>日期</th><th>展开 US</th><th>触发 US</th><th>其他</th></tr>
-          </thead>
-          <tbody>
-            <tr><td>2026-09-09</td><td>14</td><td>6</td><td>0</td></tr>
-            <tr><td>2026-09-10</td><td>42</td><td>2</td><td>0</td></tr>
-          </tbody>
-        </table>
+        <div class="section-gap subline">三天导出均未触达 60,000 行预览上限。</div>
       </article>
     </section>
 
@@ -578,58 +596,17 @@
           <tr><td>2026-09-09</td><td>499f235496b0035eacea2658bf754b7f</td><td>1</td><td>1 个 session</td></tr>
           <tr><td>2026-09-09</td><td>0164107cc94cda02b14796e73bed6862</td><td>1</td><td>未传 session_id</td></tr>
           <tr><td>2026-09-10</td><td>e63a4d6b2bc4aeb2632d3c053b048a32</td><td>2</td><td>2 个 session</td></tr>
+          <tr><td>2026-09-11</td><td>f8c2187e7d641cdbd6b65c177bc6abf1</td><td>2</td><td>2 个 session</td></tr>
+          <tr><td>2026-09-11</td><td>17d0ee8cc0eba6110df1ea9ddeae80d1</td><td>1</td><td>1 个 session</td></tr>
+          <tr><td>2026-09-11</td><td>312da69f04acdb43ff453df79edfb48c</td><td>1</td><td>1 个 session</td></tr>
         </tbody>
       </table>
     </section>
 
     <section class="panel section-gap">
-      <h2>真激活匹配</h2>
+      <h2>推荐点击事件明细</h2>
       <div class="callout">
-        真激活来自数据集 <code>RunWise重构验证-会话主表与真激活</code>，用推荐点击里解析出的真实 <code>session_id</code> 匹配该表 <code>resolved_session_id</code>，再读取 <code>is_true_activation_session</code>。
-      </div>
-      <table class="section-gap">
-        <thead>
-          <tr>
-            <th>日期</th>
-            <th>点击 PV</th>
-            <th>有 session_id</th>
-            <th>主表命中</th>
-            <th>真激活 session</th>
-            <th>真激活率</th>
-            <th>全部点击口径</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr><td>2026-09-09</td><td>6</td><td>5</td><td>1</td><td>1</td><td>20.00%</td><td>16.67%</td></tr>
-          <tr><td>2026-09-10</td><td>2</td><td>2</td><td>0</td><td>0</td><td>0.00%</td><td>0.00%</td></tr>
-          <tr><td><strong>合计</strong></td><td><strong>8</strong></td><td><strong>7</strong></td><td><strong>1</strong></td><td><strong>1</strong></td><td><strong>14.29%</strong></td><td><strong>12.50%</strong></td></tr>
-        </tbody>
-      </table>
-      <table class="section-gap">
-        <thead>
-          <tr>
-            <th>命中 session_id</th>
-            <th>share_id</th>
-            <th>query</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td>sess_64c448dab585481c</td>
-            <td>42acb055b3e200bdf4be8e0903d60b64</td>
-            <td>[2] 概述一下</td>
-          </tr>
-        </tbody>
-      </table>
-      <div class="note">
-        另按 <code>btu_id + session_date</code> 检查到 9 月 9 日同一 btu 还有一个更早的真激活会话 <code>sess_11016e83cc9e4b66</code>，但它不是推荐点击传入的 session_id，所以没有计入推荐点击真激活率。
-      </div>
-    </section>
-
-    <section class="panel section-gap">
-      <h2>点击明细</h2>
-      <div class="callout">
-        <code>session_id</code> 使用 <code>event_detail</code> JSON 中真实传入的值；<code>resolved_session_id=row|...</code> 只作为行级兜底，不作为对话 session。
+        这里只展示 <code>plg_click_rc</code> 点击事件，重点看每次点击传入的 <code>share_id</code> 和 <code>user_id</code>。真激活按点击事件的 <code>session_id</code> 精确匹配会话主表。
       </div>
       <table class="section-gap">
         <thead>
@@ -640,19 +617,22 @@
             <th>share_id</th>
             <th>session_id</th>
             <th>真激活</th>
-            <th>激活时间</th>
-            <th>query</th>
+            <th>激活日期</th>
           </tr>
         </thead>
         <tbody>
-          <tr><td>2026-09-09 13:21:03</td><td>b104f27c2f0c463da94abe71332080f5</td><td>430a1abdf48c4ee9967d58b97fba2214</td><td>42acb055b3e200bdf4be8e0903d60b64</td><td>sess_64c448dab585481c</td><td><span class="status true">真激活</span></td><td>2026-09-09 13:34:48</td><td>[2] 概述一下</td></tr>
-          <tr><td>2026-09-09 13:23:04</td><td>b104f27c2f0c463da94abe71332080f5</td><td>430a1abdf48c4ee9967d58b97fba2214</td><td>3027eb3b123e35f5859904f9462154ce</td><td>sess_edd634c1121a49e0</td><td><span class="status false">未命中</span></td><td></td><td>未匹配到会话主表</td></tr>
-          <tr><td>2026-09-09 13:36:52</td><td>b104f27c2f0c463da94abe71332080f5</td><td>430a1abdf48c4ee9967d58b97fba2214</td><td>3027eb3b123e35f5859904f9462154ce</td><td>sess_4d6d721e15e445ff</td><td><span class="status false">未命中</span></td><td></td><td>未匹配到会话主表</td></tr>
-          <tr><td>2026-09-09 14:00:27</td><td>b104f27c2f0c463da94abe71332080f5</td><td>430a1abdf48c4ee9967d58b97fba2214</td><td>0164107cc94cda02b14796e73bed6862</td><td>未传</td><td><span class="status unknown">无法判定</span></td><td></td><td>未传 session_id</td></tr>
-          <tr><td>2026-09-09 14:05:00</td><td>b104f27c2f0c463da94abe71332080f5</td><td>430a1abdf48c4ee9967d58b97fba2214</td><td>499f235496b0035eacea2658bf754b7f</td><td>sess_a980012ae72f45ba</td><td><span class="status false">未命中</span></td><td></td><td>未匹配到会话主表</td></tr>
-          <tr><td>2026-09-09 14:20:29</td><td>b104f27c2f0c463da94abe71332080f5</td><td>430a1abdf48c4ee9967d58b97fba2214</td><td>7cda8a6d139fae54270dc36ca292164e</td><td>sess_5927f1b4966246e6</td><td><span class="status false">未命中</span></td><td></td><td>未匹配到会话主表</td></tr>
-          <tr><td>2026-09-10 01:45:24</td><td>a34560aa5aab4285bff5d84b87ad1e49</td><td>83fd33bddee74b53814a6131921a8a76</td><td>e63a4d6b2bc4aeb2632d3c053b048a32</td><td>sess_e1bb14217c1e4a14</td><td><span class="status false">未命中</span></td><td></td><td>未匹配到会话主表</td></tr>
-          <tr><td>2026-09-10 01:45:58</td><td>a34560aa5aab4285bff5d84b87ad1e49</td><td>83fd33bddee74b53814a6131921a8a76</td><td>e63a4d6b2bc4aeb2632d3c053b048a32</td><td>sess_6e05b306c0a4421c</td><td><span class="status false">未命中</span></td><td></td><td>未匹配到会话主表</td></tr>
+          <tr class="activation-row"><td>2026-09-09 13:21:03</td><td>b104f27c2f0c463da94abe71332080f5</td><td>430a1abdf48c4ee9967d58b97fba2214</td><td>42acb055b3e200bdf4be8e0903d60b64</td><td>sess_64c448dab585481c</td><td><span class="status true">是</span></td><td>2026-09-09</td></tr>
+          <tr><td>2026-09-09 13:23:04</td><td>b104f27c2f0c463da94abe71332080f5</td><td>430a1abdf48c4ee9967d58b97fba2214</td><td>3027eb3b123e35f5859904f9462154ce</td><td>sess_edd634c1121a49e0</td><td><span class="status false">否</span></td><td>-</td></tr>
+          <tr><td>2026-09-09 13:36:52</td><td>b104f27c2f0c463da94abe71332080f5</td><td>430a1abdf48c4ee9967d58b97fba2214</td><td>3027eb3b123e35f5859904f9462154ce</td><td>sess_4d6d721e15e445ff</td><td><span class="status false">否</span></td><td>-</td></tr>
+          <tr><td>2026-09-09 14:00:27</td><td>b104f27c2f0c463da94abe71332080f5</td><td>430a1abdf48c4ee9967d58b97fba2214</td><td>0164107cc94cda02b14796e73bed6862</td><td>未传</td><td><span class="status unknown">无法匹配</span></td><td>-</td></tr>
+          <tr><td>2026-09-09 14:05:00</td><td>b104f27c2f0c463da94abe71332080f5</td><td>430a1abdf48c4ee9967d58b97fba2214</td><td>499f235496b0035eacea2658bf754b7f</td><td>sess_a980012ae72f45ba</td><td><span class="status false">否</span></td><td>-</td></tr>
+          <tr class="activation-row"><td>2026-09-09 14:20:29</td><td>b104f27c2f0c463da94abe71332080f5</td><td>430a1abdf48c4ee9967d58b97fba2214</td><td>7cda8a6d139fae54270dc36ca292164e</td><td>sess_5927f1b4966246e6</td><td><span class="status true">是</span></td><td>2026-09-10</td></tr>
+          <tr><td>2026-09-10 01:45:24</td><td>a34560aa5aab4285bff5d84b87ad1e49</td><td>83fd33bddee74b53814a6131921a8a76</td><td>e63a4d6b2bc4aeb2632d3c053b048a32</td><td>sess_e1bb14217c1e4a14</td><td><span class="status false">否</span></td><td>-</td></tr>
+          <tr><td>2026-09-10 01:45:58</td><td>a34560aa5aab4285bff5d84b87ad1e49</td><td>83fd33bddee74b53814a6131921a8a76</td><td>e63a4d6b2bc4aeb2632d3c053b048a32</td><td>sess_6e05b306c0a4421c</td><td><span class="status false">否</span></td><td>-</td></tr>
+          <tr><td>2026-09-11 01:46:24</td><td>de099c18b4534e3ebaba0556c7311729</td><td>1922a758c5224e57850571998bd61d68</td><td>17d0ee8cc0eba6110df1ea9ddeae80d1</td><td>sess_8868152117474ca8</td><td><span class="status false">否</span></td><td>-</td></tr>
+          <tr><td>2026-09-11 01:51:20</td><td>8c589c3677ed40d7a6f444b9c7babf25</td><td>aa10241a5b44404aaee96c950a1091c9</td><td>312da69f04acdb43ff453df79edfb48c</td><td>sess_ab3521e049f14347</td><td><span class="status false">否</span></td><td>-</td></tr>
+          <tr><td>2026-09-11 02:15:32</td><td>8f7a8c0ac77642fcb893f298c03d0f1f</td><td>22fb5184ae584ecba2266c97670c9736</td><td>f8c2187e7d641cdbd6b65c177bc6abf1</td><td>sess_42efec4c0827483b</td><td><span class="status false">否</span></td><td>-</td></tr>
+          <tr><td>2026-09-11 02:59:10</td><td>8f7a8c0ac77642fcb893f298c03d0f1f</td><td>22fb5184ae584ecba2266c97670c9736</td><td>f8c2187e7d641cdbd6b65c177bc6abf1</td><td>sess_10fad5d18cf6454b</td><td><span class="status false">否</span></td><td>-</td></tr>
         </tbody>
       </table>
     </section>
@@ -661,21 +641,19 @@
       <h2>口径说明</h2>
       <div class="kv">
         <div>数据日期</div>
-        <div>2026-09-09 和 2026-09-10。</div>
+        <div>2026-09-09 至 2026-09-11；9 月 11 日数据截至数据集更新 <code>2026-09-11 11:09:18+0800</code>。</div>
         <div>数据集</div>
-        <div>eureka产品行为数据 - 2025年1月及以后-关联付费属性。</div>
+        <div>推荐事件来自 eureka产品行为数据 - 2025年1月及以后-关联付费属性；真激活来自 RunWise重构验证-会话主表与真激活，更新至 <code>2026-09-11 11:31:28+0800</code>。</div>
         <div>PV</div>
         <div>按过滤后的事件行数计算：<code>source_type=plg_show_rc</code> 为展开，<code>source_type=plg_click_rc</code> 为触发对话。</div>
         <div>有效 UV</div>
         <div>优先使用非空且非 <code>0000000000000000</code> 的 <code>user_id</code>，其次使用 <code>btu_id</code>，再用 <code>event_detail.session_id</code> 或 <code>raw_session_id</code>。如果仍缺失，只能落到 <code>resolved_session_id</code> 的行级兜底。</div>
+        <div>真激活</div>
+        <div>按推荐点击事件里的 <code>session_id</code> 精确匹配真激活表的 <code>resolved_session_id</code>，且 <code>is_true_activation_session=1</code>。当前命中 2 个点击 session；其中 <code>sess_5927f1b4966246e6</code> 点击发生在 2026-09-09，真激活表记录激活日期为 2026-09-10。</div>
         <div>UV 风险</div>
-        <div>2026-09-10 的 <code>plg_show_rc</code> 有 16 条游客行没有 <code>btu_id</code> 和真实 session，行级兜底会让有效 UV 偏高；2026-09-09 没有游客行。</div>
-        <div>真激活口径</div>
-        <div>用点击明细里的 <code>session_id</code> 匹配真激活表 <code>resolved_session_id</code>，且 <code>is_true_activation_session=1</code> 计为真激活。未传 <code>session_id</code> 的点击记为无法判定。</div>
-        <div>query 来源</div>
-        <div><code>query</code> 来自真激活/会话主表的 <code>full_query_with_round</code>。只有精确匹配到 <code>resolved_session_id</code> 的推荐点击会话展示 query；未命中会话主表的不反查其他用户会话。</div>
+        <div>2026-09-10 的 <code>plg_show_rc</code> 有 16 条、2026-09-11 有 11 条游客行没有 <code>btu_id</code> 和真实 session，行级兜底会让有效 UV 偏高；2026-09-09 没有游客行。</div>
         <div>本地文件</div>
-        <div>明细导出保存在 <code>plg_show_rc_2026-09-09.json</code>、<code>plg_click_rc_2026-09-09.json</code>、<code>plg_show_rc_2026-09-10.json</code>、<code>plg_click_rc_2026-09-10.json</code>、<code>recommendation_true_activation_matched_sessions_with_query.json</code>。</div>
+        <div>明细导出保存在 <code>plg_show_rc_2026-09-09.json</code>、<code>plg_click_rc_2026-09-09.json</code>、<code>plg_show_rc_2026-09-10.json</code>、<code>plg_click_rc_2026-09-10.json</code>、<code>plg_show_rc_2026-09-11.json</code>、<code>plg_click_rc_2026-09-11.json</code>、<code>recommendation_click_true_activation_2026-09-09_2026-09-11.json</code>。</div>
       </div>
     </section>
   </main>

@@ -1,0 +1,5574 @@
+{
+  "taxonomy_version": "1.0.0",
+  "publication_status": "initial_rules_for_review",
+  "updated_at": "2026-09-11",
+  "purpose": "问题与答案条目的生成标签及推荐行为分析；本文件是枚举和映射目录，不是已接入运行流程的 JSON Schema。",
+  "source_files": [
+    {
+      "path": "Onboarding字段映射_三列版.xlsx",
+      "sheet": "正常映射",
+      "range": "A1:C44",
+      "purpose": "原始输入枚举"
+    },
+    {
+      "path": "欧美行业与角色_JTBD_Profiling分析.md",
+      "purpose": "角色职责、42 个细分行业、546 个组合的任务及产出分析素材"
+    },
+    {
+      "path": "cases/onboarding_field_mapping.json",
+      "purpose": "现有实现的输入别名与旧值映射；已逐项核对 XLSX"
+    }
+  ],
+  "evidence_status": "输入枚举为原表值；行业范围沿用给定研究；内容视角、任务拆分、对象分组和匹配规则是首版设计，未宣称由用户点击验证。",
+  "inputs": {
+    "job_role": [
+      {
+        "value": "rd_engineer",
+        "label_en": "R&D Engineer / Inventor"
+      },
+      {
+        "value": "researcher",
+        "label_en": "Researcher / Scientist"
+      },
+      {
+        "value": "innovation_product_strategy",
+        "label_en": "Innovation & Product Strategy"
+      },
+      {
+        "value": "in_house_ip_legal",
+        "label_en": "In-house IP & Legal"
+      },
+      {
+        "value": "patent_ip_services",
+        "label_en": "Patent & IP Services"
+      },
+      {
+        "value": "other",
+        "label_en": "Other"
+      }
+    ],
+    "industry_type": [
+      {
+        "value": "medical_devices",
+        "label_en": "Medical Devices"
+      },
+      {
+        "value": "materials",
+        "label_en": "Materials"
+      },
+      {
+        "value": "automotive",
+        "label_en": "Automotive"
+      },
+      {
+        "value": "electronics_manufacturing",
+        "label_en": "Electronics Manufacturing"
+      },
+      {
+        "value": "engineering",
+        "label_en": "Engineering"
+      },
+      {
+        "value": "biotech",
+        "label_en": "Biotechnology"
+      },
+      {
+        "value": "food_farming_production",
+        "label_en": "Food / Farming Production"
+      },
+      {
+        "value": "energy",
+        "label_en": "Energy"
+      },
+      {
+        "value": "chemical",
+        "label_en": "Chemical"
+      },
+      {
+        "value": "construction",
+        "label_en": "Construction"
+      },
+      {
+        "value": "other",
+        "label_en": "Other"
+      }
+    ],
+    "jtbd_primary": [
+      {
+        "value": "technical_solutions",
+        "label_en": "Find technical solutions"
+      },
+      {
+        "value": "existing_technologies",
+        "label_en": "Explore existing technologies"
+      },
+      {
+        "value": "product_ideas",
+        "label_en": "Generate product ideas"
+      },
+      {
+        "value": "technical_feasibility",
+        "label_en": "Assess technical feasibility"
+      },
+      {
+        "value": "patent_ip_risk",
+        "label_en": "Assess patent and IP risk"
+      },
+      {
+        "value": "new_research_fields",
+        "label_en": "Explore new research fields"
+      },
+      {
+        "value": "research_methods",
+        "label_en": "Find research methods"
+      },
+      {
+        "value": "research_trends",
+        "label_en": "Track research trends"
+      },
+      {
+        "value": "research_ideas",
+        "label_en": "Generate research ideas"
+      },
+      {
+        "value": "patents_literature",
+        "label_en": "Search patents and literature"
+      },
+      {
+        "value": "technology_competitors",
+        "label_en": "Track technologies and competitors"
+      },
+      {
+        "value": "innovation_opportunities",
+        "label_en": "Identify innovation opportunities"
+      },
+      {
+        "value": "rd_directions",
+        "label_en": "Evaluate R&D directions"
+      },
+      {
+        "value": "patent_landscapes",
+        "label_en": "Explore patent landscapes"
+      },
+      {
+        "value": "product_ip_risks",
+        "label_en": "Assess product IP risks"
+      },
+      {
+        "value": "prior_art",
+        "label_en": "Search prior art, assess novelty"
+      },
+      {
+        "value": "fto_design_risks",
+        "label_en": "Check FTO and design risks"
+      },
+      {
+        "value": "draft_review_patents",
+        "label_en": "Draft and review patents"
+      },
+      {
+        "value": "office_actions",
+        "label_en": "Respond to office actions"
+      },
+      {
+        "value": "fto_searches",
+        "label_en": "Conduct FTO searches"
+      },
+      {
+        "value": "draft_review_applications",
+        "label_en": "Draft and review applications"
+      },
+      {
+        "value": "draft_refine_claims",
+        "label_en": "Draft and refine claims"
+      },
+      {
+        "value": "technology_trends",
+        "label_en": "Track technology trends"
+      },
+      {
+        "value": "ideas_concepts",
+        "label_en": "Generate ideas and concepts"
+      },
+      {
+        "value": "search_draft_patents",
+        "label_en": "Search or draft patents"
+      },
+      {
+        "value": "other",
+        "label_en": "Other"
+      }
+    ]
+  },
+  "legacy_input_aliases": {
+    "role": {
+      "rd_engineer_inventor": "rd_engineer",
+      "researcher_scientist": "researcher",
+      "innovation_product_strategy": "innovation_product_strategy",
+      "in_house_ip_legal": "in_house_ip_legal",
+      "patent_ip_services": "patent_ip_services",
+      "other": "other"
+    },
+    "industry": {
+      "medical_devices": "medical_devices",
+      "materials": "materials",
+      "automotive": "automotive",
+      "electronics_manufacturing": "electronics_manufacturing",
+      "engineering": "engineering",
+      "biotechnology": "biotech",
+      "biotech": "biotech",
+      "food": "food_farming_production",
+      "farming_production": "food_farming_production",
+      "food_farming_production": "food_farming_production",
+      "energy": "energy",
+      "chemical": "chemical",
+      "construction": "construction",
+      "other": "other"
+    },
+    "jtbd": {
+      "find_technical_solutions": "technical_solutions",
+      "explore_existing_technologies": "existing_technologies",
+      "generate_product_ideas": "product_ideas",
+      "assess_technical_feasibility": "technical_feasibility",
+      "assess_patent_and_ip_risk": "patent_ip_risk",
+      "explore_new_research_fields": "new_research_fields",
+      "find_research_methods": "research_methods",
+      "track_research_trends": "research_trends",
+      "generate_research_ideas": "research_ideas",
+      "search_patents_and_literature": "patents_literature",
+      "track_technologies_and_competitors": "technology_competitors",
+      "identify_innovation_opportunities": "innovation_opportunities",
+      "evaluate_r_and_d_directions": "rd_directions",
+      "explore_patent_landscapes": "patent_landscapes",
+      "assess_product_ip_risks": "product_ip_risks",
+      "search_prior_art_assess_novelty": "prior_art",
+      "check_fto_and_design_risks": "fto_design_risks",
+      "draft_and_review_patents": "draft_review_patents",
+      "respond_to_office_actions": "office_actions",
+      "conduct_fto_searches": "fto_searches",
+      "draft_and_review_applications": "draft_review_applications",
+      "draft_and_refine_claims": "draft_refine_claims",
+      "track_technology_trends": "technology_trends",
+      "generate_ideas_and_concepts": "ideas_concepts",
+      "search_or_draft_patents": "search_draft_patents",
+      "other": "other"
+    }
+  },
+  "field_aliases": {
+    "role": "job_role",
+    "industry": "industry_type",
+    "jtbd": "jtbd_primary"
+  },
+  "source_roles": [
+    {
+      "source_role_id": "R01",
+      "label_zh": "研发工程师",
+      "label_en": "R&D Engineer",
+      "source_entry_label": "R&D Engineer / Inventor"
+    },
+    {
+      "source_role_id": "R02",
+      "label_zh": "独立发明人",
+      "label_en": "Independent Inventor",
+      "source_entry_label": "R&D Engineer / Inventor"
+    },
+    {
+      "source_role_id": "R03",
+      "label_zh": "企业研究员／应用科学家",
+      "label_en": "Industry Researcher / Applied Scientist",
+      "source_entry_label": "Researcher / Scientist"
+    },
+    {
+      "source_role_id": "R04",
+      "label_zh": "高校／公共机构研究人员",
+      "label_en": "Academic / Public Researcher",
+      "source_entry_label": "Researcher / Scientist"
+    },
+    {
+      "source_role_id": "R05",
+      "label_zh": "创新与技术寻源负责人",
+      "label_en": "Innovation / Technology Scouting Manager",
+      "source_entry_label": "Innovation & Product Strategy"
+    },
+    {
+      "source_role_id": "R06",
+      "label_zh": "产品战略负责人",
+      "label_en": "Product Strategy Manager",
+      "source_entry_label": "Innovation & Product Strategy"
+    },
+    {
+      "source_role_id": "R07",
+      "label_zh": "企业知识产权管理人员",
+      "label_en": "Corporate IP Manager",
+      "source_entry_label": "In-house IP / Legal"
+    },
+    {
+      "source_role_id": "R08",
+      "label_zh": "企业专利法务",
+      "label_en": "In-house Patent Counsel",
+      "source_entry_label": "In-house IP / Legal"
+    },
+    {
+      "source_role_id": "R09",
+      "label_zh": "企业商务／一般法务",
+      "label_en": "Commercial / General Counsel",
+      "source_entry_label": "In-house IP / Legal"
+    },
+    {
+      "source_role_id": "R10",
+      "label_zh": "外部专利律师",
+      "label_en": "External Patent Attorney",
+      "source_entry_label": "Patent & IP Services"
+    },
+    {
+      "source_role_id": "R11",
+      "label_zh": "专利检索与分析人员",
+      "label_en": "Patent Search / Analytics Specialist",
+      "source_entry_label": "Patent & IP Services"
+    },
+    {
+      "source_role_id": "R12",
+      "label_zh": "IP 商业化与技术转移顾问",
+      "label_en": "IP Commercialization / Technology Transfer Specialist",
+      "source_entry_label": "Patent & IP Services"
+    },
+    {
+      "source_role_id": "R13",
+      "label_zh": "专利代理人",
+      "label_en": "Patent Agent",
+      "source_entry_label": "Patent & IP Services"
+    },
+    {
+      "source_role_id": "R00",
+      "label_zh": "其他／尚未确定",
+      "label_en": "Other / Not sure",
+      "source_entry_label": "Other"
+    }
+  ],
+  "role_perspectives": [
+    {
+      "value": "product_design",
+      "label_zh": "产品与部件设计",
+      "label_en": "Product and component design",
+      "definition": "从产品功能、结构、材料和架构职责出发组织判断",
+      "boundary": "包含设计规格和部件方案取舍；批次生产控制归 process_engineering",
+      "positive_example": "比较满足同一产品规格的部件方案",
+      "negative_example": "仅比较生产线批次控制策略",
+      "source_role_ids": [
+        "R01"
+      ],
+      "status": "active",
+      "introduced_in": "1.0.0",
+      "replaced_by": null
+    },
+    {
+      "value": "process_engineering",
+      "label_zh": "工艺与制造",
+      "label_en": "Process engineering",
+      "definition": "从制造流程、工艺窗口、良率及放大职责出发组织判断",
+      "boundary": "包含量产一致性；仅讨论部件功能结构归 product_design",
+      "positive_example": "比较降低互连制造缺陷的工艺改进",
+      "negative_example": "只列产品功能清单",
+      "source_role_ids": [
+        "R01",
+        "R03"
+      ],
+      "status": "active",
+      "introduced_in": "1.0.0",
+      "replaced_by": null
+    },
+    {
+      "value": "system_integration",
+      "label_zh": "系统集成",
+      "label_en": "System integration",
+      "definition": "从接口、部件协同及端到端系统运行出发组织判断",
+      "boundary": "包含软硬件兼容、系统验证；单一部件寿命归 reliability_engineering",
+      "positive_example": "比较传感器与控制器的接口方案",
+      "negative_example": "无系统关联的单一材料机理综述",
+      "source_role_ids": [
+        "R01"
+      ],
+      "status": "active",
+      "introduced_in": "1.0.0",
+      "replaced_by": null
+    },
+    {
+      "value": "reliability_engineering",
+      "label_zh": "可靠性工程",
+      "label_en": "Reliability engineering",
+      "definition": "从故障、寿命、环境适应性及重复运行能力出发组织判断",
+      "boundary": "包含故障恢复和寿命验证；纯科学机理贡献归 applied_research 或 scientific_contribution",
+      "positive_example": "针对热循环失效比较连接结构改进",
+      "negative_example": "仅评价论文的新颖程度",
+      "source_role_ids": [
+        "R01",
+        "R03"
+      ],
+      "status": "active",
+      "introduced_in": "1.0.0",
+      "replaced_by": null
+    },
+    {
+      "value": "invention_development",
+      "label_zh": "发明构思与验证",
+      "label_en": "Invention development",
+      "definition": "从发明概念的技术差异、原型及披露证据出发组织判断",
+      "boundary": "可供受雇工程师采用；不表示独立个人身份，不等于专利可授权结论",
+      "positive_example": "为新采样结构规划最小验证",
+      "negative_example": "无依据断言用户是独立发明人",
+      "source_role_ids": [
+        "R02",
+        "R01"
+      ],
+      "status": "active",
+      "introduced_in": "1.0.0",
+      "replaced_by": null
+    },
+    {
+      "value": "applied_research",
+      "label_zh": "应用研究",
+      "label_en": "Applied research",
+      "definition": "从机理、材料或方法能否解释并改善具体应用出发组织判断",
+      "boundary": "关注可转化的研究证据；不推断雇主类型，生产操作优化归 process_engineering",
+      "positive_example": "研究噪声机制如何影响成像性能",
+      "negative_example": "仅制定生产排班计划",
+      "source_role_ids": [
+        "R03"
+      ],
+      "status": "active",
+      "introduced_in": "1.0.0",
+      "replaced_by": null
+    },
+    {
+      "value": "scientific_contribution",
+      "label_zh": "科学问题与研究贡献",
+      "label_en": "Scientific contribution",
+      "definition": "从研究空白、可检验问题及相对既有工作的贡献出发组织判断",
+      "boundary": "不推断高校身份；仅服务产品功能取舍归 product_design",
+      "positive_example": "识别低数据量重建研究中的可检验空白",
+      "negative_example": "把用户认定为大学研究员",
+      "source_role_ids": [
+        "R04"
+      ],
+      "status": "active",
+      "introduced_in": "1.0.0",
+      "replaced_by": null
+    },
+    {
+      "value": "research_methodology",
+      "label_zh": "研究方法与可复现性",
+      "label_en": "Research methodology",
+      "definition": "从实验设计、测量、基准及结果可复现性出发组织判断",
+      "boundary": "包含研究方法比较；产品验收规划按产品或可靠性视角",
+      "positive_example": "比较用于检验机制假设的实验方法",
+      "negative_example": "只列市场增长数字",
+      "source_role_ids": [
+        "R03",
+        "R04"
+      ],
+      "status": "active",
+      "introduced_in": "1.0.0",
+      "replaced_by": null
+    },
+    {
+      "value": "technology_scouting",
+      "label_zh": "技术寻源与采用",
+      "label_en": "Technology scouting",
+      "definition": "从外部技术供给、成熟度及引入条件出发组织判断",
+      "boundary": "包含合作候选与试点门槛；客户定位归 product_strategy",
+      "positive_example": "筛选可开展试点的封装技术路线",
+      "negative_example": "仅设计广告投放渠道",
+      "source_role_ids": [
+        "R05"
+      ],
+      "status": "active",
+      "introduced_in": "1.0.0",
+      "replaced_by": null
+    },
+    {
+      "value": "product_strategy",
+      "label_zh": "产品定位与路线图",
+      "label_en": "Product strategy",
+      "definition": "从目标客户、使用场景、产品定位及功能优先级出发组织判断",
+      "boundary": "包含进入路径；外部技术供应筛选归 technology_scouting",
+      "positive_example": "为新检测平台比较首发应用场景",
+      "negative_example": "仅核验专利法律状态",
+      "source_role_ids": [
+        "R06"
+      ],
+      "status": "active",
+      "introduced_in": "1.0.0",
+      "replaced_by": null
+    },
+    {
+      "value": "competitive_intelligence",
+      "label_zh": "技术与竞争情报",
+      "label_en": "Competitive intelligence",
+      "definition": "从竞争主体能力、技术变化及相对位置出发组织判断",
+      "boundary": "可以使用技术或专利证据；核心是主体比较，非单一方案参数取舍",
+      "positive_example": "跟踪不同企业的封装研发方向",
+      "negative_example": "仅对自己的样机做故障排查",
+      "source_role_ids": [
+        "R05",
+        "R06",
+        "R07"
+      ],
+      "status": "active",
+      "introduced_in": "1.0.0",
+      "replaced_by": null
+    },
+    {
+      "value": "ip_portfolio_management",
+      "label_zh": "知识产权组合管理",
+      "label_en": "IP portfolio management",
+      "definition": "从技术资产与业务路线的覆盖、布局和维护出发组织判断",
+      "boundary": "具体组合分析需资产范围；不等于单产品侵权判断",
+      "positive_example": "将产品技术路线与专利主题覆盖关联",
+      "negative_example": "仅凭专利数量宣布不存在侵权风险",
+      "source_role_ids": [
+        "R07"
+      ],
+      "status": "active",
+      "introduced_in": "1.0.0",
+      "replaced_by": null
+    },
+    {
+      "value": "patent_risk_review",
+      "label_zh": "专利风险审查",
+      "label_en": "Patent risk review",
+      "definition": "从产品实施、权利要求、法律状态和适用范围出发组织风险问题",
+      "boundary": "通用内容可做证据清单；不得把检索结果当确定法律结论",
+      "positive_example": "列出评估设计改动所需的权利要求证据",
+      "negative_example": "无产品与地域范围直接断言 FTO 安全",
+      "source_role_ids": [
+        "R08",
+        "R10"
+      ],
+      "status": "active",
+      "introduced_in": "1.0.0",
+      "replaced_by": null
+    },
+    {
+      "value": "commercial_legal_review",
+      "label_zh": "合作合同与权属",
+      "label_en": "Commercial legal review",
+      "definition": "从研发合作、数据使用、成果归属及交易责任出发组织判断",
+      "boundary": "启用前需明确合作或合同场景；不把所有 Legal 用户都当专利律师",
+      "positive_example": "整理合作研发成果归属的业务输入",
+      "negative_example": "把普通技术路线比较包装成合同审查",
+      "source_role_ids": [
+        "R09"
+      ],
+      "status": "active",
+      "introduced_in": "1.0.0",
+      "replaced_by": null
+    },
+    {
+      "value": "patent_evidence_analysis",
+      "label_zh": "专利检索与证据分析",
+      "label_en": "Patent evidence analysis",
+      "definition": "从检索覆盖、家族日期、分类和特征证据映射出发组织判断",
+      "boundary": "核心是可复核证据，不自动附带代理资格或法律意见",
+      "positive_example": "设计能复现的微流控卡匣专利检索策略",
+      "negative_example": "将高相关度结果当作必然侵权结论",
+      "source_role_ids": [
+        "R11",
+        "R07",
+        "R10"
+      ],
+      "status": "active",
+      "introduced_in": "1.0.0",
+      "replaced_by": null
+    },
+    {
+      "value": "patent_prosecution",
+      "label_zh": "专利申请与审查",
+      "label_en": "Patent prosecution",
+      "definition": "从披露支持、申请文件、权利要求及审查答复出发组织判断",
+      "boundary": "缺具体披露或审查材料时仅生成模板，不虚构申请内容",
+      "positive_example": "用披露支持表检查权利要求草稿",
+      "negative_example": "根据行业名称编造具体审查意见",
+      "source_role_ids": [
+        "R13",
+        "R10",
+        "R08"
+      ],
+      "status": "active",
+      "introduced_in": "1.0.0",
+      "replaced_by": null
+    },
+    {
+      "value": "ip_commercialization",
+      "label_zh": "技术许可与转移",
+      "label_en": "IP commercialization",
+      "definition": "从技术资产与潜在采用方的匹配、开发差距和交易准备出发组织判断",
+      "boundary": "启用前需明确许可、转移或引入场景；不凭职位推断正在交易",
+      "positive_example": "识别许可候选与尚缺的验证证据",
+      "negative_example": "仅以引用次数推定可成交估值",
+      "source_role_ids": [
+        "R12",
+        "R05"
+      ],
+      "status": "active",
+      "introduced_in": "1.0.0",
+      "replaced_by": null
+    },
+    {
+      "value": "task_exploration",
+      "label_zh": "任务探索",
+      "label_en": "Task exploration",
+      "definition": "在任务尚不明确时帮助比较可选工作及其交付物",
+      "boundary": "仅用于 task_clarification；不作为其他已明确任务的万能标签",
+      "positive_example": "说明方案比较和可行性评估分别解决什么",
+      "negative_example": "已明确检索任务仍标为未知任务",
+      "source_role_ids": [
+        "R00"
+      ],
+      "status": "active",
+      "introduced_in": "1.0.0",
+      "replaced_by": null
+    }
+  ],
+  "industry_segments": [
+    {
+      "value": "medical_imaging",
+      "label_zh": "医学影像设备与诊断影像软件",
+      "label_en": "Medical Imaging Equipment & Diagnostic Imaging Software",
+      "source_industry_id": "H01",
+      "source_anchor": "industry-h01",
+      "entry_industry": "medical_devices",
+      "definition": "CT、MRI、超声及直接承担影像重建或诊断辅助的软件",
+      "boundary": "医院影像服务、一般健康应用不在此类；探测器上游另关联电子行业",
+      "source_technology_objects": "探测器、成像链路、重建算法、图像判读工作流",
+      "source_constraints": "图像质量、采集速度和低剂量之间的取舍；跨设备与人群泛化",
+      "selection_requirement": "entry_industry_or_explicit_context",
+      "status": "active",
+      "introduced_in": "1.0.0",
+      "replaced_by": null
+    },
+    {
+      "value": "in_vitro_diagnostics",
+      "label_zh": "体外诊断与分子检测",
+      "label_en": "In Vitro Diagnostics & Molecular Testing",
+      "source_industry_id": "H02",
+      "source_anchor": "industry-h02",
+      "entry_industry": "medical_devices",
+      "definition": "临床检测试剂、仪器、分子诊断系统及居家检测产品",
+      "boundary": "研究用试剂归H13生命科学工具；医院检验服务不是器械制造",
+      "source_technology_objects": "样本前处理、试剂体系、微流控卡匣、信号检测",
+      "source_constraints": "灵敏度、特异性、出结果时间和非专业操作容错的平衡",
+      "selection_requirement": "entry_industry_or_explicit_context",
+      "status": "active",
+      "introduced_in": "1.0.0",
+      "replaced_by": null
+    },
+    {
+      "value": "diabetes_monitoring_delivery",
+      "label_zh": "糖尿病监测与给药设备",
+      "label_en": "Diabetes Monitoring & Insulin Delivery Devices",
+      "source_industry_id": "H03",
+      "source_anchor": "industry-h03",
+      "entry_industry": "medical_devices",
+      "definition": "连续血糖监测、血糖仪、胰岛素泵及相关闭环设备",
+      "boundary": "胰岛素药品归药物；非医疗运动手环与泛健康软件不在此类",
+      "source_technology_objects": "电化学传感器、皮肤界面、微量泵、控制与告警链路",
+      "source_constraints": "传感漂移与佩戴耐受；传输可靠性、续航和给药安全验证",
+      "selection_requirement": "entry_industry_or_explicit_context",
+      "status": "active",
+      "introduced_in": "1.0.0",
+      "replaced_by": null
+    },
+    {
+      "value": "surgical_robotics",
+      "label_zh": "手术机器人与微创手术系统",
+      "label_en": "Surgical Robotics & Minimally Invasive Surgical Systems",
+      "source_industry_id": "H04",
+      "source_anchor": "industry-h04",
+      "entry_industry": "medical_devices",
+      "definition": "手术机器人、内镜介入平台、专用器械及术中导航",
+      "boundary": "通用工业机器人归工业自动化；医院手术服务不在此类",
+      "source_technology_objects": "机械臂、柔性导管、腕式器械、视觉导航与操控界面",
+      "source_constraints": "狭窄空间灵活性与精度；可灭菌性、延迟及人机交互安全",
+      "selection_requirement": "entry_industry_or_explicit_context",
+      "status": "active",
+      "introduced_in": "1.0.0",
+      "replaced_by": null
+    },
+    {
+      "value": "engineering_polymers_composites",
+      "label_zh": "工程聚合物与复合材料",
+      "label_en": "Engineering Polymers & Composites",
+      "source_industry_id": "M01",
+      "source_anchor": "industry-m01",
+      "entry_industry": "materials",
+      "definition": "树脂改性、工程塑料、纤维增强复材及半成品；按材料供应业务选择",
+      "boundary": "涂料胶黏配方归M10；最终汽车/电子整机归其终端行业",
+      "source_technology_objects": "玻纤增强热塑料、碳纤维复材和低损耗聚合物",
+      "source_constraints": "强度/阻燃/介电性能、加工窗口与回收性需兼顾",
+      "selection_requirement": "entry_industry_or_explicit_context",
+      "status": "active",
+      "introduced_in": "1.0.0",
+      "replaced_by": null
+    },
+    {
+      "value": "specialty_metals_alloys",
+      "label_zh": "特种金属与高性能合金",
+      "label_en": "Specialty Metals & Alloys",
+      "source_industry_id": "M02",
+      "source_anchor": "industry-m02",
+      "entry_industry": "materials",
+      "definition": "镍基高温合金、钛合金、特种钢及金属粉末供应研发",
+      "boundary": "普通钢材贸易不作为热点；最终航空/医疗零件归终端行业",
+      "source_technology_objects": "镍基合金、钛合金及增材制造金属粉末",
+      "source_constraints": "蠕变/疲劳寿命、杂质控制和批次一致性",
+      "selection_requirement": "entry_industry_or_explicit_context",
+      "status": "active",
+      "introduced_in": "1.0.0",
+      "replaced_by": null
+    },
+    {
+      "value": "technical_ceramics_glass",
+      "label_zh": "技术陶瓷与特种玻璃",
+      "label_en": "Technical Ceramics & Specialty Glass",
+      "source_industry_id": "M03",
+      "source_anchor": "industry-m03",
+      "entry_industry": "materials",
+      "definition": "电子绝缘散热陶瓷、陶瓷纤维、熔融石英及功能玻璃",
+      "boundary": "建筑水泥归M14；陶瓷装饰和普通日用玻璃非本轮热点",
+      "source_technology_objects": "氮化硼填料、低介电玻璃和技术陶瓷基材",
+      "source_constraints": "热导率、介电损耗、热膨胀匹配与脆性",
+      "selection_requirement": "entry_industry_or_explicit_context",
+      "status": "active",
+      "introduced_in": "1.0.0",
+      "replaced_by": null
+    },
+    {
+      "value": "battery_materials_recycling",
+      "label_zh": "电池材料与材料回收",
+      "label_en": "Battery Materials & Recycling",
+      "source_industry_id": "M04",
+      "source_anchor": "industry-m04",
+      "entry_industry": "materials",
+      "definition": "正负极活性材料、电解质、隔膜材料与回收再生材料",
+      "boundary": "电芯/电池包/储能系统归M05；采矿仅作上游标签",
+      "source_technology_objects": "LFP正极、硅基负极、电解液及再生材料",
+      "source_constraints": "循环稳定性、原料杂质、成本和量产一致性",
+      "selection_requirement": "entry_industry_or_explicit_context",
+      "status": "active",
+      "introduced_in": "1.0.0",
+      "replaced_by": null
+    },
+    {
+      "value": "automotive_electrified_powertrains",
+      "label_zh": "汽车电驱与动力总成",
+      "label_en": "Automotive Electrified Powertrains",
+      "source_industry_id": "E05",
+      "source_anchor": "industry-e05",
+      "entry_industry": "automotive",
+      "definition": "BEV/HEV/PHEV 电机、逆变器、电驱桥及混合动力耦合系统",
+      "boundary": "电芯材料及独立储能电池另归能源/材料；底盘与自动驾驶另列",
+      "source_technology_objects": "牵引电机、逆变器、传动与电驱热管理",
+      "source_constraints": "整车效率、成本、温升、NVH和多车型平台兼容性",
+      "selection_requirement": "entry_industry_or_explicit_context",
+      "status": "active",
+      "introduced_in": "1.0.0",
+      "replaced_by": null
+    },
+    {
+      "value": "adas_automated_driving",
+      "label_zh": "驾驶辅助与自动驾驶系统",
+      "label_en": "ADAS & Automated Driving Systems",
+      "source_industry_id": "E06",
+      "source_anchor": "industry-e06",
+      "entry_industry": "automotive",
+      "definition": "感知融合、驾驶决策、控制、安全验证及车载计算集成",
+      "boundary": "仅制造通用传感芯片归半导体；不将辅助驾驶等同无人驾驶",
+      "source_technology_objects": "车载摄像头/雷达融合、决策栈、场景与安全证据",
+      "source_constraints": "长尾场景、漏检误报、实时性、驾驶员接管及可验证性",
+      "selection_requirement": "entry_industry_or_explicit_context",
+      "status": "active",
+      "introduced_in": "1.0.0",
+      "replaced_by": null
+    },
+    {
+      "value": "automotive_chassis_body",
+      "label_zh": "汽车底盘与车身零部件",
+      "label_en": "Automotive Chassis & Body Components",
+      "source_industry_id": "E07",
+      "source_anchor": "industry-e07",
+      "entry_industry": "automotive",
+      "definition": "制动、转向、悬架、车身结构、座舱及车用热管理部件",
+      "boundary": "电驱动力总成与 ADAS 算法单列；原材料归材料行业",
+      "source_technology_objects": "车身连接、制动与悬架部件及热管理总成",
+      "source_constraints": "安全耐久、重量、噪振、可制造性和供应成本",
+      "selection_requirement": "entry_industry_or_explicit_context",
+      "status": "active",
+      "introduced_in": "1.0.0",
+      "replaced_by": null
+    },
+    {
+      "value": "commercial_special_vehicles",
+      "label_zh": "商用及专用车辆",
+      "label_en": "Commercial & Special-Purpose Vehicles",
+      "source_industry_id": "E08",
+      "source_anchor": "industry-e08",
+      "entry_industry": "automotive",
+      "definition": "公路卡车、客车、厢式商用车及专用车整车/系统工程",
+      "boundary": "乘用车、车队运营服务；非道路工程/农业机械归对应机械行业",
+      "source_technology_objects": "车辆架构、上装接口、动力与工作循环",
+      "source_constraints": "载荷、续航或能耗、停机时间、成本和恶劣工况",
+      "selection_requirement": "entry_industry_or_explicit_context",
+      "status": "active",
+      "introduced_in": "1.0.0",
+      "replaced_by": null
+    },
+    {
+      "value": "semiconductors",
+      "label_zh": "半导体",
+      "label_en": "Semiconductors",
+      "source_industry_id": "E01",
+      "source_anchor": "industry-e01",
+      "entry_industry": "electronics_manufacturing",
+      "definition": "芯片设计、晶圆制造、封装与测试；逻辑、存储、模拟及功率器件",
+      "boundary": "整机、PCB及独立光学仪器；半导体设备按主营活动另标设备",
+      "source_technology_objects": "芯片架构、互连封装、晶圆工艺与器件可靠性",
+      "source_constraints": "性能、功耗、面积、良率、热管理与量产成本同时约束",
+      "selection_requirement": "entry_industry_or_explicit_context",
+      "status": "active",
+      "introduced_in": "1.0.0",
+      "replaced_by": null
+    },
+    {
+      "value": "electronic_components_interconnects",
+      "label_zh": "电子元件与互连",
+      "label_en": "Electronic Components & Interconnects",
+      "source_industry_id": "E02",
+      "source_anchor": "industry-e02",
+      "entry_industry": "electronics_manufacturing",
+      "definition": "PCB、连接器、无源器件和电子组装互连；覆盖刚柔板",
+      "boundary": "半导体芯片、整机服务器、完整光学系统",
+      "source_technology_objects": "多层板、微孔、焊点、连接器接触和无源网络",
+      "source_constraints": "高频损耗、散热、尺寸缩小与长期连接可靠性",
+      "selection_requirement": "entry_industry_or_explicit_context",
+      "status": "active",
+      "introduced_in": "1.0.0",
+      "replaced_by": null
+    },
+    {
+      "value": "computing_network_hardware",
+      "label_zh": "计算与网络硬件",
+      "label_en": "Computing & Network Hardware",
+      "source_industry_id": "E03",
+      "source_anchor": "industry-e03",
+      "entry_industry": "electronics_manufacturing",
+      "definition": "服务器、存储系统、网络交换与通信设备的硬件和系统集成",
+      "boundary": "纯软件 SaaS、芯片设计、数据中心电力设施本体",
+      "source_technology_objects": "服务器节点、交换机、机柜互连与硬件散热",
+      "source_constraints": "算力密度、通信带宽、功耗、可维护性与供货周期",
+      "selection_requirement": "entry_industry_or_explicit_context",
+      "status": "active",
+      "introduced_in": "1.0.0",
+      "replaced_by": null
+    },
+    {
+      "value": "photonics_optical_sensing",
+      "label_zh": "光子与光学传感系统",
+      "label_en": "Photonics & Optical Sensing Systems",
+      "source_industry_id": "E04",
+      "source_anchor": "industry-e04",
+      "entry_industry": "electronics_manufacturing",
+      "definition": "激光器、光学仪器、成像与光谱检测系统；光学传感模块",
+      "boundary": "芯片级半导体器件归 E01；非光学传感按实际终端归类",
+      "source_technology_objects": "激光源、光路、成像/光谱传感和标定链",
+      "source_constraints": "信噪比、分辨率、环境漂移、体积和批量校准成本",
+      "selection_requirement": "entry_industry_or_explicit_context",
+      "status": "active",
+      "introduced_in": "1.0.0",
+      "replaced_by": null
+    },
+    {
+      "value": "industrial_robotics_automation",
+      "label_zh": "工业机器人与自动化",
+      "label_en": "Industrial Robotics & Automation",
+      "source_industry_id": "E09",
+      "source_anchor": "industry-e09",
+      "entry_industry": "engineering",
+      "definition": "工业机器人、协作机器人、机器视觉集成和自动化工作单元",
+      "boundary": "消费机器人；单台非机器人加工设备另列",
+      "source_technology_objects": "机器人本体、末端执行器、视觉与工作单元控制",
+      "source_constraints": "节拍、换型、人员安全、精度和非标集成成本",
+      "selection_requirement": "entry_industry_or_explicit_context",
+      "status": "active",
+      "introduced_in": "1.0.0",
+      "replaced_by": null
+    },
+    {
+      "value": "industrial_machinery",
+      "label_zh": "工业机械与生产设备",
+      "label_en": "Industrial Machinery & Production Equipment",
+      "source_industry_id": "E10",
+      "source_anchor": "industry-e10",
+      "entry_industry": "engineering",
+      "definition": "金属加工机床、成形与专用生产设备；机械子领域按客户对象补标签",
+      "boundary": "机器人、增材设备单列；民用建筑施工服务不在此类",
+      "source_technology_objects": "主轴、运动轴、加工刀具与工艺控制",
+      "source_constraints": "精度、节拍、热漂移、可靠性和单位产出能耗",
+      "selection_requirement": "entry_industry_or_explicit_context",
+      "status": "active",
+      "introduced_in": "1.0.0",
+      "replaced_by": null
+    },
+    {
+      "value": "additive_manufacturing_systems",
+      "label_zh": "增材制造设备与系统",
+      "label_en": "Additive Manufacturing Equipment & Systems",
+      "source_industry_id": "E12",
+      "source_anchor": "industry-e12",
+      "entry_industry": "engineering",
+      "definition": "工业 3D 打印机、过程监控、控制系统及设备集成",
+      "boundary": "打印粉末与树脂归材料；纯打印服务按最终客户行业多标签",
+      "source_technology_objects": "打印设备、铺粉/能量输入、在线监测与成形过程",
+      "source_constraints": "批间重复性、缺陷、表面质量、产能和鉴定成本",
+      "selection_requirement": "entry_industry_or_explicit_context",
+      "status": "active",
+      "introduced_in": "1.0.0",
+      "replaced_by": null
+    },
+    {
+      "value": "engineering_design_services",
+      "label_zh": "工程设计与技术咨询服务",
+      "label_en": "Engineering Design & Technical Consulting Services",
+      "source_industry_id": "E13",
+      "source_anchor": "industry-e13",
+      "entry_industry": "engineering",
+      "definition": "面向设施、系统和产品的工程分析、设计、技术咨询与集成建议",
+      "boundary": "设备制造、建筑施工承包、纯管理咨询和律师服务不在此类",
+      "source_technology_objects": "设施/系统方案、计算模型、接口与工程交付文件",
+      "source_constraints": "客户约束、设计假设、可验证性、跨专业协调和交付责任",
+      "selection_requirement": "entry_industry_or_explicit_context",
+      "status": "active",
+      "introduced_in": "1.0.0",
+      "replaced_by": null
+    },
+    {
+      "value": "antibody_protein_medicines",
+      "label_zh": "抗体与治疗性蛋白药物",
+      "label_en": "Antibody & Therapeutic Protein Medicines",
+      "source_industry_id": "H05",
+      "source_anchor": "industry-h05",
+      "entry_industry": "biotech",
+      "definition": "单克隆抗体、双特异抗体、抗体偶联药物及其他治疗蛋白",
+      "boundary": "小分子化药不是本子类；替客户生产归CDMO；细胞/基因产品另列",
+      "source_technology_objects": "抗体序列、结合结构、连接子/载荷、制剂与分析方法",
+      "source_constraints": "效力和选择性之外，还需处理聚集、稳定性、可制造性及安全证据",
+      "selection_requirement": "entry_industry_or_explicit_context",
+      "status": "active",
+      "introduced_in": "1.0.0",
+      "replaced_by": null
+    },
+    {
+      "value": "cell_gene_therapies",
+      "label_zh": "细胞治疗与基因治疗",
+      "label_en": "Cell & Gene Therapies",
+      "source_industry_id": "H06",
+      "source_anchor": "industry-h06",
+      "entry_industry": "biotech",
+      "definition": "CAR-T等细胞产品、体内/体外基因治疗及基因编辑治疗产品",
+      "boundary": "非治疗用途基因编辑归对应农业/工业方向；一般试剂与纯CDMO另列",
+      "source_technology_objects": "细胞群体、载体、编辑系统、递送与效力分析",
+      "source_constraints": "细胞或载体一致性、递送效率、效力表征和批次放大",
+      "selection_requirement": "entry_industry_or_explicit_context",
+      "status": "active",
+      "introduced_in": "1.0.0",
+      "replaced_by": null
+    },
+    {
+      "value": "biologics_process_manufacturing",
+      "label_zh": "生物药工艺开发与合同制造",
+      "label_en": "Biologics Process Development & Contract Manufacturing",
+      "source_industry_id": "H07",
+      "source_anchor": "industry-h07",
+      "entry_industry": "biotech",
+      "definition": "生物药CDMO、细胞株开发、培养纯化、分析及技术转移服务",
+      "boundary": "自有药物发现归药物子类；通用设备销售可跨标工程行业",
+      "source_technology_objects": "细胞株、培养基、生物反应器、纯化与制剂流程",
+      "source_constraints": "放大可比性、污染控制、收率、批次一致性与多场地转移",
+      "selection_requirement": "entry_industry_or_explicit_context",
+      "status": "active",
+      "introduced_in": "1.0.0",
+      "replaced_by": null
+    },
+    {
+      "value": "industrial_enzymes_microorganisms",
+      "label_zh": "工业酶与工业微生物",
+      "label_en": "Industrial Enzymes & Microorganisms",
+      "source_industry_id": "H08",
+      "source_anchor": "industry-h08",
+      "entry_industry": "biotech",
+      "definition": "清洁、纺织、造纸和工业生物加工用酶、生产菌种及相关配方",
+      "boundary": "食品配料归食品子类；可再生燃料成品归Chemical，能源作应用标签；聚合物成品归材料",
+      "source_technology_objects": "酶序列、生产菌种、发酵流程、酶制剂与应用工艺",
+      "source_constraints": "活性、工况稳定性、发酵收率和单位应用成本",
+      "selection_requirement": "entry_industry_or_explicit_context",
+      "status": "active",
+      "introduced_in": "1.0.0",
+      "replaced_by": null
+    },
+    {
+      "value": "life_science_research_tools",
+      "label_zh": "生命科学研究工具与实验室仪器",
+      "label_en": "Life Science Research Tools & Laboratory Instruments",
+      "source_industry_id": "H13",
+      "source_anchor": "industry-h13",
+      "entry_industry": "biotech",
+      "definition": "研究用测序与单细胞/多组学仪器、样本制备、分析试剂和实验室自动化",
+      "boundary": "用于临床诊断的成套IVD产品归H02；生物药CDMO归H07；研究用途不等同临床获批用途",
+      "source_technology_objects": "测序与成像平台、微流控、试剂化学、样本制备和分析工作流",
+      "source_constraints": "灵敏度、通量、批次效应、样本消耗和每个有效结果的成本",
+      "selection_requirement": "entry_industry_or_explicit_context",
+      "status": "active",
+      "introduced_in": "1.0.0",
+      "replaced_by": null
+    },
+    {
+      "value": "agricultural_machinery_precision_farming",
+      "label_zh": "农业机械与精准农业系统",
+      "label_en": "Agricultural Machinery & Precision Farming Systems",
+      "source_industry_id": "H09",
+      "source_anchor": "industry-h09",
+      "entry_industry": "food_farming_production",
+      "definition": "自动导航农机、精量播种、变量施用、感知与农业作业系统",
+      "boundary": "以工程制造作主业可跨标Engineering；种植服务不是设备研发",
+      "source_technology_objects": "农机执行器、定位与视觉感知、作业控制和处方图",
+      "source_constraints": "田间环境鲁棒性、定位精度、异构设备互联与投入成本",
+      "selection_requirement": "entry_industry_or_explicit_context",
+      "status": "active",
+      "introduced_in": "1.0.0",
+      "replaced_by": null
+    },
+    {
+      "value": "seeds_crop_breeding",
+      "label_zh": "种子与作物育种",
+      "label_en": "Seeds & Crop Breeding",
+      "source_industry_id": "H10",
+      "source_anchor": "industry-h10",
+      "entry_industry": "food_farming_production",
+      "definition": "商业种子、种苗与作物性状开发，含常规育种和生物技术育种",
+      "boundary": "农业机械另归农业装备；农药和生物防治产品本版未单列，可用 Other 补充",
+      "source_technology_objects": "种质、分子标记、育种流程、作物性状与田间表型",
+      "source_constraints": "性状效果与产量取舍；遗传背景、环境交互和多地点稳定性",
+      "selection_requirement": "entry_industry_or_explicit_context",
+      "status": "active",
+      "introduced_in": "1.0.0",
+      "replaced_by": null
+    },
+    {
+      "value": "frozen_prepared_foods",
+      "label_zh": "冷冻及方便食品",
+      "label_en": "Frozen & Prepared Foods",
+      "source_industry_id": "H11",
+      "source_anchor": "industry-h11",
+      "entry_industry": "food_farming_production",
+      "definition": "冷冻果蔬、冷冻餐食及即食方便食品制造，聚焦加工保鲜工艺",
+      "boundary": "纯食品机械制造可跨标Engineering；原粮、饮料和冷链运输服务不在此类",
+      "source_technology_objects": "食品基质、微生物控制、热质传递、冻结/干燥流程",
+      "source_constraints": "安全、感官、营养保留与能耗和产线吞吐的取舍",
+      "selection_requirement": "entry_industry_or_explicit_context",
+      "status": "active",
+      "introduced_in": "1.0.0",
+      "replaced_by": null
+    },
+    {
+      "value": "food_ingredients_nutrition",
+      "label_zh": "食品配料与营养成分",
+      "label_en": "Food Ingredients & Nutritional Components",
+      "source_industry_id": "H12",
+      "source_anchor": "industry-h12",
+      "entry_industry": "food_farming_production",
+      "definition": "面向食品制造的蛋白、膳食纤维、酶、菌种和功能配料及应用配方",
+      "boundary": "治疗性药物归生物药；工业用途酶归工业生物；不把替代蛋白视作全部行业",
+      "source_technology_objects": "蛋白组分、膳食纤维、发酵菌种、食品酶和乳化/凝胶体系",
+      "source_constraints": "口感、溶解性、营养组成、配方稳定与成本及规模化",
+      "selection_requirement": "entry_industry_or_explicit_context",
+      "status": "active",
+      "introduced_in": "1.0.0",
+      "replaced_by": null
+    },
+    {
+      "value": "batteries_stationary_storage",
+      "label_zh": "电池与固定式储能系统",
+      "label_en": "Batteries & Stationary Energy Storage",
+      "source_industry_id": "M05",
+      "source_anchor": "industry-m05",
+      "entry_industry": "energy",
+      "definition": "电芯制造、电池包、BMS、PCS与工商业/电网储能集成",
+      "boundary": "活性材料归M04；整车动力系统归Automotive；非泛指所有发电",
+      "source_technology_objects": "电芯、储能电池簇、BMS与储能变流器",
+      "source_constraints": "寿命、安全、可用容量及系统收益之间权衡",
+      "selection_requirement": "entry_industry_or_explicit_context",
+      "status": "active",
+      "introduced_in": "1.0.0",
+      "replaced_by": null
+    },
+    {
+      "value": "grid_power_equipment",
+      "label_zh": "电网与电力设备",
+      "label_en": "Grid & Power Equipment",
+      "source_industry_id": "M06",
+      "source_anchor": "industry-m06",
+      "entry_industry": "energy",
+      "definition": "变压器、开关设备、电缆、保护控制与电网增强技术",
+      "boundary": "发电设备归对应行业；仅售电交易不属于本类研发画像",
+      "source_technology_objects": "配电变压器、开关柜、保护继电器和动态载流监测",
+      "source_constraints": "载荷增长、绝缘老化、故障隔离与交付周期",
+      "selection_requirement": "entry_industry_or_explicit_context",
+      "status": "active",
+      "introduced_in": "1.0.0",
+      "replaced_by": null
+    },
+    {
+      "value": "solar_photovoltaics",
+      "label_zh": "太阳能光伏设备",
+      "label_en": "Solar Photovoltaics",
+      "source_industry_id": "M07",
+      "source_anchor": "industry-m07",
+      "entry_industry": "energy",
+      "definition": "光伏电池片/组件、封装、支架跟踪及逆变器研发制造",
+      "boundary": "晶圆级通用半导体归Electronics；上游树脂/玻璃归材料",
+      "source_technology_objects": "光伏电池片、封装组件、跟踪支架与逆变器",
+      "source_constraints": "转换效率、长期衰减、极端天气和度电成本",
+      "selection_requirement": "entry_industry_or_explicit_context",
+      "status": "active",
+      "introduced_in": "1.0.0",
+      "replaced_by": null
+    },
+    {
+      "value": "hydrogen_fuel_cell_equipment",
+      "label_zh": "制氢与燃料电池设备",
+      "label_en": "Hydrogen & Fuel Cell Equipment",
+      "source_industry_id": "M08",
+      "source_anchor": "industry-m08",
+      "entry_industry": "energy",
+      "definition": "电解槽、燃料电池电堆、氢压缩储运设备和辅助系统",
+      "boundary": "工业氢气商品供应归M11；氢基燃料合成归M12",
+      "source_technology_objects": "PEM/碱性电解槽、燃料电池膜电极与辅助系统",
+      "source_constraints": "寿命、间歇负荷、贵金属用量及氢成本",
+      "selection_requirement": "entry_industry_or_explicit_context",
+      "status": "active",
+      "introduced_in": "1.0.0",
+      "replaced_by": null
+    },
+    {
+      "value": "electronic_chemicals",
+      "label_zh": "电子化学品",
+      "label_en": "Electronic Chemicals",
+      "source_industry_id": "M09",
+      "source_anchor": "industry-m09",
+      "entry_industry": "chemical",
+      "definition": "光刻胶、湿电子化学品、CMP浆料、电镀添加剂及沉积前驱体",
+      "boundary": "工业气体商品归M11；晶圆器件/封装服务归Electronics",
+      "source_technology_objects": "光刻胶、CMP浆料、电子级清洗液和电镀添加剂",
+      "source_constraints": "纳米级缺陷、金属杂质、工艺兼容与批次稳定",
+      "selection_requirement": "entry_industry_or_explicit_context",
+      "status": "active",
+      "introduced_in": "1.0.0",
+      "replaced_by": null
+    },
+    {
+      "value": "coatings_adhesives_sealants",
+      "label_zh": "涂料、胶黏剂与密封剂",
+      "label_en": "Coatings, Adhesives & Sealants",
+      "source_industry_id": "M10",
+      "source_anchor": "industry-m10",
+      "entry_industry": "chemical",
+      "definition": "工业/功能涂料、结构胶、电子胶及建筑密封配方研发制造",
+      "boundary": "基础树脂供货归M01；实际喷涂/安装业务需另标服务角色",
+      "source_technology_objects": "水性涂料、结构胶、导热胶和耐候密封剂",
+      "source_constraints": "附着/固化速度、耐久、排放与施工窗口",
+      "selection_requirement": "entry_industry_or_explicit_context",
+      "status": "active",
+      "introduced_in": "1.0.0",
+      "replaced_by": null
+    },
+    {
+      "value": "industrial_specialty_gases",
+      "label_zh": "工业与电子特种气体",
+      "label_en": "Industrial & Specialty Gases",
+      "source_industry_id": "M11",
+      "source_anchor": "industry-m11",
+      "entry_industry": "chemical",
+      "definition": "高纯/特种气体、空分、纯化、气体配送和回收供应系统",
+      "boundary": "氢能设备归M08；催化剂不与气体混为同一细分行业",
+      "source_technology_objects": "超高纯氮氩、电子特气、纯化器及供气系统",
+      "source_constraints": "痕量杂质、连续供气、安全与单位能耗",
+      "selection_requirement": "entry_industry_or_explicit_context",
+      "status": "active",
+      "introduced_in": "1.0.0",
+      "replaced_by": null
+    },
+    {
+      "value": "renewable_fuels",
+      "label_zh": "可再生燃料",
+      "label_en": "Renewable Fuels",
+      "source_industry_id": "M12",
+      "source_anchor": "industry-m12",
+      "entry_industry": "chemical",
+      "definition": "SAF、可再生柴油、生物醇和合成燃料的化工转化生产",
+      "boundary": "发酵平台研发归Biotechnology并加交叉标签；制氢设备归M08",
+      "source_technology_objects": "HEFA/醇制航煤工艺、催化剂和可再生原料",
+      "source_constraints": "碳收率、氢耗、原料稳定性、认证及生产成本",
+      "selection_requirement": "entry_industry_or_explicit_context",
+      "status": "active",
+      "introduced_in": "1.0.0",
+      "replaced_by": null
+    },
+    {
+      "value": "building_hvac_heat_pumps",
+      "label_zh": "建筑暖通与热泵设备",
+      "label_en": "Building HVAC & Heat Pumps",
+      "source_industry_id": "M13",
+      "source_anchor": "industry-m13",
+      "entry_industry": "construction",
+      "definition": "热泵、空调、通风、热水设备及建筑控制研发制造",
+      "boundary": "施工安装另加承包/服务标签；不是把设备厂等同建筑承包商",
+      "source_technology_objects": "热泵压缩机、换热器、制冷剂回路与楼宇控制",
+      "source_constraints": "低温效率、除霜、噪声、安装成本和舒适度",
+      "selection_requirement": "entry_industry_or_explicit_context",
+      "status": "active",
+      "introduced_in": "1.0.0",
+      "replaced_by": null
+    },
+    {
+      "value": "cement_concrete",
+      "label_zh": "水泥与混凝土",
+      "label_en": "Cement & Concrete",
+      "source_industry_id": "M14",
+      "source_anchor": "industry-m14",
+      "entry_industry": "construction",
+      "definition": "水泥、胶凝材料、预拌/预制混凝土，低碳技术作标签",
+      "boundary": "主体是建材供应/产品研发；现场浇筑承包活动另标；不囊括所有材料",
+      "source_technology_objects": "低熟料胶凝体系、SCM与混凝土配合比",
+      "source_constraints": "早期强度、长期耐久、和易性与隐含碳",
+      "selection_requirement": "entry_industry_or_explicit_context",
+      "status": "active",
+      "introduced_in": "1.0.0",
+      "replaced_by": null
+    },
+    {
+      "value": "prefabricated_modular_buildings",
+      "label_zh": "装配式与模块化建筑",
+      "label_en": "Prefabricated & Modular Buildings",
+      "source_industry_id": "M15",
+      "source_anchor": "industry-m15",
+      "entry_industry": "construction",
+      "definition": "工厂化模块/面板系统、结构连接及机电一体化交付",
+      "boundary": "按工厂制造/设计/现场安装区分子活动；不等同房产开发或所有建筑",
+      "source_technology_objects": "建筑模块、墙板、结构连接件和机电接口",
+      "source_constraints": "运输限制、接口公差、结构/防火性能和安装节拍",
+      "selection_requirement": "entry_industry_or_explicit_context",
+      "status": "active",
+      "introduced_in": "1.0.0",
+      "replaced_by": null
+    },
+    {
+      "value": "water_wastewater_infrastructure",
+      "label_zh": "水与污水处理基础设施",
+      "label_en": "Water & Wastewater Infrastructure",
+      "source_industry_id": "M16",
+      "source_anchor": "industry-m16",
+      "entry_industry": "construction",
+      "definition": "给排水网络、处理工艺/设备、再生水与更新工程",
+      "boundary": "水务运营/工程建设/设备研发分别打子活动标签；非所有环保行业",
+      "source_technology_objects": "膜处理、吸附介质、曝气系统与供排水管网",
+      "source_constraints": "出水质量、能耗、污染物变化和连续运行可靠性",
+      "selection_requirement": "entry_industry_or_explicit_context",
+      "status": "active",
+      "introduced_in": "1.0.0",
+      "replaced_by": null
+    },
+    {
+      "value": "aerospace_space",
+      "label_zh": "航空航天",
+      "label_en": "Aerospace & Space",
+      "source_industry_id": "E11",
+      "source_anchor": "industry-e11",
+      "entry_industry": "other",
+      "definition": "飞机、航空推进与航电、卫星及航天器部件/系统；建议从 Other 新增具名行业，Engineering 旧用户可按对象迁移",
+      "boundary": "航空运营与旅游服务；陆海军工及纯网络安全不纳入",
+      "source_technology_objects": "航空结构、推进/航电或卫星系统及其环境验证",
+      "source_constraints": "质量功耗预算、可靠性、可追溯性、认证与供应周期",
+      "selection_requirement": "explicit_segment_context",
+      "status": "active",
+      "introduced_in": "1.0.0",
+      "replaced_by": null
+    }
+  ],
+  "technology_objects": [
+    {
+      "value": "imaging_detector",
+      "label_zh": "成像探测器",
+      "label_en": "Imaging detector",
+      "definition": "成像链路中将入射信号转换为检测信号的器件",
+      "allowed_segments": [
+        "medical_imaging"
+      ],
+      "source_industry_ids": [
+        "H01"
+      ],
+      "boundary": "仅标记问题主要处理的上述对象；排除顺带提及的对象、优化目标和未列出的同名应用。",
+      "status": "active",
+      "introduced_in": "1.0.0",
+      "replaced_by": null
+    },
+    {
+      "value": "image_reconstruction",
+      "label_zh": "图像重建方法",
+      "label_en": "Image reconstruction",
+      "definition": "从采集数据恢复图像的算法和重建流程",
+      "allowed_segments": [
+        "medical_imaging"
+      ],
+      "source_industry_ids": [
+        "H01"
+      ],
+      "boundary": "仅标记问题主要处理的上述对象；排除顺带提及的对象、优化目标和未列出的同名应用。",
+      "status": "active",
+      "introduced_in": "1.0.0",
+      "replaced_by": null
+    },
+    {
+      "value": "imaging_acquisition_chain",
+      "label_zh": "成像采集链路",
+      "label_en": "Imaging acquisition chain",
+      "definition": "影像采集硬件及其信号链的系统组合",
+      "allowed_segments": [
+        "medical_imaging"
+      ],
+      "source_industry_ids": [
+        "H01"
+      ],
+      "boundary": "仅标记问题主要处理的上述对象；排除顺带提及的对象、优化目标和未列出的同名应用。",
+      "status": "active",
+      "introduced_in": "1.0.0",
+      "replaced_by": null
+    },
+    {
+      "value": "microfluidic_cartridge",
+      "label_zh": "微流控卡匣",
+      "label_en": "Microfluidic cartridge",
+      "definition": "集成样本输送、处理或反应的微流控载体",
+      "allowed_segments": [
+        "in_vitro_diagnostics",
+        "life_science_research_tools"
+      ],
+      "source_industry_ids": [
+        "H02",
+        "H13"
+      ],
+      "boundary": "仅标记问题主要处理的上述对象；排除顺带提及的对象、优化目标和未列出的同名应用。",
+      "status": "active",
+      "introduced_in": "1.0.0",
+      "replaced_by": null
+    },
+    {
+      "value": "diagnostic_reagent_system",
+      "label_zh": "诊断试剂体系",
+      "label_en": "Diagnostic reagent system",
+      "definition": "用于诊断检测的反应、探针及试剂组合",
+      "allowed_segments": [
+        "in_vitro_diagnostics"
+      ],
+      "source_industry_ids": [
+        "H02"
+      ],
+      "boundary": "仅标记问题主要处理的上述对象；排除顺带提及的对象、优化目标和未列出的同名应用。",
+      "status": "active",
+      "introduced_in": "1.0.0",
+      "replaced_by": null
+    },
+    {
+      "value": "sample_preparation",
+      "label_zh": "样本前处理",
+      "label_en": "Sample preparation",
+      "definition": "进入检测或分析前的提取、分离及处理流程",
+      "allowed_segments": [
+        "in_vitro_diagnostics",
+        "life_science_research_tools"
+      ],
+      "source_industry_ids": [
+        "H02",
+        "H13"
+      ],
+      "boundary": "仅标记问题主要处理的上述对象；排除顺带提及的对象、优化目标和未列出的同名应用。",
+      "status": "active",
+      "introduced_in": "1.0.0",
+      "replaced_by": null
+    },
+    {
+      "value": "glucose_sensor",
+      "label_zh": "葡萄糖传感器",
+      "label_en": "Glucose sensor",
+      "definition": "用于葡萄糖监测的传感器及校准对象",
+      "allowed_segments": [
+        "diabetes_monitoring_delivery"
+      ],
+      "source_industry_ids": [
+        "H03"
+      ],
+      "boundary": "仅标记问题主要处理的上述对象；排除顺带提及的对象、优化目标和未列出的同名应用。",
+      "status": "active",
+      "introduced_in": "1.0.0",
+      "replaced_by": null
+    },
+    {
+      "value": "insulin_delivery_pump",
+      "label_zh": "胰岛素给药泵",
+      "label_en": "Insulin delivery pump",
+      "definition": "控制微量给药的泵与给药机构",
+      "allowed_segments": [
+        "diabetes_monitoring_delivery"
+      ],
+      "source_industry_ids": [
+        "H03"
+      ],
+      "boundary": "仅标记问题主要处理的上述对象；排除顺带提及的对象、优化目标和未列出的同名应用。",
+      "status": "active",
+      "introduced_in": "1.0.0",
+      "replaced_by": null
+    },
+    {
+      "value": "wearable_skin_interface",
+      "label_zh": "穿戴皮肤界面",
+      "label_en": "Wearable skin interface",
+      "definition": "设备与皮肤之间的黏附、封装及接触界面",
+      "allowed_segments": [
+        "diabetes_monitoring_delivery"
+      ],
+      "source_industry_ids": [
+        "H03"
+      ],
+      "boundary": "仅标记问题主要处理的上述对象；排除顺带提及的对象、优化目标和未列出的同名应用。",
+      "status": "active",
+      "introduced_in": "1.0.0",
+      "replaced_by": null
+    },
+    {
+      "value": "surgical_manipulator",
+      "label_zh": "手术操控机构",
+      "label_en": "Surgical manipulator",
+      "definition": "手术机械臂、腕式器械和执行结构",
+      "allowed_segments": [
+        "surgical_robotics"
+      ],
+      "source_industry_ids": [
+        "H04"
+      ],
+      "boundary": "仅标记问题主要处理的上述对象；排除顺带提及的对象、优化目标和未列出的同名应用。",
+      "status": "active",
+      "introduced_in": "1.0.0",
+      "replaced_by": null
+    },
+    {
+      "value": "flexible_surgical_catheter",
+      "label_zh": "柔性手术导管",
+      "label_en": "Flexible surgical catheter",
+      "definition": "用于腔内操作的柔性导管及传动结构",
+      "allowed_segments": [
+        "surgical_robotics"
+      ],
+      "source_industry_ids": [
+        "H04"
+      ],
+      "boundary": "仅标记问题主要处理的上述对象；排除顺带提及的对象、优化目标和未列出的同名应用。",
+      "status": "active",
+      "introduced_in": "1.0.0",
+      "replaced_by": null
+    },
+    {
+      "value": "surgical_navigation",
+      "label_zh": "手术导航系统",
+      "label_en": "Surgical navigation",
+      "definition": "支持器械定位与操控的视觉导航链路",
+      "allowed_segments": [
+        "surgical_robotics"
+      ],
+      "source_industry_ids": [
+        "H04"
+      ],
+      "boundary": "仅标记问题主要处理的上述对象；排除顺带提及的对象、优化目标和未列出的同名应用。",
+      "status": "active",
+      "introduced_in": "1.0.0",
+      "replaced_by": null
+    },
+    {
+      "value": "engineering_polymer",
+      "label_zh": "工程聚合物",
+      "label_en": "Engineering polymer",
+      "definition": "以结构或电热性能为目标的工程聚合物体系",
+      "allowed_segments": [
+        "engineering_polymers_composites"
+      ],
+      "source_industry_ids": [
+        "M01"
+      ],
+      "boundary": "仅标记问题主要处理的上述对象；排除顺带提及的对象、优化目标和未列出的同名应用。",
+      "status": "active",
+      "introduced_in": "1.0.0",
+      "replaced_by": null
+    },
+    {
+      "value": "fiber_composite",
+      "label_zh": "纤维增强复合材料",
+      "label_en": "Fiber reinforced composite",
+      "definition": "纤维与基体共同构成的工程复合材料",
+      "allowed_segments": [
+        "engineering_polymers_composites"
+      ],
+      "source_industry_ids": [
+        "M01"
+      ],
+      "boundary": "仅标记问题主要处理的上述对象；排除顺带提及的对象、优化目标和未列出的同名应用。",
+      "status": "active",
+      "introduced_in": "1.0.0",
+      "replaced_by": null
+    },
+    {
+      "value": "polymer_molding",
+      "label_zh": "聚合物成型工艺",
+      "label_en": "Polymer molding",
+      "definition": "聚合物或复材的成型、加工窗口及结构形成过程",
+      "allowed_segments": [
+        "engineering_polymers_composites"
+      ],
+      "source_industry_ids": [
+        "M01"
+      ],
+      "boundary": "仅标记问题主要处理的上述对象；排除顺带提及的对象、优化目标和未列出的同名应用。",
+      "status": "active",
+      "introduced_in": "1.0.0",
+      "replaced_by": null
+    },
+    {
+      "value": "high_performance_alloy",
+      "label_zh": "高性能合金",
+      "label_en": "High performance alloy",
+      "definition": "以耐温、疲劳等性能为目标的金属合金体系",
+      "allowed_segments": [
+        "specialty_metals_alloys"
+      ],
+      "source_industry_ids": [
+        "M02"
+      ],
+      "boundary": "仅标记问题主要处理的上述对象；排除顺带提及的对象、优化目标和未列出的同名应用。",
+      "status": "active",
+      "introduced_in": "1.0.0",
+      "replaced_by": null
+    },
+    {
+      "value": "metal_am_powder",
+      "label_zh": "金属增材制造粉末",
+      "label_en": "Metal additive manufacturing powder",
+      "definition": "用于金属增材制造的粉末原料及其适配特性",
+      "allowed_segments": [
+        "specialty_metals_alloys",
+        "additive_manufacturing_systems"
+      ],
+      "source_industry_ids": [
+        "M02",
+        "E12"
+      ],
+      "boundary": "仅标记问题主要处理的上述对象；排除顺带提及的对象、优化目标和未列出的同名应用。",
+      "status": "active",
+      "introduced_in": "1.0.0",
+      "replaced_by": null
+    },
+    {
+      "value": "alloy_heat_treatment",
+      "label_zh": "合金热处理",
+      "label_en": "Alloy heat treatment",
+      "definition": "调控合金组织与性能的热处理路线",
+      "allowed_segments": [
+        "specialty_metals_alloys"
+      ],
+      "source_industry_ids": [
+        "M02"
+      ],
+      "boundary": "仅标记问题主要处理的上述对象；排除顺带提及的对象、优化目标和未列出的同名应用。",
+      "status": "active",
+      "introduced_in": "1.0.0",
+      "replaced_by": null
+    },
+    {
+      "value": "technical_ceramic",
+      "label_zh": "技术陶瓷",
+      "label_en": "Technical ceramic",
+      "definition": "服务电、热或结构功能的陶瓷材料及基材",
+      "allowed_segments": [
+        "technical_ceramics_glass"
+      ],
+      "source_industry_ids": [
+        "M03"
+      ],
+      "boundary": "仅标记问题主要处理的上述对象；排除顺带提及的对象、优化目标和未列出的同名应用。",
+      "status": "active",
+      "introduced_in": "1.0.0",
+      "replaced_by": null
+    },
+    {
+      "value": "specialty_glass",
+      "label_zh": "特种玻璃",
+      "label_en": "Specialty glass",
+      "definition": "面向特定电热或结构性能的玻璃体系",
+      "allowed_segments": [
+        "technical_ceramics_glass"
+      ],
+      "source_industry_ids": [
+        "M03"
+      ],
+      "boundary": "仅标记问题主要处理的上述对象；排除顺带提及的对象、优化目标和未列出的同名应用。",
+      "status": "active",
+      "introduced_in": "1.0.0",
+      "replaced_by": null
+    },
+    {
+      "value": "thermal_filler",
+      "label_zh": "导热填料",
+      "label_en": "Thermally conductive filler",
+      "definition": "用于调节热传导和界面特性的填充材料",
+      "allowed_segments": [
+        "technical_ceramics_glass"
+      ],
+      "source_industry_ids": [
+        "M03"
+      ],
+      "boundary": "仅标记问题主要处理的上述对象；排除顺带提及的对象、优化目标和未列出的同名应用。",
+      "status": "active",
+      "introduced_in": "1.0.0",
+      "replaced_by": null
+    },
+    {
+      "value": "battery_electrode_material",
+      "label_zh": "电池电极材料",
+      "label_en": "Battery electrode material",
+      "definition": "电池正负极活性材料、包覆及颗粒体系",
+      "allowed_segments": [
+        "battery_materials_recycling"
+      ],
+      "source_industry_ids": [
+        "M04"
+      ],
+      "boundary": "仅标记问题主要处理的上述对象；排除顺带提及的对象、优化目标和未列出的同名应用。",
+      "status": "active",
+      "introduced_in": "1.0.0",
+      "replaced_by": null
+    },
+    {
+      "value": "battery_electrolyte",
+      "label_zh": "电池电解液",
+      "label_en": "Battery electrolyte",
+      "definition": "电池电解液配方及与电极的相容体系",
+      "allowed_segments": [
+        "battery_materials_recycling"
+      ],
+      "source_industry_ids": [
+        "M04"
+      ],
+      "boundary": "仅标记问题主要处理的上述对象；排除顺带提及的对象、优化目标和未列出的同名应用。",
+      "status": "active",
+      "introduced_in": "1.0.0",
+      "replaced_by": null
+    },
+    {
+      "value": "battery_material_recovery",
+      "label_zh": "电池材料回收工艺",
+      "label_en": "Battery material recovery",
+      "definition": "从退役材料回收、再生电池材料的工艺",
+      "allowed_segments": [
+        "battery_materials_recycling"
+      ],
+      "source_industry_ids": [
+        "M04"
+      ],
+      "boundary": "仅标记问题主要处理的上述对象；排除顺带提及的对象、优化目标和未列出的同名应用。",
+      "status": "active",
+      "introduced_in": "1.0.0",
+      "replaced_by": null
+    },
+    {
+      "value": "traction_motor",
+      "label_zh": "牵引电机",
+      "label_en": "Traction motor",
+      "definition": "汽车电驱系统中产生牵引动力的电机",
+      "allowed_segments": [
+        "automotive_electrified_powertrains"
+      ],
+      "source_industry_ids": [
+        "E05"
+      ],
+      "boundary": "仅标记问题主要处理的上述对象；排除顺带提及的对象、优化目标和未列出的同名应用。",
+      "status": "active",
+      "introduced_in": "1.0.0",
+      "replaced_by": null
+    },
+    {
+      "value": "traction_inverter",
+      "label_zh": "牵引逆变器",
+      "label_en": "Traction inverter",
+      "definition": "汽车电驱系统的功率变换与控制部件",
+      "allowed_segments": [
+        "automotive_electrified_powertrains"
+      ],
+      "source_industry_ids": [
+        "E05"
+      ],
+      "boundary": "仅标记问题主要处理的上述对象；排除顺带提及的对象、优化目标和未列出的同名应用。",
+      "status": "active",
+      "introduced_in": "1.0.0",
+      "replaced_by": null
+    },
+    {
+      "value": "electric_drive_assembly",
+      "label_zh": "电驱总成",
+      "label_en": "Electric drive assembly",
+      "definition": "电机、传动及配套热管理的集成总成",
+      "allowed_segments": [
+        "automotive_electrified_powertrains"
+      ],
+      "source_industry_ids": [
+        "E05"
+      ],
+      "boundary": "仅标记问题主要处理的上述对象；排除顺带提及的对象、优化目标和未列出的同名应用。",
+      "status": "active",
+      "introduced_in": "1.0.0",
+      "replaced_by": null
+    },
+    {
+      "value": "automotive_sensor_fusion",
+      "label_zh": "车载传感融合",
+      "label_en": "Automotive sensor fusion",
+      "definition": "对摄像头、雷达等车载感知输入进行融合的方法",
+      "allowed_segments": [
+        "adas_automated_driving"
+      ],
+      "source_industry_ids": [
+        "E06"
+      ],
+      "boundary": "仅标记问题主要处理的上述对象；排除顺带提及的对象、优化目标和未列出的同名应用。",
+      "status": "active",
+      "introduced_in": "1.0.0",
+      "replaced_by": null
+    },
+    {
+      "value": "automated_driving_control",
+      "label_zh": "自动驾驶决策控制",
+      "label_en": "Automated driving decision and control",
+      "definition": "驾驶自动化中的决策与控制技术链",
+      "allowed_segments": [
+        "adas_automated_driving"
+      ],
+      "source_industry_ids": [
+        "E06"
+      ],
+      "boundary": "仅标记问题主要处理的上述对象；排除顺带提及的对象、优化目标和未列出的同名应用。",
+      "status": "active",
+      "introduced_in": "1.0.0",
+      "replaced_by": null
+    },
+    {
+      "value": "driving_scenario_validation",
+      "label_zh": "驾驶场景验证体系",
+      "label_en": "Driving scenario validation",
+      "definition": "面向运行场景、接管及降级的测试对象与方法体系",
+      "allowed_segments": [
+        "adas_automated_driving"
+      ],
+      "source_industry_ids": [
+        "E06"
+      ],
+      "boundary": "仅标记问题主要处理的上述对象；排除顺带提及的对象、优化目标和未列出的同名应用。",
+      "status": "active",
+      "introduced_in": "1.0.0",
+      "replaced_by": null
+    },
+    {
+      "value": "vehicle_body_joint",
+      "label_zh": "车身连接结构",
+      "label_en": "Vehicle body joint",
+      "definition": "汽车车身材料之间的连接及接头结构",
+      "allowed_segments": [
+        "automotive_chassis_body"
+      ],
+      "source_industry_ids": [
+        "E07"
+      ],
+      "boundary": "仅标记问题主要处理的上述对象；排除顺带提及的对象、优化目标和未列出的同名应用。",
+      "status": "active",
+      "introduced_in": "1.0.0",
+      "replaced_by": null
+    },
+    {
+      "value": "braking_suspension_component",
+      "label_zh": "制动与悬架部件",
+      "label_en": "Braking and suspension component",
+      "definition": "汽车制动或悬架系统中的功能部件",
+      "allowed_segments": [
+        "automotive_chassis_body"
+      ],
+      "source_industry_ids": [
+        "E07"
+      ],
+      "boundary": "仅标记问题主要处理的上述对象；排除顺带提及的对象、优化目标和未列出的同名应用。",
+      "status": "active",
+      "introduced_in": "1.0.0",
+      "replaced_by": null
+    },
+    {
+      "value": "automotive_thermal_assembly",
+      "label_zh": "汽车热管理总成",
+      "label_en": "Automotive thermal assembly",
+      "definition": "车身与底盘应用中的热管理部件组合",
+      "allowed_segments": [
+        "automotive_chassis_body"
+      ],
+      "source_industry_ids": [
+        "E07"
+      ],
+      "boundary": "仅标记问题主要处理的上述对象；排除顺带提及的对象、优化目标和未列出的同名应用。",
+      "status": "active",
+      "introduced_in": "1.0.0",
+      "replaced_by": null
+    },
+    {
+      "value": "commercial_vehicle_architecture",
+      "label_zh": "商用车辆架构",
+      "label_en": "Commercial vehicle architecture",
+      "definition": "按载荷、动力及作业要求形成的整车系统架构",
+      "allowed_segments": [
+        "commercial_special_vehicles"
+      ],
+      "source_industry_ids": [
+        "E08"
+      ],
+      "boundary": "仅标记问题主要处理的上述对象；排除顺带提及的对象、优化目标和未列出的同名应用。",
+      "status": "active",
+      "introduced_in": "1.0.0",
+      "replaced_by": null
+    },
+    {
+      "value": "vocational_body_interface",
+      "label_zh": "专用车辆上装接口",
+      "label_en": "Vocational body interface",
+      "definition": "底盘与作业上装之间的机械、能源及控制接口",
+      "allowed_segments": [
+        "commercial_special_vehicles"
+      ],
+      "source_industry_ids": [
+        "E08"
+      ],
+      "boundary": "仅标记问题主要处理的上述对象；排除顺带提及的对象、优化目标和未列出的同名应用。",
+      "status": "active",
+      "introduced_in": "1.0.0",
+      "replaced_by": null
+    },
+    {
+      "value": "vehicle_duty_cycle",
+      "label_zh": "车辆工作循环",
+      "label_en": "Vehicle duty cycle",
+      "definition": "用于设计或验证商用车辆的载荷与运行工况序列",
+      "allowed_segments": [
+        "commercial_special_vehicles"
+      ],
+      "source_industry_ids": [
+        "E08"
+      ],
+      "boundary": "仅标记问题主要处理的上述对象；排除顺带提及的对象、优化目标和未列出的同名应用。",
+      "status": "active",
+      "introduced_in": "1.0.0",
+      "replaced_by": null
+    },
+    {
+      "value": "chip_interconnect",
+      "label_zh": "芯片互连",
+      "label_en": "Chip interconnect",
+      "definition": "芯片内部或芯片间用于信号与供电的互连结构",
+      "allowed_segments": [
+        "semiconductors"
+      ],
+      "source_industry_ids": [
+        "E01"
+      ],
+      "boundary": "仅标记问题主要处理的上述对象；排除顺带提及的对象、优化目标和未列出的同名应用。",
+      "status": "active",
+      "introduced_in": "1.0.0",
+      "replaced_by": null
+    },
+    {
+      "value": "semiconductor_packaging",
+      "label_zh": "半导体封装",
+      "label_en": "Semiconductor packaging",
+      "definition": "芯片封装的结构、工艺及集成技术",
+      "allowed_segments": [
+        "semiconductors"
+      ],
+      "source_industry_ids": [
+        "E01"
+      ],
+      "boundary": "仅标记问题主要处理的上述对象；排除顺带提及的对象、优化目标和未列出的同名应用。",
+      "status": "active",
+      "introduced_in": "1.0.0",
+      "replaced_by": null
+    },
+    {
+      "value": "wafer_fabrication",
+      "label_zh": "晶圆制造工艺",
+      "label_en": "Wafer fabrication",
+      "definition": "在晶圆上形成器件的制造流程及工艺窗口",
+      "allowed_segments": [
+        "semiconductors"
+      ],
+      "source_industry_ids": [
+        "E01"
+      ],
+      "boundary": "仅标记问题主要处理的上述对象；排除顺带提及的对象、优化目标和未列出的同名应用。",
+      "status": "active",
+      "introduced_in": "1.0.0",
+      "replaced_by": null
+    },
+    {
+      "value": "printed_circuit_board",
+      "label_zh": "印制电路板",
+      "label_en": "Printed circuit board",
+      "definition": "板级布线、层叠、微孔及相关板材结构",
+      "allowed_segments": [
+        "electronic_components_interconnects"
+      ],
+      "source_industry_ids": [
+        "E02"
+      ],
+      "boundary": "仅标记问题主要处理的上述对象；排除顺带提及的对象、优化目标和未列出的同名应用。",
+      "status": "active",
+      "introduced_in": "1.0.0",
+      "replaced_by": null
+    },
+    {
+      "value": "connector_contact",
+      "label_zh": "连接器接触结构",
+      "label_en": "Connector contact",
+      "definition": "连接器中承担电连接的接触及配合结构",
+      "allowed_segments": [
+        "electronic_components_interconnects"
+      ],
+      "source_industry_ids": [
+        "E02"
+      ],
+      "boundary": "仅标记问题主要处理的上述对象；排除顺带提及的对象、优化目标和未列出的同名应用。",
+      "status": "active",
+      "introduced_in": "1.0.0",
+      "replaced_by": null
+    },
+    {
+      "value": "solder_joint",
+      "label_zh": "焊点",
+      "label_en": "Solder joint",
+      "definition": "电子装配中承担电与机械连接的焊接接头",
+      "allowed_segments": [
+        "electronic_components_interconnects"
+      ],
+      "source_industry_ids": [
+        "E02"
+      ],
+      "boundary": "仅标记问题主要处理的上述对象；排除顺带提及的对象、优化目标和未列出的同名应用。",
+      "status": "active",
+      "introduced_in": "1.0.0",
+      "replaced_by": null
+    },
+    {
+      "value": "server_node",
+      "label_zh": "服务器节点",
+      "label_en": "Server node",
+      "definition": "服务器硬件的计算节点及部件组织",
+      "allowed_segments": [
+        "computing_network_hardware"
+      ],
+      "source_industry_ids": [
+        "E03"
+      ],
+      "boundary": "仅标记问题主要处理的上述对象；排除顺带提及的对象、优化目标和未列出的同名应用。",
+      "status": "active",
+      "introduced_in": "1.0.0",
+      "replaced_by": null
+    },
+    {
+      "value": "network_switch",
+      "label_zh": "网络交换机",
+      "label_en": "Network switch",
+      "definition": "计算网络中的交换硬件及其互连结构",
+      "allowed_segments": [
+        "computing_network_hardware"
+      ],
+      "source_industry_ids": [
+        "E03"
+      ],
+      "boundary": "仅标记问题主要处理的上述对象；排除顺带提及的对象、优化目标和未列出的同名应用。",
+      "status": "active",
+      "introduced_in": "1.0.0",
+      "replaced_by": null
+    },
+    {
+      "value": "rack_cooling",
+      "label_zh": "机柜散热系统",
+      "label_en": "Rack cooling",
+      "definition": "面向服务器机柜的散热和冷却硬件系统",
+      "allowed_segments": [
+        "computing_network_hardware"
+      ],
+      "source_industry_ids": [
+        "E03"
+      ],
+      "boundary": "仅标记问题主要处理的上述对象；排除顺带提及的对象、优化目标和未列出的同名应用。",
+      "status": "active",
+      "introduced_in": "1.0.0",
+      "replaced_by": null
+    },
+    {
+      "value": "laser_source",
+      "label_zh": "激光源",
+      "label_en": "Laser source",
+      "definition": "光子或光学测量系统中的激光发射器件",
+      "allowed_segments": [
+        "photonics_optical_sensing"
+      ],
+      "source_industry_ids": [
+        "E04"
+      ],
+      "boundary": "仅标记问题主要处理的上述对象；排除顺带提及的对象、优化目标和未列出的同名应用。",
+      "status": "active",
+      "introduced_in": "1.0.0",
+      "replaced_by": null
+    },
+    {
+      "value": "optical_sensing_chain",
+      "label_zh": "光学传感链路",
+      "label_en": "Optical sensing chain",
+      "definition": "光路、探测器与信号处理共同形成的测量链",
+      "allowed_segments": [
+        "photonics_optical_sensing"
+      ],
+      "source_industry_ids": [
+        "E04"
+      ],
+      "boundary": "仅标记问题主要处理的上述对象；排除顺带提及的对象、优化目标和未列出的同名应用。",
+      "status": "active",
+      "introduced_in": "1.0.0",
+      "replaced_by": null
+    },
+    {
+      "value": "optical_calibration",
+      "label_zh": "光学标定",
+      "label_en": "Optical calibration",
+      "definition": "确定光学测量关系与误差修正的标定方法",
+      "allowed_segments": [
+        "photonics_optical_sensing"
+      ],
+      "source_industry_ids": [
+        "E04"
+      ],
+      "boundary": "仅标记问题主要处理的上述对象；排除顺带提及的对象、优化目标和未列出的同名应用。",
+      "status": "active",
+      "introduced_in": "1.0.0",
+      "replaced_by": null
+    },
+    {
+      "value": "industrial_robot",
+      "label_zh": "工业机器人本体",
+      "label_en": "Industrial robot",
+      "definition": "工业作业机器人的机械本体及运动能力",
+      "allowed_segments": [
+        "industrial_robotics_automation"
+      ],
+      "source_industry_ids": [
+        "E09"
+      ],
+      "boundary": "仅标记问题主要处理的上述对象；排除顺带提及的对象、优化目标和未列出的同名应用。",
+      "status": "active",
+      "introduced_in": "1.0.0",
+      "replaced_by": null
+    },
+    {
+      "value": "end_effector",
+      "label_zh": "末端执行器",
+      "label_en": "End effector",
+      "definition": "工业机器人接触工件或执行作业的末端机构",
+      "allowed_segments": [
+        "industrial_robotics_automation"
+      ],
+      "source_industry_ids": [
+        "E09"
+      ],
+      "boundary": "仅标记问题主要处理的上述对象；排除顺带提及的对象、优化目标和未列出的同名应用。",
+      "status": "active",
+      "introduced_in": "1.0.0",
+      "replaced_by": null
+    },
+    {
+      "value": "automation_cell_control",
+      "label_zh": "自动化工作单元控制",
+      "label_en": "Automation cell control",
+      "definition": "协调视觉、机器人与工序的单元控制系统",
+      "allowed_segments": [
+        "industrial_robotics_automation"
+      ],
+      "source_industry_ids": [
+        "E09"
+      ],
+      "boundary": "仅标记问题主要处理的上述对象；排除顺带提及的对象、优化目标和未列出的同名应用。",
+      "status": "active",
+      "introduced_in": "1.0.0",
+      "replaced_by": null
+    },
+    {
+      "value": "machine_spindle",
+      "label_zh": "机床主轴",
+      "label_en": "Machine spindle",
+      "definition": "加工设备中的主轴及相关旋转系统",
+      "allowed_segments": [
+        "industrial_machinery"
+      ],
+      "source_industry_ids": [
+        "E10"
+      ],
+      "boundary": "仅标记问题主要处理的上述对象；排除顺带提及的对象、优化目标和未列出的同名应用。",
+      "status": "active",
+      "introduced_in": "1.0.0",
+      "replaced_by": null
+    },
+    {
+      "value": "motion_axis",
+      "label_zh": "运动轴",
+      "label_en": "Motion axis",
+      "definition": "工业设备中承担精密运动的轴系与驱动结构",
+      "allowed_segments": [
+        "industrial_machinery"
+      ],
+      "source_industry_ids": [
+        "E10"
+      ],
+      "boundary": "仅标记问题主要处理的上述对象；排除顺带提及的对象、优化目标和未列出的同名应用。",
+      "status": "active",
+      "introduced_in": "1.0.0",
+      "replaced_by": null
+    },
+    {
+      "value": "machining_process",
+      "label_zh": "机械加工工艺",
+      "label_en": "Machining process",
+      "definition": "刀具、加工参数与过程控制组成的加工方案",
+      "allowed_segments": [
+        "industrial_machinery"
+      ],
+      "source_industry_ids": [
+        "E10"
+      ],
+      "boundary": "仅标记问题主要处理的上述对象；排除顺带提及的对象、优化目标和未列出的同名应用。",
+      "status": "active",
+      "introduced_in": "1.0.0",
+      "replaced_by": null
+    },
+    {
+      "value": "powder_energy_delivery",
+      "label_zh": "铺粉与能量输入系统",
+      "label_en": "Powder and energy delivery system",
+      "definition": "增材设备中的铺粉及能量施加机构",
+      "allowed_segments": [
+        "additive_manufacturing_systems"
+      ],
+      "source_industry_ids": [
+        "E12"
+      ],
+      "boundary": "仅标记问题主要处理的上述对象；排除顺带提及的对象、优化目标和未列出的同名应用。",
+      "status": "active",
+      "introduced_in": "1.0.0",
+      "replaced_by": null
+    },
+    {
+      "value": "am_in_process_monitoring",
+      "label_zh": "增材过程监测",
+      "label_en": "Additive manufacturing process monitoring",
+      "definition": "对增材成形过程和缺陷信号的在线监测",
+      "allowed_segments": [
+        "additive_manufacturing_systems"
+      ],
+      "source_industry_ids": [
+        "E12"
+      ],
+      "boundary": "仅标记问题主要处理的上述对象；排除顺带提及的对象、优化目标和未列出的同名应用。",
+      "status": "active",
+      "introduced_in": "1.0.0",
+      "replaced_by": null
+    },
+    {
+      "value": "engineering_system_design",
+      "label_zh": "工程系统方案",
+      "label_en": "Engineering system design",
+      "definition": "工程服务中交付的设施或系统设计方案",
+      "allowed_segments": [
+        "engineering_design_services"
+      ],
+      "source_industry_ids": [
+        "E13"
+      ],
+      "boundary": "仅标记问题主要处理的上述对象；排除顺带提及的对象、优化目标和未列出的同名应用。",
+      "status": "active",
+      "introduced_in": "1.0.0",
+      "replaced_by": null
+    },
+    {
+      "value": "engineering_simulation_model",
+      "label_zh": "工程计算模型",
+      "label_en": "Engineering simulation model",
+      "definition": "支持工程设计验证的计算或仿真模型",
+      "allowed_segments": [
+        "engineering_design_services"
+      ],
+      "source_industry_ids": [
+        "E13"
+      ],
+      "boundary": "仅标记问题主要处理的上述对象；排除顺带提及的对象、优化目标和未列出的同名应用。",
+      "status": "active",
+      "introduced_in": "1.0.0",
+      "replaced_by": null
+    },
+    {
+      "value": "multidisciplinary_interface",
+      "label_zh": "跨专业工程接口",
+      "label_en": "Multidisciplinary engineering interface",
+      "definition": "不同工程专业之间需协调的设计接口与交付边界",
+      "allowed_segments": [
+        "engineering_design_services"
+      ],
+      "source_industry_ids": [
+        "E13"
+      ],
+      "boundary": "仅标记问题主要处理的上述对象；排除顺带提及的对象、优化目标和未列出的同名应用。",
+      "status": "active",
+      "introduced_in": "1.0.0",
+      "replaced_by": null
+    },
+    {
+      "value": "therapeutic_antibody",
+      "label_zh": "治疗性抗体",
+      "label_en": "Therapeutic antibody",
+      "definition": "抗体序列、结构及相关治疗性蛋白对象",
+      "allowed_segments": [
+        "antibody_protein_medicines"
+      ],
+      "source_industry_ids": [
+        "H05"
+      ],
+      "boundary": "仅标记问题主要处理的上述对象；排除顺带提及的对象、优化目标和未列出的同名应用。",
+      "status": "active",
+      "introduced_in": "1.0.0",
+      "replaced_by": null
+    },
+    {
+      "value": "adc_linker_payload",
+      "label_zh": "抗体偶联连接子与载荷",
+      "label_en": "Antibody conjugate linker and payload",
+      "definition": "抗体偶联体系中的连接子、载荷及其组合",
+      "allowed_segments": [
+        "antibody_protein_medicines"
+      ],
+      "source_industry_ids": [
+        "H05"
+      ],
+      "boundary": "仅标记问题主要处理的上述对象；排除顺带提及的对象、优化目标和未列出的同名应用。",
+      "status": "active",
+      "introduced_in": "1.0.0",
+      "replaced_by": null
+    },
+    {
+      "value": "protein_formulation",
+      "label_zh": "蛋白制剂",
+      "label_en": "Protein formulation",
+      "definition": "治疗性蛋白的制剂配方与稳定体系",
+      "allowed_segments": [
+        "antibody_protein_medicines"
+      ],
+      "source_industry_ids": [
+        "H05"
+      ],
+      "boundary": "仅标记问题主要处理的上述对象；排除顺带提及的对象、优化目标和未列出的同名应用。",
+      "status": "active",
+      "introduced_in": "1.0.0",
+      "replaced_by": null
+    },
+    {
+      "value": "therapeutic_cell",
+      "label_zh": "治疗性细胞",
+      "label_en": "Therapeutic cell",
+      "definition": "作为治疗技术对象的细胞群体与表征",
+      "allowed_segments": [
+        "cell_gene_therapies"
+      ],
+      "source_industry_ids": [
+        "H06"
+      ],
+      "boundary": "仅标记问题主要处理的上述对象；排除顺带提及的对象、优化目标和未列出的同名应用。",
+      "status": "active",
+      "introduced_in": "1.0.0",
+      "replaced_by": null
+    },
+    {
+      "value": "gene_delivery_vector",
+      "label_zh": "基因递送载体",
+      "label_en": "Gene delivery vector",
+      "definition": "用于基因递送的载体及递送系统",
+      "allowed_segments": [
+        "cell_gene_therapies"
+      ],
+      "source_industry_ids": [
+        "H06"
+      ],
+      "boundary": "仅标记问题主要处理的上述对象；排除顺带提及的对象、优化目标和未列出的同名应用。",
+      "status": "active",
+      "introduced_in": "1.0.0",
+      "replaced_by": null
+    },
+    {
+      "value": "gene_editing_system",
+      "label_zh": "基因编辑系统",
+      "label_en": "Gene editing system",
+      "definition": "对遗传物质进行定向编辑的技术系统",
+      "allowed_segments": [
+        "cell_gene_therapies"
+      ],
+      "source_industry_ids": [
+        "H06"
+      ],
+      "boundary": "仅标记问题主要处理的上述对象；排除顺带提及的对象、优化目标和未列出的同名应用。",
+      "status": "active",
+      "introduced_in": "1.0.0",
+      "replaced_by": null
+    },
+    {
+      "value": "bioreactor_process",
+      "label_zh": "生物反应器工艺",
+      "label_en": "Bioreactor process",
+      "definition": "培养、混合及传质等反应器运行工艺",
+      "allowed_segments": [
+        "biologics_process_manufacturing"
+      ],
+      "source_industry_ids": [
+        "H07"
+      ],
+      "boundary": "仅标记问题主要处理的上述对象；排除顺带提及的对象、优化目标和未列出的同名应用。",
+      "status": "active",
+      "introduced_in": "1.0.0",
+      "replaced_by": null
+    },
+    {
+      "value": "biologics_purification",
+      "label_zh": "生物药纯化工艺",
+      "label_en": "Biologics purification",
+      "definition": "生物药下游分离、纯化及工艺转移对象",
+      "allowed_segments": [
+        "biologics_process_manufacturing"
+      ],
+      "source_industry_ids": [
+        "H07"
+      ],
+      "boundary": "仅标记问题主要处理的上述对象；排除顺带提及的对象、优化目标和未列出的同名应用。",
+      "status": "active",
+      "introduced_in": "1.0.0",
+      "replaced_by": null
+    },
+    {
+      "value": "production_cell_media",
+      "label_zh": "生产细胞与培养基体系",
+      "label_en": "Production cell and medium system",
+      "definition": "生物药生产细胞株与配套培养基的组合体系",
+      "allowed_segments": [
+        "biologics_process_manufacturing"
+      ],
+      "source_industry_ids": [
+        "H07"
+      ],
+      "boundary": "仅标记问题主要处理的上述对象；排除顺带提及的对象、优化目标和未列出的同名应用。",
+      "status": "active",
+      "introduced_in": "1.0.0",
+      "replaced_by": null
+    },
+    {
+      "value": "industrial_enzyme",
+      "label_zh": "工业酶",
+      "label_en": "Industrial enzyme",
+      "definition": "用于工业应用的酶及其制剂或固定化对象",
+      "allowed_segments": [
+        "industrial_enzymes_microorganisms"
+      ],
+      "source_industry_ids": [
+        "H08"
+      ],
+      "boundary": "仅标记问题主要处理的上述对象；排除顺带提及的对象、优化目标和未列出的同名应用。",
+      "status": "active",
+      "introduced_in": "1.0.0",
+      "replaced_by": null
+    },
+    {
+      "value": "production_microorganism",
+      "label_zh": "生产微生物",
+      "label_en": "Production microorganism",
+      "definition": "工业生产中承担合成或转化功能的菌株",
+      "allowed_segments": [
+        "industrial_enzymes_microorganisms"
+      ],
+      "source_industry_ids": [
+        "H08"
+      ],
+      "boundary": "仅标记问题主要处理的上述对象；排除顺带提及的对象、优化目标和未列出的同名应用。",
+      "status": "active",
+      "introduced_in": "1.0.0",
+      "replaced_by": null
+    },
+    {
+      "value": "industrial_fermentation",
+      "label_zh": "工业发酵工艺",
+      "label_en": "Industrial fermentation",
+      "definition": "工业微生物培养与产物生成的过程体系",
+      "allowed_segments": [
+        "industrial_enzymes_microorganisms"
+      ],
+      "source_industry_ids": [
+        "H08"
+      ],
+      "boundary": "仅标记问题主要处理的上述对象；排除顺带提及的对象、优化目标和未列出的同名应用。",
+      "status": "active",
+      "introduced_in": "1.0.0",
+      "replaced_by": null
+    },
+    {
+      "value": "research_sequencing_imaging",
+      "label_zh": "研究用测序与成像平台",
+      "label_en": "Research sequencing and imaging platform",
+      "definition": "用于生命科学研究的测序或成像仪器平台",
+      "allowed_segments": [
+        "life_science_research_tools"
+      ],
+      "source_industry_ids": [
+        "H13"
+      ],
+      "boundary": "仅标记问题主要处理的上述对象；排除顺带提及的对象、优化目标和未列出的同名应用。",
+      "status": "active",
+      "introduced_in": "1.0.0",
+      "replaced_by": null
+    },
+    {
+      "value": "agricultural_vision",
+      "label_zh": "农业机器视觉",
+      "label_en": "Agricultural machine vision",
+      "definition": "面向田间目标及作业对象的视觉识别系统",
+      "allowed_segments": [
+        "agricultural_machinery_precision_farming"
+      ],
+      "source_industry_ids": [
+        "H09"
+      ],
+      "boundary": "仅标记问题主要处理的上述对象；排除顺带提及的对象、优化目标和未列出的同名应用。",
+      "status": "active",
+      "introduced_in": "1.0.0",
+      "replaced_by": null
+    },
+    {
+      "value": "precision_application_control",
+      "label_zh": "精准施用控制",
+      "label_en": "Precision application control",
+      "definition": "控制喷嘴或施用执行器的定位与作业控制链",
+      "allowed_segments": [
+        "agricultural_machinery_precision_farming"
+      ],
+      "source_industry_ids": [
+        "H09"
+      ],
+      "boundary": "仅标记问题主要处理的上述对象；排除顺带提及的对象、优化目标和未列出的同名应用。",
+      "status": "active",
+      "introduced_in": "1.0.0",
+      "replaced_by": null
+    },
+    {
+      "value": "agricultural_equipment_interface",
+      "label_zh": "农业装备接口",
+      "label_en": "Agricultural equipment interface",
+      "definition": "农机、处方图和控制系统之间的数据或设备接口",
+      "allowed_segments": [
+        "agricultural_machinery_precision_farming"
+      ],
+      "source_industry_ids": [
+        "H09"
+      ],
+      "boundary": "仅标记问题主要处理的上述对象；排除顺带提及的对象、优化目标和未列出的同名应用。",
+      "status": "active",
+      "introduced_in": "1.0.0",
+      "replaced_by": null
+    },
+    {
+      "value": "crop_germplasm",
+      "label_zh": "作物种质",
+      "label_en": "Crop germplasm",
+      "definition": "作为育种输入与选择对象的种质材料",
+      "allowed_segments": [
+        "seeds_crop_breeding"
+      ],
+      "source_industry_ids": [
+        "H10"
+      ],
+      "boundary": "仅标记问题主要处理的上述对象；排除顺带提及的对象、优化目标和未列出的同名应用。",
+      "status": "active",
+      "introduced_in": "1.0.0",
+      "replaced_by": null
+    },
+    {
+      "value": "molecular_breeding_marker",
+      "label_zh": "分子育种标记",
+      "label_en": "Molecular breeding marker",
+      "definition": "用于育种选择和性状关联的分子标记",
+      "allowed_segments": [
+        "seeds_crop_breeding"
+      ],
+      "source_industry_ids": [
+        "H10"
+      ],
+      "boundary": "仅标记问题主要处理的上述对象；排除顺带提及的对象、优化目标和未列出的同名应用。",
+      "status": "active",
+      "introduced_in": "1.0.0",
+      "replaced_by": null
+    },
+    {
+      "value": "field_phenotyping",
+      "label_zh": "田间表型方法",
+      "label_en": "Field phenotyping",
+      "definition": "对作物性状在田间环境中进行测量和比较的方法",
+      "allowed_segments": [
+        "seeds_crop_breeding"
+      ],
+      "source_industry_ids": [
+        "H10"
+      ],
+      "boundary": "仅标记问题主要处理的上述对象；排除顺带提及的对象、优化目标和未列出的同名应用。",
+      "status": "active",
+      "introduced_in": "1.0.0",
+      "replaced_by": null
+    },
+    {
+      "value": "food_matrix",
+      "label_zh": "食品基质",
+      "label_en": "Food matrix",
+      "definition": "冷冻或方便食品的组成与结构体系",
+      "allowed_segments": [
+        "frozen_prepared_foods"
+      ],
+      "source_industry_ids": [
+        "H11"
+      ],
+      "boundary": "仅标记问题主要处理的上述对象；排除顺带提及的对象、优化目标和未列出的同名应用。",
+      "status": "active",
+      "introduced_in": "1.0.0",
+      "replaced_by": null
+    },
+    {
+      "value": "food_thermal_processing",
+      "label_zh": "食品热加工",
+      "label_en": "Food thermal processing",
+      "definition": "以热处理与热质传递为核心的食品加工过程",
+      "allowed_segments": [
+        "frozen_prepared_foods"
+      ],
+      "source_industry_ids": [
+        "H11"
+      ],
+      "boundary": "仅标记问题主要处理的上述对象；排除顺带提及的对象、优化目标和未列出的同名应用。",
+      "status": "active",
+      "introduced_in": "1.0.0",
+      "replaced_by": null
+    },
+    {
+      "value": "food_freezing_drying",
+      "label_zh": "食品冷冻与干燥",
+      "label_en": "Food freezing and drying",
+      "definition": "冷冻、干燥及相应品质保持工艺",
+      "allowed_segments": [
+        "frozen_prepared_foods"
+      ],
+      "source_industry_ids": [
+        "H11"
+      ],
+      "boundary": "仅标记问题主要处理的上述对象；排除顺带提及的对象、优化目标和未列出的同名应用。",
+      "status": "active",
+      "introduced_in": "1.0.0",
+      "replaced_by": null
+    },
+    {
+      "value": "food_protein_fiber",
+      "label_zh": "食品蛋白与纤维配料",
+      "label_en": "Food protein and fiber ingredients",
+      "definition": "用于营养与功能配方的蛋白和膳食纤维原料",
+      "allowed_segments": [
+        "food_ingredients_nutrition"
+      ],
+      "source_industry_ids": [
+        "H12"
+      ],
+      "boundary": "仅标记问题主要处理的上述对象；排除顺带提及的对象、优化目标和未列出的同名应用。",
+      "status": "active",
+      "introduced_in": "1.0.0",
+      "replaced_by": null
+    },
+    {
+      "value": "food_emulsion_gel",
+      "label_zh": "食品乳化与凝胶体系",
+      "label_en": "Food emulsion and gel system",
+      "definition": "影响稳定性与口感的食品乳化或凝胶结构",
+      "allowed_segments": [
+        "food_ingredients_nutrition"
+      ],
+      "source_industry_ids": [
+        "H12"
+      ],
+      "boundary": "仅标记问题主要处理的上述对象；排除顺带提及的对象、优化目标和未列出的同名应用。",
+      "status": "active",
+      "introduced_in": "1.0.0",
+      "replaced_by": null
+    },
+    {
+      "value": "food_enzyme_fermentation",
+      "label_zh": "食品酶与发酵配料",
+      "label_en": "Food enzymes and fermentation ingredients",
+      "definition": "用于食品配方和加工的酶、菌种及发酵配料",
+      "allowed_segments": [
+        "food_ingredients_nutrition"
+      ],
+      "source_industry_ids": [
+        "H12"
+      ],
+      "boundary": "仅标记问题主要处理的上述对象；排除顺带提及的对象、优化目标和未列出的同名应用。",
+      "status": "active",
+      "introduced_in": "1.0.0",
+      "replaced_by": null
+    },
+    {
+      "value": "battery_cell",
+      "label_zh": "电芯",
+      "label_en": "Battery cell",
+      "definition": "储能系统的电化学储能单元，关注单元结构与运行特性",
+      "allowed_segments": [
+        "batteries_stationary_storage"
+      ],
+      "source_industry_ids": [
+        "M05"
+      ],
+      "boundary": "仅标记问题主要处理的上述对象；排除顺带提及的对象、优化目标和未列出的同名应用。",
+      "status": "active",
+      "introduced_in": "1.0.0",
+      "replaced_by": null
+    },
+    {
+      "value": "storage_battery_cluster",
+      "label_zh": "储能电池簇",
+      "label_en": "Storage battery cluster",
+      "definition": "多电芯或模组构成的储能电池组合",
+      "allowed_segments": [
+        "batteries_stationary_storage"
+      ],
+      "source_industry_ids": [
+        "M05"
+      ],
+      "boundary": "仅标记问题主要处理的上述对象；排除顺带提及的对象、优化目标和未列出的同名应用。",
+      "status": "active",
+      "introduced_in": "1.0.0",
+      "replaced_by": null
+    },
+    {
+      "value": "battery_management_system",
+      "label_zh": "电池管理系统",
+      "label_en": "Battery management system",
+      "definition": "承担电池状态管理、保护及控制的系统",
+      "allowed_segments": [
+        "batteries_stationary_storage"
+      ],
+      "source_industry_ids": [
+        "M05"
+      ],
+      "boundary": "仅标记问题主要处理的上述对象；排除顺带提及的对象、优化目标和未列出的同名应用。",
+      "status": "active",
+      "introduced_in": "1.0.0",
+      "replaced_by": null
+    },
+    {
+      "value": "distribution_transformer",
+      "label_zh": "配电变压器",
+      "label_en": "Distribution transformer",
+      "definition": "配电系统中的电压变换设备",
+      "allowed_segments": [
+        "grid_power_equipment"
+      ],
+      "source_industry_ids": [
+        "M06"
+      ],
+      "boundary": "仅标记问题主要处理的上述对象；排除顺带提及的对象、优化目标和未列出的同名应用。",
+      "status": "active",
+      "introduced_in": "1.0.0",
+      "replaced_by": null
+    },
+    {
+      "value": "switchgear_protection",
+      "label_zh": "开关与保护设备",
+      "label_en": "Switchgear and protection equipment",
+      "definition": "用于开断、故障隔离和保护的设备",
+      "allowed_segments": [
+        "grid_power_equipment"
+      ],
+      "source_industry_ids": [
+        "M06"
+      ],
+      "boundary": "仅标记问题主要处理的上述对象；排除顺带提及的对象、优化目标和未列出的同名应用。",
+      "status": "active",
+      "introduced_in": "1.0.0",
+      "replaced_by": null
+    },
+    {
+      "value": "grid_condition_monitoring",
+      "label_zh": "电网状态监测",
+      "label_en": "Grid condition monitoring",
+      "definition": "面向电网设备载荷、老化及运行状态的监测技术",
+      "allowed_segments": [
+        "grid_power_equipment"
+      ],
+      "source_industry_ids": [
+        "M06"
+      ],
+      "boundary": "仅标记问题主要处理的上述对象；排除顺带提及的对象、优化目标和未列出的同名应用。",
+      "status": "active",
+      "introduced_in": "1.0.0",
+      "replaced_by": null
+    },
+    {
+      "value": "photovoltaic_cell",
+      "label_zh": "光伏电池片",
+      "label_en": "Photovoltaic cell",
+      "definition": "承担光电转换的电池片结构和工艺对象",
+      "allowed_segments": [
+        "solar_photovoltaics"
+      ],
+      "source_industry_ids": [
+        "M07"
+      ],
+      "boundary": "仅标记问题主要处理的上述对象；排除顺带提及的对象、优化目标和未列出的同名应用。",
+      "status": "active",
+      "introduced_in": "1.0.0",
+      "replaced_by": null
+    },
+    {
+      "value": "photovoltaic_module",
+      "label_zh": "光伏组件",
+      "label_en": "Photovoltaic module",
+      "definition": "电池片互联、封装及保护构成的光伏组件",
+      "allowed_segments": [
+        "solar_photovoltaics"
+      ],
+      "source_industry_ids": [
+        "M07"
+      ],
+      "boundary": "仅标记问题主要处理的上述对象；排除顺带提及的对象、优化目标和未列出的同名应用。",
+      "status": "active",
+      "introduced_in": "1.0.0",
+      "replaced_by": null
+    },
+    {
+      "value": "photovoltaic_inverter",
+      "label_zh": "光伏逆变器",
+      "label_en": "Photovoltaic inverter",
+      "definition": "光伏发电应用中的功率变换设备",
+      "allowed_segments": [
+        "solar_photovoltaics"
+      ],
+      "source_industry_ids": [
+        "M07"
+      ],
+      "boundary": "仅标记问题主要处理的上述对象；排除顺带提及的对象、优化目标和未列出的同名应用。",
+      "status": "active",
+      "introduced_in": "1.0.0",
+      "replaced_by": null
+    },
+    {
+      "value": "electrolyzer",
+      "label_zh": "电解槽",
+      "label_en": "Electrolyzer",
+      "definition": "用于制氢的电解反应设备与结构",
+      "allowed_segments": [
+        "hydrogen_fuel_cell_equipment"
+      ],
+      "source_industry_ids": [
+        "M08"
+      ],
+      "boundary": "仅标记问题主要处理的上述对象；排除顺带提及的对象、优化目标和未列出的同名应用。",
+      "status": "active",
+      "introduced_in": "1.0.0",
+      "replaced_by": null
+    },
+    {
+      "value": "fuel_cell_membrane_electrode",
+      "label_zh": "燃料电池膜电极",
+      "label_en": "Fuel cell membrane electrode assembly",
+      "definition": "燃料电池中的膜、电极及相应结构组合",
+      "allowed_segments": [
+        "hydrogen_fuel_cell_equipment"
+      ],
+      "source_industry_ids": [
+        "M08"
+      ],
+      "boundary": "仅标记问题主要处理的上述对象；排除顺带提及的对象、优化目标和未列出的同名应用。",
+      "status": "active",
+      "introduced_in": "1.0.0",
+      "replaced_by": null
+    },
+    {
+      "value": "hydrogen_balance_of_plant",
+      "label_zh": "氢能辅助系统",
+      "label_en": "Hydrogen balance of plant",
+      "definition": "制氢或燃料电池设备配套的水热及辅助运行系统",
+      "allowed_segments": [
+        "hydrogen_fuel_cell_equipment"
+      ],
+      "source_industry_ids": [
+        "M08"
+      ],
+      "boundary": "仅标记问题主要处理的上述对象；排除顺带提及的对象、优化目标和未列出的同名应用。",
+      "status": "active",
+      "introduced_in": "1.0.0",
+      "replaced_by": null
+    },
+    {
+      "value": "photoresist",
+      "label_zh": "光刻胶",
+      "label_en": "Photoresist",
+      "definition": "用于图形化制程的光刻胶材料体系",
+      "allowed_segments": [
+        "electronic_chemicals"
+      ],
+      "source_industry_ids": [
+        "M09"
+      ],
+      "boundary": "仅标记问题主要处理的上述对象；排除顺带提及的对象、优化目标和未列出的同名应用。",
+      "status": "active",
+      "introduced_in": "1.0.0",
+      "replaced_by": null
+    },
+    {
+      "value": "cmp_slurry",
+      "label_zh": "化学机械抛光浆料",
+      "label_en": "Chemical mechanical polishing slurry",
+      "definition": "用于 CMP 制程的抛光浆料与配方",
+      "allowed_segments": [
+        "electronic_chemicals"
+      ],
+      "source_industry_ids": [
+        "M09"
+      ],
+      "boundary": "仅标记问题主要处理的上述对象；排除顺带提及的对象、优化目标和未列出的同名应用。",
+      "status": "active",
+      "introduced_in": "1.0.0",
+      "replaced_by": null
+    },
+    {
+      "value": "electronic_cleaning_plating",
+      "label_zh": "电子清洗与电镀化学品",
+      "label_en": "Electronic cleaning and plating chemicals",
+      "definition": "电子级清洗液、电镀添加剂及相关应用配方",
+      "allowed_segments": [
+        "electronic_chemicals"
+      ],
+      "source_industry_ids": [
+        "M09"
+      ],
+      "boundary": "仅标记问题主要处理的上述对象；排除顺带提及的对象、优化目标和未列出的同名应用。",
+      "status": "active",
+      "introduced_in": "1.0.0",
+      "replaced_by": null
+    },
+    {
+      "value": "coating_formulation",
+      "label_zh": "涂料配方",
+      "label_en": "Coating formulation",
+      "definition": "形成涂层性能的树脂与配套配方体系",
+      "allowed_segments": [
+        "coatings_adhesives_sealants"
+      ],
+      "source_industry_ids": [
+        "M10"
+      ],
+      "boundary": "仅标记问题主要处理的上述对象；排除顺带提及的对象、优化目标和未列出的同名应用。",
+      "status": "active",
+      "introduced_in": "1.0.0",
+      "replaced_by": null
+    },
+    {
+      "value": "adhesive_formulation",
+      "label_zh": "胶黏剂配方",
+      "label_en": "Adhesive formulation",
+      "definition": "结构粘接或导热粘接使用的胶黏剂体系",
+      "allowed_segments": [
+        "coatings_adhesives_sealants"
+      ],
+      "source_industry_ids": [
+        "M10"
+      ],
+      "boundary": "仅标记问题主要处理的上述对象；排除顺带提及的对象、优化目标和未列出的同名应用。",
+      "status": "active",
+      "introduced_in": "1.0.0",
+      "replaced_by": null
+    },
+    {
+      "value": "sealant_formulation",
+      "label_zh": "密封剂配方",
+      "label_en": "Sealant formulation",
+      "definition": "用于密封及耐候功能的配方体系",
+      "allowed_segments": [
+        "coatings_adhesives_sealants"
+      ],
+      "source_industry_ids": [
+        "M10"
+      ],
+      "boundary": "仅标记问题主要处理的上述对象；排除顺带提及的对象、优化目标和未列出的同名应用。",
+      "status": "active",
+      "introduced_in": "1.0.0",
+      "replaced_by": null
+    },
+    {
+      "value": "specialty_process_gas",
+      "label_zh": "工艺特种气体",
+      "label_en": "Specialty process gas",
+      "definition": "工业或电子制造使用的高纯和特种气体",
+      "allowed_segments": [
+        "industrial_specialty_gases"
+      ],
+      "source_industry_ids": [
+        "M11"
+      ],
+      "boundary": "仅标记问题主要处理的上述对象；排除顺带提及的对象、优化目标和未列出的同名应用。",
+      "status": "active",
+      "introduced_in": "1.0.0",
+      "replaced_by": null
+    },
+    {
+      "value": "gas_purification",
+      "label_zh": "气体纯化技术",
+      "label_en": "Gas purification",
+      "definition": "去除工艺气体痕量杂质的设备或工艺",
+      "allowed_segments": [
+        "industrial_specialty_gases"
+      ],
+      "source_industry_ids": [
+        "M11"
+      ],
+      "boundary": "仅标记问题主要处理的上述对象；排除顺带提及的对象、优化目标和未列出的同名应用。",
+      "status": "active",
+      "introduced_in": "1.0.0",
+      "replaced_by": null
+    },
+    {
+      "value": "gas_supply_system",
+      "label_zh": "供气系统",
+      "label_en": "Gas supply system",
+      "definition": "管路、容器、阀件及冗余构成的供气系统",
+      "allowed_segments": [
+        "industrial_specialty_gases"
+      ],
+      "source_industry_ids": [
+        "M11"
+      ],
+      "boundary": "仅标记问题主要处理的上述对象；排除顺带提及的对象、优化目标和未列出的同名应用。",
+      "status": "active",
+      "introduced_in": "1.0.0",
+      "replaced_by": null
+    },
+    {
+      "value": "renewable_fuel_feedstock",
+      "label_zh": "可再生燃料原料",
+      "label_en": "Renewable fuel feedstock",
+      "definition": "用于可再生燃料生产的原料及预处理对象",
+      "allowed_segments": [
+        "renewable_fuels"
+      ],
+      "source_industry_ids": [
+        "M12"
+      ],
+      "boundary": "仅标记问题主要处理的上述对象；排除顺带提及的对象、优化目标和未列出的同名应用。",
+      "status": "active",
+      "introduced_in": "1.0.0",
+      "replaced_by": null
+    },
+    {
+      "value": "fuel_conversion_catalyst",
+      "label_zh": "燃料转化催化剂",
+      "label_en": "Fuel conversion catalyst",
+      "definition": "支持可再生原料转化的催化剂体系",
+      "allowed_segments": [
+        "renewable_fuels"
+      ],
+      "source_industry_ids": [
+        "M12"
+      ],
+      "boundary": "仅标记问题主要处理的上述对象；排除顺带提及的对象、优化目标和未列出的同名应用。",
+      "status": "active",
+      "introduced_in": "1.0.0",
+      "replaced_by": null
+    },
+    {
+      "value": "renewable_fuel_process",
+      "label_zh": "可再生燃料工艺",
+      "label_en": "Renewable fuel process",
+      "definition": "转化、分离和燃料产品形成的生产流程",
+      "allowed_segments": [
+        "renewable_fuels"
+      ],
+      "source_industry_ids": [
+        "M12"
+      ],
+      "boundary": "仅标记问题主要处理的上述对象；排除顺带提及的对象、优化目标和未列出的同名应用。",
+      "status": "active",
+      "introduced_in": "1.0.0",
+      "replaced_by": null
+    },
+    {
+      "value": "heat_pump_compressor",
+      "label_zh": "热泵压缩机",
+      "label_en": "Heat pump compressor",
+      "definition": "热泵系统中的压缩部件",
+      "allowed_segments": [
+        "building_hvac_heat_pumps"
+      ],
+      "source_industry_ids": [
+        "M13"
+      ],
+      "boundary": "仅标记问题主要处理的上述对象；排除顺带提及的对象、优化目标和未列出的同名应用。",
+      "status": "active",
+      "introduced_in": "1.0.0",
+      "replaced_by": null
+    },
+    {
+      "value": "hvac_heat_exchanger",
+      "label_zh": "暖通换热器",
+      "label_en": "HVAC heat exchanger",
+      "definition": "暖通或热泵设备中的换热部件",
+      "allowed_segments": [
+        "building_hvac_heat_pumps"
+      ],
+      "source_industry_ids": [
+        "M13"
+      ],
+      "boundary": "仅标记问题主要处理的上述对象；排除顺带提及的对象、优化目标和未列出的同名应用。",
+      "status": "active",
+      "introduced_in": "1.0.0",
+      "replaced_by": null
+    },
+    {
+      "value": "refrigerant_control_loop",
+      "label_zh": "制冷剂回路与控制",
+      "label_en": "Refrigerant loop and control",
+      "definition": "制冷剂循环与相应楼宇或设备控制体系",
+      "allowed_segments": [
+        "building_hvac_heat_pumps"
+      ],
+      "source_industry_ids": [
+        "M13"
+      ],
+      "boundary": "仅标记问题主要处理的上述对象；排除顺带提及的对象、优化目标和未列出的同名应用。",
+      "status": "active",
+      "introduced_in": "1.0.0",
+      "replaced_by": null
+    },
+    {
+      "value": "low_clinker_binder",
+      "label_zh": "低熟料胶凝体系",
+      "label_en": "Low clinker binder",
+      "definition": "降低熟料比例的水泥胶凝材料组合",
+      "allowed_segments": [
+        "cement_concrete"
+      ],
+      "source_industry_ids": [
+        "M14"
+      ],
+      "boundary": "仅标记问题主要处理的上述对象；排除顺带提及的对象、优化目标和未列出的同名应用。",
+      "status": "active",
+      "introduced_in": "1.0.0",
+      "replaced_by": null
+    },
+    {
+      "value": "supplementary_cementitious_material",
+      "label_zh": "辅助胶凝材料",
+      "label_en": "Supplementary cementitious material",
+      "definition": "用于混凝土或水泥体系的补充胶凝原料",
+      "allowed_segments": [
+        "cement_concrete"
+      ],
+      "source_industry_ids": [
+        "M14"
+      ],
+      "boundary": "仅标记问题主要处理的上述对象；排除顺带提及的对象、优化目标和未列出的同名应用。",
+      "status": "active",
+      "introduced_in": "1.0.0",
+      "replaced_by": null
+    },
+    {
+      "value": "concrete_mix",
+      "label_zh": "混凝土配合比",
+      "label_en": "Concrete mix",
+      "definition": "混凝土原料比例与养护适配方案",
+      "allowed_segments": [
+        "cement_concrete"
+      ],
+      "source_industry_ids": [
+        "M14"
+      ],
+      "boundary": "仅标记问题主要处理的上述对象；排除顺带提及的对象、优化目标和未列出的同名应用。",
+      "status": "active",
+      "introduced_in": "1.0.0",
+      "replaced_by": null
+    },
+    {
+      "value": "building_module",
+      "label_zh": "建筑模块",
+      "label_en": "Building module",
+      "definition": "工厂预制并在现场组装的建筑单元",
+      "allowed_segments": [
+        "prefabricated_modular_buildings"
+      ],
+      "source_industry_ids": [
+        "M15"
+      ],
+      "boundary": "仅标记问题主要处理的上述对象；排除顺带提及的对象、优化目标和未列出的同名应用。",
+      "status": "active",
+      "introduced_in": "1.0.0",
+      "replaced_by": null
+    },
+    {
+      "value": "modular_structural_connection",
+      "label_zh": "模块结构连接",
+      "label_en": "Modular structural connection",
+      "definition": "模块化建筑单元之间的结构连接件与节点",
+      "allowed_segments": [
+        "prefabricated_modular_buildings"
+      ],
+      "source_industry_ids": [
+        "M15"
+      ],
+      "boundary": "仅标记问题主要处理的上述对象；排除顺带提及的对象、优化目标和未列出的同名应用。",
+      "status": "active",
+      "introduced_in": "1.0.0",
+      "replaced_by": null
+    },
+    {
+      "value": "modular_mep_interface",
+      "label_zh": "模块机电接口",
+      "label_en": "Modular MEP interface",
+      "definition": "模块化建筑机电系统的安装和连接接口",
+      "allowed_segments": [
+        "prefabricated_modular_buildings"
+      ],
+      "source_industry_ids": [
+        "M15"
+      ],
+      "boundary": "仅标记问题主要处理的上述对象；排除顺带提及的对象、优化目标和未列出的同名应用。",
+      "status": "active",
+      "introduced_in": "1.0.0",
+      "replaced_by": null
+    },
+    {
+      "value": "water_treatment_membrane",
+      "label_zh": "水处理膜",
+      "label_en": "Water treatment membrane",
+      "definition": "水与污水处理中承担分离功能的膜体系",
+      "allowed_segments": [
+        "water_wastewater_infrastructure"
+      ],
+      "source_industry_ids": [
+        "M16"
+      ],
+      "boundary": "仅标记问题主要处理的上述对象；排除顺带提及的对象、优化目标和未列出的同名应用。",
+      "status": "active",
+      "introduced_in": "1.0.0",
+      "replaced_by": null
+    },
+    {
+      "value": "water_adsorption_media",
+      "label_zh": "水处理吸附介质",
+      "label_en": "Water adsorption media",
+      "definition": "去除水中目标污染物的吸附材料",
+      "allowed_segments": [
+        "water_wastewater_infrastructure"
+      ],
+      "source_industry_ids": [
+        "M16"
+      ],
+      "boundary": "仅标记问题主要处理的上述对象；排除顺带提及的对象、优化目标和未列出的同名应用。",
+      "status": "active",
+      "introduced_in": "1.0.0",
+      "replaced_by": null
+    },
+    {
+      "value": "aeration_system",
+      "label_zh": "曝气系统",
+      "label_en": "Aeration system",
+      "definition": "水处理中供氧、气液传递及运行控制的设备系统",
+      "allowed_segments": [
+        "water_wastewater_infrastructure"
+      ],
+      "source_industry_ids": [
+        "M16"
+      ],
+      "boundary": "仅标记问题主要处理的上述对象；排除顺带提及的对象、优化目标和未列出的同名应用。",
+      "status": "active",
+      "introduced_in": "1.0.0",
+      "replaced_by": null
+    },
+    {
+      "value": "aerospace_structure",
+      "label_zh": "航空航天结构",
+      "label_en": "Aerospace structure",
+      "definition": "航空器或航天器的承载结构及其材料连接",
+      "allowed_segments": [
+        "aerospace_space"
+      ],
+      "source_industry_ids": [
+        "E11"
+      ],
+      "boundary": "仅标记问题主要处理的上述对象；排除顺带提及的对象、优化目标和未列出的同名应用。",
+      "status": "active",
+      "introduced_in": "1.0.0",
+      "replaced_by": null
+    },
+    {
+      "value": "aerospace_propulsion_avionics",
+      "label_zh": "推进与航电系统",
+      "label_en": "Aerospace propulsion and avionics",
+      "definition": "航空航天应用中的推进或航电技术系统",
+      "allowed_segments": [
+        "aerospace_space"
+      ],
+      "source_industry_ids": [
+        "E11"
+      ],
+      "boundary": "仅标记问题主要处理的上述对象；排除顺带提及的对象、优化目标和未列出的同名应用。",
+      "status": "active",
+      "introduced_in": "1.0.0",
+      "replaced_by": null
+    },
+    {
+      "value": "satellite_system",
+      "label_zh": "卫星系统",
+      "label_en": "Satellite system",
+      "definition": "卫星平台、载荷及其环境验证所涉及的系统",
+      "allowed_segments": [
+        "aerospace_space"
+      ],
+      "source_industry_ids": [
+        "E11"
+      ],
+      "boundary": "仅标记问题主要处理的上述对象；排除顺带提及的对象、优化目标和未列出的同名应用。",
+      "status": "active",
+      "introduced_in": "1.0.0",
+      "replaced_by": null
+    }
+  ],
+  "jtbd_tasks": [
+    {
+      "value": "solution_search",
+      "label_zh": "寻找技术方案",
+      "label_en": "Find technical solutions",
+      "definition": "在给定功能或问题下寻找可采用的技术方案",
+      "boundary": "不以全领域盘点代替问题导向的寻找",
+      "allowed_outputs": [
+        "candidate_shortlist",
+        "evidence_table"
+      ],
+      "allowed_perspectives": [
+        "product_design",
+        "process_engineering",
+        "system_integration",
+        "reliability_engineering",
+        "invention_development",
+        "applied_research",
+        "technology_scouting"
+      ],
+      "context_requirement": "none",
+      "source_jtbd_values": [
+        "technical_solutions"
+      ],
+      "source_role_ids": [
+        "R01",
+        "R02",
+        "R03",
+        "R05"
+      ],
+      "status": "active",
+      "introduced_in": "1.0.0",
+      "replaced_by": null
+    },
+    {
+      "value": "solution_comparison",
+      "label_zh": "比较技术方案",
+      "label_en": "Compare technical solutions",
+      "definition": "在共同约束与评价条件下比较已识别的路线或方案",
+      "boundary": "不等于寻找方案；纯研究方法比较用 research_method_comparison",
+      "allowed_outputs": [
+        "comparison_matrix"
+      ],
+      "allowed_perspectives": [
+        "product_design",
+        "process_engineering",
+        "system_integration",
+        "reliability_engineering",
+        "invention_development",
+        "applied_research",
+        "technology_scouting",
+        "product_strategy"
+      ],
+      "context_requirement": "none",
+      "source_jtbd_values": [
+        "technical_solutions",
+        "existing_technologies",
+        "rd_directions"
+      ],
+      "source_role_ids": [
+        "R01",
+        "R02",
+        "R03",
+        "R05",
+        "R06"
+      ],
+      "status": "active",
+      "introduced_in": "1.0.0",
+      "replaced_by": null
+    },
+    {
+      "value": "failure_resolution",
+      "label_zh": "解决技术失效",
+      "label_en": "Resolve technical failures",
+      "definition": "从具体类型的故障或性能失效出发寻找修正措施及验证",
+      "boundary": "核心是恢复功能；解释科学机理而无修正目标归 evidence_synthesis",
+      "allowed_outputs": [
+        "improvement_plan",
+        "validation_plan"
+      ],
+      "allowed_perspectives": [
+        "product_design",
+        "process_engineering",
+        "system_integration",
+        "reliability_engineering",
+        "applied_research"
+      ],
+      "context_requirement": "none",
+      "source_jtbd_values": [
+        "technical_solutions"
+      ],
+      "source_role_ids": [
+        "R01",
+        "R03"
+      ],
+      "status": "active",
+      "introduced_in": "1.0.0",
+      "replaced_by": null
+    },
+    {
+      "value": "process_optimization",
+      "label_zh": "优化工艺",
+      "label_en": "Optimize processes",
+      "definition": "调整制造或运行参数、流程以改善良率、一致性或效率",
+      "boundary": "排除只改变产品定位或研究命题",
+      "allowed_outputs": [
+        "improvement_plan",
+        "comparison_matrix"
+      ],
+      "allowed_perspectives": [
+        "process_engineering",
+        "system_integration",
+        "reliability_engineering",
+        "applied_research"
+      ],
+      "context_requirement": "none",
+      "source_jtbd_values": [
+        "technical_solutions"
+      ],
+      "source_role_ids": [
+        "R01",
+        "R03"
+      ],
+      "status": "active",
+      "introduced_in": "1.0.0",
+      "replaced_by": null
+    },
+    {
+      "value": "technology_landscape",
+      "label_zh": "梳理现有技术",
+      "label_en": "Map existing technologies",
+      "definition": "组织已有路线、技术类别和成熟度证据",
+      "boundary": "静态结构为主；按时间监测用 technology_trend_tracking",
+      "allowed_outputs": [
+        "landscape_map",
+        "evidence_review"
+      ],
+      "allowed_perspectives": [
+        "product_design",
+        "process_engineering",
+        "system_integration",
+        "invention_development",
+        "applied_research",
+        "technology_scouting",
+        "competitive_intelligence"
+      ],
+      "context_requirement": "none",
+      "source_jtbd_values": [
+        "existing_technologies",
+        "technology_competitors",
+        "technology_trends"
+      ],
+      "source_role_ids": [
+        "R01",
+        "R02",
+        "R03",
+        "R05",
+        "R06",
+        "R07"
+      ],
+      "status": "active",
+      "introduced_in": "1.0.0",
+      "replaced_by": null
+    },
+    {
+      "value": "product_ideation",
+      "label_zh": "形成产品构思",
+      "label_en": "Generate product concepts",
+      "definition": "从使用问题与技术能力形成可检验的产品或发明概念",
+      "boundary": "科学贡献问题用 research_ideation",
+      "allowed_outputs": [
+        "concept_brief"
+      ],
+      "allowed_perspectives": [
+        "product_design",
+        "invention_development",
+        "technology_scouting",
+        "product_strategy"
+      ],
+      "context_requirement": "none",
+      "source_jtbd_values": [
+        "product_ideas",
+        "ideas_concepts"
+      ],
+      "source_role_ids": [
+        "R01",
+        "R02",
+        "R05",
+        "R06"
+      ],
+      "status": "active",
+      "introduced_in": "1.0.0",
+      "replaced_by": null
+    },
+    {
+      "value": "feasibility_assessment",
+      "label_zh": "评估技术可行性",
+      "label_en": "Assess technical feasibility",
+      "definition": "判断方案在指定条件下是否具备实施依据并识别证据缺口",
+      "boundary": "缺条件时列条件性判断；执行验证计划用 validation_planning",
+      "allowed_outputs": [
+        "assessment_brief",
+        "comparison_matrix"
+      ],
+      "allowed_perspectives": [
+        "product_design",
+        "process_engineering",
+        "system_integration",
+        "reliability_engineering",
+        "invention_development",
+        "applied_research",
+        "technology_scouting",
+        "product_strategy"
+      ],
+      "context_requirement": "none",
+      "source_jtbd_values": [
+        "technical_feasibility",
+        "rd_directions"
+      ],
+      "source_role_ids": [
+        "R01",
+        "R02",
+        "R03",
+        "R05",
+        "R06"
+      ],
+      "status": "active",
+      "introduced_in": "1.0.0",
+      "replaced_by": null
+    },
+    {
+      "value": "validation_planning",
+      "label_zh": "规划验证",
+      "label_en": "Plan validation",
+      "definition": "设计检验假设或方案的实验、样机或测试路径",
+      "boundary": "排除声称实验已完成；研究方法搜寻用 research_method_search",
+      "allowed_outputs": [
+        "validation_plan"
+      ],
+      "allowed_perspectives": [
+        "product_design",
+        "process_engineering",
+        "system_integration",
+        "reliability_engineering",
+        "invention_development",
+        "applied_research",
+        "scientific_contribution",
+        "research_methodology"
+      ],
+      "context_requirement": "none",
+      "source_jtbd_values": [
+        "technical_feasibility",
+        "research_methods"
+      ],
+      "source_role_ids": [
+        "R01",
+        "R02",
+        "R03",
+        "R04"
+      ],
+      "status": "active",
+      "introduced_in": "1.0.0",
+      "replaced_by": null
+    },
+    {
+      "value": "research_field_exploration",
+      "label_zh": "探索研究领域",
+      "label_en": "Explore research fields",
+      "definition": "梳理新领域的核心问题、研究路线和进入知识基础",
+      "boundary": "不以热点排行替代问题结构",
+      "allowed_outputs": [
+        "landscape_map",
+        "evidence_review"
+      ],
+      "allowed_perspectives": [
+        "applied_research",
+        "scientific_contribution",
+        "research_methodology",
+        "technology_scouting"
+      ],
+      "context_requirement": "none",
+      "source_jtbd_values": [
+        "new_research_fields"
+      ],
+      "source_role_ids": [
+        "R03",
+        "R04",
+        "R05"
+      ],
+      "status": "active",
+      "introduced_in": "1.0.0",
+      "replaced_by": null
+    },
+    {
+      "value": "research_gap_identification",
+      "label_zh": "识别研究空白",
+      "label_en": "Identify research gaps",
+      "definition": "基于已有证据与限制指出尚未解决且可研究的问题",
+      "boundary": "未检索到不等于不存在；具体提出课题用 research_ideation",
+      "allowed_outputs": [
+        "research_agenda",
+        "evidence_review"
+      ],
+      "allowed_perspectives": [
+        "applied_research",
+        "scientific_contribution",
+        "research_methodology"
+      ],
+      "context_requirement": "none",
+      "source_jtbd_values": [
+        "new_research_fields",
+        "research_ideas"
+      ],
+      "source_role_ids": [
+        "R03",
+        "R04"
+      ],
+      "status": "active",
+      "introduced_in": "1.0.0",
+      "replaced_by": null
+    },
+    {
+      "value": "research_method_search",
+      "label_zh": "寻找研究方法",
+      "label_en": "Find research methods",
+      "definition": "针对研究问题寻找测量、实验或分析方法",
+      "boundary": "不把产品生产流程直接当研究方法",
+      "allowed_outputs": [
+        "candidate_shortlist",
+        "evidence_table"
+      ],
+      "allowed_perspectives": [
+        "applied_research",
+        "scientific_contribution",
+        "research_methodology"
+      ],
+      "context_requirement": "none",
+      "source_jtbd_values": [
+        "research_methods"
+      ],
+      "source_role_ids": [
+        "R03",
+        "R04"
+      ],
+      "status": "active",
+      "introduced_in": "1.0.0",
+      "replaced_by": null
+    },
+    {
+      "value": "research_method_comparison",
+      "label_zh": "比较研究方法",
+      "label_en": "Compare research methods",
+      "definition": "比较研究方法的假设、样本要求、适用范围和局限",
+      "boundary": "比较产品技术路线用 solution_comparison",
+      "allowed_outputs": [
+        "comparison_matrix"
+      ],
+      "allowed_perspectives": [
+        "applied_research",
+        "scientific_contribution",
+        "research_methodology"
+      ],
+      "context_requirement": "none",
+      "source_jtbd_values": [
+        "research_methods"
+      ],
+      "source_role_ids": [
+        "R03",
+        "R04"
+      ],
+      "status": "active",
+      "introduced_in": "1.0.0",
+      "replaced_by": null
+    },
+    {
+      "value": "research_ideation",
+      "label_zh": "形成研究构思",
+      "label_en": "Generate research ideas",
+      "definition": "将研究空白转成假设、课题和可检验路径",
+      "boundary": "不只列宽泛研究方向；产品需求构思用 product_ideation",
+      "allowed_outputs": [
+        "research_agenda",
+        "concept_brief"
+      ],
+      "allowed_perspectives": [
+        "applied_research",
+        "scientific_contribution",
+        "research_methodology",
+        "invention_development"
+      ],
+      "context_requirement": "none",
+      "source_jtbd_values": [
+        "research_ideas",
+        "ideas_concepts"
+      ],
+      "source_role_ids": [
+        "R01",
+        "R02",
+        "R03",
+        "R04"
+      ],
+      "status": "active",
+      "introduced_in": "1.0.0",
+      "replaced_by": null
+    },
+    {
+      "value": "evidence_search",
+      "label_zh": "检索专利与文献",
+      "label_en": "Search patents and literature",
+      "definition": "围绕明确主题建立可复查的资料集及相关性说明",
+      "boundary": "专门为现有技术或 FTO 检索时用专门任务；资料类型写检索范围",
+      "allowed_outputs": [
+        "evidence_table"
+      ],
+      "allowed_perspectives": [
+        "product_design",
+        "invention_development",
+        "applied_research",
+        "scientific_contribution",
+        "research_methodology",
+        "technology_scouting",
+        "patent_evidence_analysis"
+      ],
+      "context_requirement": "none",
+      "source_jtbd_values": [
+        "existing_technologies",
+        "patents_literature",
+        "search_draft_patents"
+      ],
+      "source_role_ids": [
+        "R01",
+        "R02",
+        "R03",
+        "R04",
+        "R05",
+        "R07",
+        "R10",
+        "R11"
+      ],
+      "status": "active",
+      "introduced_in": "1.0.0",
+      "replaced_by": null
+    },
+    {
+      "value": "evidence_synthesis",
+      "label_zh": "综合研究证据",
+      "label_en": "Synthesize research evidence",
+      "definition": "解释多项研究的共同发现、分歧和适用边界",
+      "boundary": "不把专利公开当实验验证；纯检索列表用 evidence_search",
+      "allowed_outputs": [
+        "evidence_review"
+      ],
+      "allowed_perspectives": [
+        "applied_research",
+        "scientific_contribution",
+        "research_methodology",
+        "reliability_engineering",
+        "technology_scouting",
+        "patent_evidence_analysis"
+      ],
+      "context_requirement": "none",
+      "source_jtbd_values": [
+        "research_trends",
+        "patents_literature"
+      ],
+      "source_role_ids": [
+        "R01",
+        "R03",
+        "R04",
+        "R05",
+        "R07",
+        "R10",
+        "R11"
+      ],
+      "status": "active",
+      "introduced_in": "1.0.0",
+      "replaced_by": null
+    },
+    {
+      "value": "research_trend_tracking",
+      "label_zh": "跟踪研究趋势",
+      "label_en": "Track research trends",
+      "definition": "按时间观察科学问题、研究方法或结果的变化",
+      "boundary": "技术产品化与产业采用为主用 technology_trend_tracking",
+      "allowed_outputs": [
+        "trend_brief",
+        "landscape_map"
+      ],
+      "allowed_perspectives": [
+        "applied_research",
+        "scientific_contribution",
+        "research_methodology",
+        "technology_scouting"
+      ],
+      "context_requirement": "none",
+      "source_jtbd_values": [
+        "research_trends"
+      ],
+      "source_role_ids": [
+        "R03",
+        "R04",
+        "R05"
+      ],
+      "status": "active",
+      "introduced_in": "1.0.0",
+      "replaced_by": null
+    },
+    {
+      "value": "technology_trend_tracking",
+      "label_zh": "跟踪技术趋势",
+      "label_en": "Track technology trends",
+      "definition": "按时间跟踪技术路线、性能进展和采用证据",
+      "boundary": "单纯静态盘点用 technology_landscape；单纯学术演变用 research_trend_tracking",
+      "allowed_outputs": [
+        "trend_brief"
+      ],
+      "allowed_perspectives": [
+        "product_design",
+        "process_engineering",
+        "system_integration",
+        "technology_scouting",
+        "product_strategy",
+        "competitive_intelligence"
+      ],
+      "context_requirement": "none",
+      "source_jtbd_values": [
+        "technology_competitors",
+        "technology_trends"
+      ],
+      "source_role_ids": [
+        "R01",
+        "R03",
+        "R05",
+        "R06",
+        "R07"
+      ],
+      "status": "active",
+      "introduced_in": "1.0.0",
+      "replaced_by": null
+    },
+    {
+      "value": "competitor_tracking",
+      "label_zh": "跟踪竞争主体",
+      "label_en": "Track competitors",
+      "definition": "跟踪特定类型或指定主体的能力、研发及产品变化",
+      "boundary": "未给主体时可以说明筛选方法，不虚构用户的竞争对手",
+      "allowed_outputs": [
+        "trend_brief",
+        "comparison_matrix",
+        "landscape_map"
+      ],
+      "allowed_perspectives": [
+        "competitive_intelligence",
+        "technology_scouting",
+        "product_strategy",
+        "ip_portfolio_management"
+      ],
+      "context_requirement": "none",
+      "source_jtbd_values": [
+        "technology_competitors"
+      ],
+      "source_role_ids": [
+        "R05",
+        "R06",
+        "R07"
+      ],
+      "status": "active",
+      "introduced_in": "1.0.0",
+      "replaced_by": null
+    },
+    {
+      "value": "innovation_opportunity_identification",
+      "label_zh": "识别创新机会",
+      "label_en": "Identify innovation opportunities",
+      "definition": "从未满足需求、技术能力与应用缺口筛选机会",
+      "boundary": "有具体许可交易目标时用 licensing_opportunity_assessment",
+      "allowed_outputs": [
+        "candidate_shortlist",
+        "assessment_brief"
+      ],
+      "allowed_perspectives": [
+        "technology_scouting",
+        "product_strategy",
+        "competitive_intelligence",
+        "invention_development"
+      ],
+      "context_requirement": "none",
+      "source_jtbd_values": [
+        "product_ideas",
+        "innovation_opportunities",
+        "ideas_concepts"
+      ],
+      "source_role_ids": [
+        "R01",
+        "R02",
+        "R05",
+        "R06",
+        "R07"
+      ],
+      "status": "active",
+      "introduced_in": "1.0.0",
+      "replaced_by": null
+    },
+    {
+      "value": "rd_direction_prioritization",
+      "label_zh": "排定研发方向",
+      "label_en": "Prioritize R&D directions",
+      "definition": "对研发方向的价值、证据、成熟度和资源要求做取舍",
+      "boundary": "未给资源预算时不编造企业真实评分",
+      "allowed_outputs": [
+        "priority_matrix",
+        "comparison_matrix"
+      ],
+      "allowed_perspectives": [
+        "technology_scouting",
+        "product_strategy",
+        "applied_research",
+        "scientific_contribution"
+      ],
+      "context_requirement": "none",
+      "source_jtbd_values": [
+        "rd_directions"
+      ],
+      "source_role_ids": [
+        "R03",
+        "R04",
+        "R05",
+        "R06"
+      ],
+      "status": "active",
+      "introduced_in": "1.0.0",
+      "replaced_by": null
+    },
+    {
+      "value": "patent_landscape_analysis",
+      "label_zh": "分析专利态势",
+      "label_en": "Analyze patent landscapes",
+      "definition": "按主题、主体、时间和家族组织专利布局证据",
+      "boundary": "专利态势不等于产品 FTO；自身资产决策用 ip_portfolio_planning",
+      "allowed_outputs": [
+        "landscape_map",
+        "evidence_table"
+      ],
+      "allowed_perspectives": [
+        "patent_evidence_analysis",
+        "ip_portfolio_management",
+        "competitive_intelligence",
+        "technology_scouting",
+        "patent_risk_review"
+      ],
+      "context_requirement": "none",
+      "source_jtbd_values": [
+        "patent_landscapes"
+      ],
+      "source_role_ids": [
+        "R05",
+        "R06",
+        "R07",
+        "R08",
+        "R10",
+        "R11"
+      ],
+      "status": "active",
+      "introduced_in": "1.0.0",
+      "replaced_by": null
+    },
+    {
+      "value": "prior_art_search",
+      "label_zh": "检索现有技术",
+      "label_en": "Search prior art",
+      "definition": "针对技术特征和检索目的定位相关既有公开证据",
+      "boundary": "需说明检索日期范围；不自动得出新颖性结论",
+      "allowed_outputs": [
+        "evidence_table"
+      ],
+      "allowed_perspectives": [
+        "invention_development",
+        "patent_evidence_analysis",
+        "patent_prosecution",
+        "patent_risk_review"
+      ],
+      "context_requirement": "none",
+      "source_jtbd_values": [
+        "patent_ip_risk",
+        "prior_art",
+        "search_draft_patents"
+      ],
+      "source_role_ids": [
+        "R01",
+        "R02",
+        "R07",
+        "R08",
+        "R10",
+        "R11",
+        "R13"
+      ],
+      "status": "active",
+      "introduced_in": "1.0.0",
+      "replaced_by": null
+    },
+    {
+      "value": "novelty_comparison",
+      "label_zh": "比较新颖性差异",
+      "label_en": "Compare novelty-related features",
+      "definition": "将给定技术特征与既有证据逐项比较并标明缺口",
+      "boundary": "技术差异不等于可授权判断；缺披露可提供比较方法",
+      "allowed_outputs": [
+        "comparison_matrix",
+        "evidence_table",
+        "document_template"
+      ],
+      "allowed_perspectives": [
+        "invention_development",
+        "patent_evidence_analysis",
+        "patent_prosecution",
+        "patent_risk_review"
+      ],
+      "context_requirement": "none",
+      "source_jtbd_values": [
+        "prior_art"
+      ],
+      "source_role_ids": [
+        "R01",
+        "R02",
+        "R07",
+        "R08",
+        "R10",
+        "R11",
+        "R13"
+      ],
+      "status": "active",
+      "introduced_in": "1.0.0",
+      "replaced_by": null
+    },
+    {
+      "value": "fto_evidence_search",
+      "label_zh": "检索 FTO 相关证据",
+      "label_en": "Search FTO evidence",
+      "definition": "围绕产品实施、目标范围和时间搜集权利要求及状态线索",
+      "boundary": "与现有技术检索目的不同；缺范围时提供检索框架，不判定安全",
+      "allowed_outputs": [
+        "evidence_table",
+        "document_template"
+      ],
+      "allowed_perspectives": [
+        "patent_evidence_analysis",
+        "patent_risk_review"
+      ],
+      "context_requirement": "none",
+      "source_jtbd_values": [
+        "patent_ip_risk",
+        "product_ip_risks",
+        "fto_design_risks",
+        "fto_searches"
+      ],
+      "source_role_ids": [
+        "R07",
+        "R08",
+        "R10",
+        "R11"
+      ],
+      "status": "active",
+      "introduced_in": "1.0.0",
+      "replaced_by": null
+    },
+    {
+      "value": "design_risk_analysis",
+      "label_zh": "分析设计相关专利风险",
+      "label_en": "Analyze design-related patent risk",
+      "definition": "比较设计实施或改动与相关权利要求证据，识别待审问题",
+      "boundary": "设计绕开假设须验证；缺具体范围时限于方法与风险清单",
+      "allowed_outputs": [
+        "risk_register",
+        "comparison_matrix",
+        "document_template"
+      ],
+      "allowed_perspectives": [
+        "patent_risk_review",
+        "patent_evidence_analysis",
+        "product_design",
+        "system_integration"
+      ],
+      "context_requirement": "none",
+      "source_jtbd_values": [
+        "patent_ip_risk",
+        "product_ip_risks",
+        "fto_design_risks"
+      ],
+      "source_role_ids": [
+        "R01",
+        "R07",
+        "R08",
+        "R10",
+        "R11"
+      ],
+      "status": "active",
+      "introduced_in": "1.0.0",
+      "replaced_by": null
+    },
+    {
+      "value": "ip_risk_identification",
+      "label_zh": "识别知识产权风险事项",
+      "label_en": "Identify IP risk issues",
+      "definition": "梳理技术使用、专利或权属相关的证据缺口与行动事项",
+      "boundary": "不自动扩展到合同谈判或确定法律意见；具体合同用 collaboration_terms_review",
+      "allowed_outputs": [
+        "risk_register",
+        "document_template"
+      ],
+      "allowed_perspectives": [
+        "patent_risk_review",
+        "ip_portfolio_management",
+        "patent_evidence_analysis",
+        "invention_development",
+        "product_strategy"
+      ],
+      "context_requirement": "none",
+      "source_jtbd_values": [
+        "patent_ip_risk",
+        "product_ip_risks"
+      ],
+      "source_role_ids": [
+        "R01",
+        "R02",
+        "R06",
+        "R07",
+        "R08",
+        "R10",
+        "R11"
+      ],
+      "status": "active",
+      "introduced_in": "1.0.0",
+      "replaced_by": null
+    },
+    {
+      "value": "application_drafting",
+      "label_zh": "起草申请文件",
+      "label_en": "Draft patent applications",
+      "definition": "根据技术披露组织申请文件与支持关系",
+      "boundary": "不虚构技术特征；只给三个输入时提供模板",
+      "allowed_outputs": [
+        "application_draft",
+        "document_template"
+      ],
+      "allowed_perspectives": [
+        "patent_prosecution",
+        "invention_development"
+      ],
+      "context_requirement": "disclosure",
+      "source_jtbd_values": [
+        "draft_review_patents",
+        "draft_review_applications",
+        "search_draft_patents"
+      ],
+      "source_role_ids": [
+        "R01",
+        "R02",
+        "R08",
+        "R10",
+        "R13"
+      ],
+      "status": "active",
+      "introduced_in": "1.0.0",
+      "replaced_by": null
+    },
+    {
+      "value": "application_review",
+      "label_zh": "审阅申请文件",
+      "label_en": "Review patent applications",
+      "definition": "核对给定文件的技术支持、表述一致性与待修改事项",
+      "boundary": "必须有被审阅文件；没有则提供审阅模板",
+      "allowed_outputs": [
+        "review_notes",
+        "document_template"
+      ],
+      "allowed_perspectives": [
+        "patent_prosecution",
+        "patent_risk_review"
+      ],
+      "context_requirement": "application",
+      "source_jtbd_values": [
+        "draft_review_patents",
+        "draft_review_applications"
+      ],
+      "source_role_ids": [
+        "R08",
+        "R10",
+        "R13"
+      ],
+      "status": "active",
+      "introduced_in": "1.0.0",
+      "replaced_by": null
+    },
+    {
+      "value": "claims_drafting",
+      "label_zh": "起草权利要求",
+      "label_en": "Draft patent claims",
+      "definition": "从技术披露中组织核心特征和权利要求层级",
+      "boundary": "不从行业名称推造发明特征；无披露用模板",
+      "allowed_outputs": [
+        "claims_draft",
+        "document_template"
+      ],
+      "allowed_perspectives": [
+        "patent_prosecution",
+        "invention_development"
+      ],
+      "context_requirement": "disclosure",
+      "source_jtbd_values": [
+        "draft_review_patents",
+        "draft_refine_claims",
+        "search_draft_patents"
+      ],
+      "source_role_ids": [
+        "R01",
+        "R02",
+        "R08",
+        "R10",
+        "R13"
+      ],
+      "status": "active",
+      "introduced_in": "1.0.0",
+      "replaced_by": null
+    },
+    {
+      "value": "claims_refinement",
+      "label_zh": "完善权利要求",
+      "label_en": "Refine patent claims",
+      "definition": "对已有权利要求及支持材料提出范围、依赖和表述修改",
+      "boundary": "没有原权利要求及支持材料时只提供模板",
+      "allowed_outputs": [
+        "review_notes",
+        "comparison_matrix",
+        "document_template"
+      ],
+      "allowed_perspectives": [
+        "patent_prosecution",
+        "patent_risk_review"
+      ],
+      "context_requirement": "claims_and_support",
+      "source_jtbd_values": [
+        "draft_review_patents",
+        "draft_refine_claims"
+      ],
+      "source_role_ids": [
+        "R08",
+        "R10",
+        "R13"
+      ],
+      "status": "active",
+      "introduced_in": "1.0.0",
+      "replaced_by": null
+    },
+    {
+      "value": "office_action_analysis",
+      "label_zh": "分析审查意见",
+      "label_en": "Analyze office actions",
+      "definition": "将给定意见、引证与申请支持材料对应，定位待回应事项",
+      "boundary": "不根据行业猜测审查意见或期限；缺材料用模板",
+      "allowed_outputs": [
+        "evidence_table",
+        "review_notes",
+        "document_template"
+      ],
+      "allowed_perspectives": [
+        "patent_prosecution",
+        "patent_evidence_analysis",
+        "patent_risk_review"
+      ],
+      "context_requirement": "office_action_package",
+      "source_jtbd_values": [
+        "office_actions"
+      ],
+      "source_role_ids": [
+        "R07",
+        "R08",
+        "R10",
+        "R11",
+        "R13"
+      ],
+      "status": "active",
+      "introduced_in": "1.0.0",
+      "replaced_by": null
+    },
+    {
+      "value": "office_action_response",
+      "label_zh": "组织审查答复",
+      "label_en": "Prepare office action responses",
+      "definition": "根据给定审查意见与申请材料组织回应及修改支持",
+      "boundary": "缺具体材料只提供答复结构模板",
+      "allowed_outputs": [
+        "response_outline",
+        "document_template"
+      ],
+      "allowed_perspectives": [
+        "patent_prosecution",
+        "patent_risk_review"
+      ],
+      "context_requirement": "office_action_package",
+      "source_jtbd_values": [
+        "office_actions"
+      ],
+      "source_role_ids": [
+        "R08",
+        "R10",
+        "R13"
+      ],
+      "status": "active",
+      "introduced_in": "1.0.0",
+      "replaced_by": null
+    },
+    {
+      "value": "licensing_opportunity_assessment",
+      "label_zh": "评估许可与转移机会",
+      "label_en": "Assess licensing opportunities",
+      "definition": "关联技术资产、应用证据和采用方需求，识别交易准备缺口",
+      "boundary": "需许可、转移或引入场景；不虚构合作意向",
+      "allowed_outputs": [
+        "transaction_brief",
+        "candidate_shortlist",
+        "document_template"
+      ],
+      "allowed_perspectives": [
+        "ip_commercialization",
+        "technology_scouting"
+      ],
+      "context_requirement": "licensing_context",
+      "source_jtbd_values": [
+        "innovation_opportunities"
+      ],
+      "source_role_ids": [
+        "R05",
+        "R12"
+      ],
+      "status": "active",
+      "introduced_in": "1.0.0",
+      "replaced_by": null
+    },
+    {
+      "value": "collaboration_terms_review",
+      "label_zh": "梳理合作与权属问题",
+      "label_en": "Review collaboration and ownership issues",
+      "definition": "将合作目标、成果与数据使用对应到待讨论的合同业务问题",
+      "boundary": "需合作或合同场景；不因为 Legal 标签自动启用",
+      "allowed_outputs": [
+        "risk_register",
+        "document_template"
+      ],
+      "allowed_perspectives": [
+        "commercial_legal_review",
+        "ip_commercialization"
+      ],
+      "context_requirement": "collaboration_context",
+      "source_jtbd_values": [
+        "product_ip_risks"
+      ],
+      "source_role_ids": [
+        "R05",
+        "R09",
+        "R12"
+      ],
+      "status": "active",
+      "introduced_in": "1.0.0",
+      "replaced_by": null
+    },
+    {
+      "value": "ip_portfolio_planning",
+      "label_zh": "规划知识产权组合",
+      "label_en": "Plan IP portfolios",
+      "definition": "对技术资产覆盖、业务重点和维护方向形成规划",
+      "boundary": "具体方案需要资产范围；无范围仅提供方法模板",
+      "allowed_outputs": [
+        "portfolio_plan",
+        "priority_matrix",
+        "document_template"
+      ],
+      "allowed_perspectives": [
+        "ip_portfolio_management",
+        "patent_evidence_analysis"
+      ],
+      "context_requirement": "portfolio_scope",
+      "source_jtbd_values": [
+        "patent_landscapes"
+      ],
+      "source_role_ids": [
+        "R07",
+        "R10",
+        "R11"
+      ],
+      "status": "active",
+      "introduced_in": "1.0.0",
+      "replaced_by": null
+    },
+    {
+      "value": "task_clarification",
+      "label_zh": "澄清当前任务",
+      "label_en": "Clarify the current task",
+      "definition": "帮助用户区分任务、所需材料与对应工作成果",
+      "boundary": "已有明确任务时不用于替代该任务",
+      "allowed_outputs": [
+        "task_menu"
+      ],
+      "allowed_perspectives": [
+        "task_exploration"
+      ],
+      "context_requirement": "none",
+      "source_jtbd_values": [
+        "other"
+      ],
+      "source_role_ids": [
+        "R00"
+      ],
+      "status": "active",
+      "introduced_in": "1.0.0",
+      "replaced_by": null
+    }
+  ],
+  "desired_outputs": [
+    {
+      "value": "candidate_shortlist",
+      "label_zh": "候选清单",
+      "label_en": "Candidate shortlist",
+      "definition": "列明候选、筛选依据和适用条件",
+      "boundary": "不仅罗列名称；有同口径横向比较时优先 comparison_matrix",
+      "status": "active",
+      "introduced_in": "1.0.0",
+      "replaced_by": null
+    },
+    {
+      "value": "comparison_matrix",
+      "label_zh": "对比矩阵",
+      "label_en": "Comparison matrix",
+      "definition": "在统一指标、条件和证据口径下比较多个选项",
+      "boundary": "不把不同条件的数值直接排名；单方案可行性归 assessment_brief",
+      "status": "active",
+      "introduced_in": "1.0.0",
+      "replaced_by": null
+    },
+    {
+      "value": "improvement_plan",
+      "label_zh": "改进方案",
+      "label_en": "Improvement plan",
+      "definition": "给出问题、改进措施、依据和验证方式",
+      "boundary": "不仅解释失效机理；纯验证步骤归 validation_plan",
+      "status": "active",
+      "introduced_in": "1.0.0",
+      "replaced_by": null
+    },
+    {
+      "value": "landscape_map",
+      "label_zh": "领域图谱",
+      "label_en": "Landscape map",
+      "definition": "按主题、技术路线或主体组织领域覆盖与关系",
+      "boundary": "技术和专利图谱由任务区别；时间变化为主归 trend_brief",
+      "status": "active",
+      "introduced_in": "1.0.0",
+      "replaced_by": null
+    },
+    {
+      "value": "concept_brief",
+      "label_zh": "构思说明",
+      "label_en": "Concept brief",
+      "definition": "描述问题、构思差异、依据和最小验证",
+      "boundary": "不声称已完成实验或已确认专利新颖性",
+      "status": "active",
+      "introduced_in": "1.0.0",
+      "replaced_by": null
+    },
+    {
+      "value": "assessment_brief",
+      "label_zh": "评估说明",
+      "label_en": "Assessment brief",
+      "definition": "对明确问题整理条件、证据、缺口及继续判断的依据",
+      "boundary": "不是无条件可行或安全的结论；多选项对照归 comparison_matrix",
+      "status": "active",
+      "introduced_in": "1.0.0",
+      "replaced_by": null
+    },
+    {
+      "value": "validation_plan",
+      "label_zh": "验证计划",
+      "label_en": "Validation plan",
+      "definition": "写明假设、样本或工况、方法、指标和判定规则",
+      "boundary": "不把计划写成已完成的实验结果",
+      "status": "active",
+      "introduced_in": "1.0.0",
+      "replaced_by": null
+    },
+    {
+      "value": "research_agenda",
+      "label_zh": "研究问题清单",
+      "label_en": "Research agenda",
+      "definition": "提出研究空白、具体问题、依据和可检验路径",
+      "boundary": "产品构思归 concept_brief，不只罗列流行关键词",
+      "status": "active",
+      "introduced_in": "1.0.0",
+      "replaced_by": null
+    },
+    {
+      "value": "evidence_table",
+      "label_zh": "证据表",
+      "label_en": "Evidence table",
+      "definition": "将来源、定位、技术特征或结论与支持证据对应",
+      "boundary": "不编造文献或专利；综合解释为主归 evidence_review",
+      "status": "active",
+      "introduced_in": "1.0.0",
+      "replaced_by": null
+    },
+    {
+      "value": "evidence_review",
+      "label_zh": "证据综述",
+      "label_en": "Evidence review",
+      "definition": "对多项证据做综合解释、分歧分析和局限说明",
+      "boundary": "不仅列检索结果；动态跟踪为主归 trend_brief",
+      "status": "active",
+      "introduced_in": "1.0.0",
+      "replaced_by": null
+    },
+    {
+      "value": "trend_brief",
+      "label_zh": "趋势简报",
+      "label_en": "Trend brief",
+      "definition": "在明确时间窗口内说明变化、证据及影响",
+      "boundary": "不以静态图谱代替时间变化，不把预测当已发生事件",
+      "status": "active",
+      "introduced_in": "1.0.0",
+      "replaced_by": null
+    },
+    {
+      "value": "priority_matrix",
+      "label_zh": "优先级矩阵",
+      "label_en": "Priority matrix",
+      "definition": "按目标、评价维度和证据安排候选优先级",
+      "boundary": "说明权衡与不确定性，不凭任意分数制造确定排名",
+      "status": "active",
+      "introduced_in": "1.0.0",
+      "replaced_by": null
+    },
+    {
+      "value": "risk_register",
+      "label_zh": "风险事项清单",
+      "label_en": "Risk register",
+      "definition": "记录风险问题、适用范围、证据缺口和待执行行动",
+      "boundary": "不是无范围的法律结论；事实检索本身归 evidence_table",
+      "status": "active",
+      "introduced_in": "1.0.0",
+      "replaced_by": null
+    },
+    {
+      "value": "application_draft",
+      "label_zh": "申请文件草稿",
+      "label_en": "Application draft",
+      "definition": "基于给定技术披露组织说明书、实施例和相关申请段落",
+      "boundary": "须有披露材料；没有材料用 document_template",
+      "status": "active",
+      "introduced_in": "1.0.0",
+      "replaced_by": null
+    },
+    {
+      "value": "review_notes",
+      "label_zh": "审阅与修改意见",
+      "label_en": "Review notes",
+      "definition": "对已有文件逐项指出问题、依据和修改建议",
+      "boundary": "须有被审阅文本；没有文本用 document_template",
+      "status": "active",
+      "introduced_in": "1.0.0",
+      "replaced_by": null
+    },
+    {
+      "value": "claims_draft",
+      "label_zh": "权利要求草稿",
+      "label_en": "Claims draft",
+      "definition": "基于明确技术披露组织权利要求层级和支持依据",
+      "boundary": "不虚构技术特征；没有披露材料用 document_template",
+      "status": "active",
+      "introduced_in": "1.0.0",
+      "replaced_by": null
+    },
+    {
+      "value": "response_outline",
+      "label_zh": "审查答复提纲",
+      "label_en": "Office action response outline",
+      "definition": "依据给定审查意见和申请材料整理答复结构与支持证据",
+      "boundary": "没有具体意见及相关文件时用 document_template",
+      "status": "active",
+      "introduced_in": "1.0.0",
+      "replaced_by": null
+    },
+    {
+      "value": "transaction_brief",
+      "label_zh": "许可与转移准备说明",
+      "label_en": "Transaction brief",
+      "definition": "关联技术资产、采用方需求、开发缺口和交易准备",
+      "boundary": "不编造交易意向或估值；单纯技术名单归 candidate_shortlist",
+      "status": "active",
+      "introduced_in": "1.0.0",
+      "replaced_by": null
+    },
+    {
+      "value": "portfolio_plan",
+      "label_zh": "组合布局方案",
+      "label_en": "Portfolio plan",
+      "definition": "将明确资产范围与业务技术重点对应，提出维护或补充方向",
+      "boundary": "须有组合或资产范围；通用规划方法用 document_template",
+      "status": "active",
+      "introduced_in": "1.0.0",
+      "replaced_by": null
+    },
+    {
+      "value": "task_menu",
+      "label_zh": "任务与产出导航",
+      "label_en": "Task menu",
+      "definition": "帮助用户区分可选任务、前提和相应交付物",
+      "boundary": "不是宣称已经明确的用户需求",
+      "status": "active",
+      "introduced_in": "1.0.0",
+      "replaced_by": null
+    },
+    {
+      "value": "document_template",
+      "label_zh": "工作文档模板",
+      "label_en": "Working document template",
+      "definition": "提供字段、结构、填写说明和待补材料清单",
+      "boundary": "模板中的假设或占位符不能写成真实用户材料或已完成结论",
+      "status": "active",
+      "introduced_in": "1.0.0",
+      "replaced_by": null
+    }
+  ],
+  "role_preferred_perspectives": {
+    "rd_engineer": [
+      "product_design",
+      "process_engineering",
+      "system_integration",
+      "reliability_engineering",
+      "invention_development"
+    ],
+    "researcher": [
+      "applied_research",
+      "scientific_contribution",
+      "research_methodology"
+    ],
+    "innovation_product_strategy": [
+      "technology_scouting",
+      "product_strategy",
+      "competitive_intelligence"
+    ],
+    "in_house_ip_legal": [
+      "ip_portfolio_management",
+      "patent_risk_review",
+      "patent_evidence_analysis",
+      "patent_prosecution",
+      "commercial_legal_review"
+    ],
+    "patent_ip_services": [
+      "patent_evidence_analysis",
+      "patent_prosecution",
+      "patent_risk_review",
+      "ip_commercialization"
+    ],
+    "other": [
+      "task_exploration"
+    ]
+  },
+  "jtbd_allowed_tasks": {
+    "technical_solutions": [
+      "solution_search",
+      "solution_comparison",
+      "failure_resolution",
+      "process_optimization"
+    ],
+    "existing_technologies": [
+      "technology_landscape",
+      "solution_comparison",
+      "evidence_search"
+    ],
+    "product_ideas": [
+      "product_ideation",
+      "innovation_opportunity_identification"
+    ],
+    "technical_feasibility": [
+      "feasibility_assessment",
+      "validation_planning"
+    ],
+    "patent_ip_risk": [
+      "ip_risk_identification",
+      "prior_art_search",
+      "fto_evidence_search",
+      "design_risk_analysis"
+    ],
+    "new_research_fields": [
+      "research_field_exploration",
+      "research_gap_identification"
+    ],
+    "research_methods": [
+      "research_method_search",
+      "research_method_comparison",
+      "validation_planning"
+    ],
+    "research_trends": [
+      "research_trend_tracking",
+      "evidence_synthesis"
+    ],
+    "research_ideas": [
+      "research_ideation",
+      "research_gap_identification"
+    ],
+    "patents_literature": [
+      "evidence_search",
+      "evidence_synthesis"
+    ],
+    "technology_competitors": [
+      "technology_trend_tracking",
+      "competitor_tracking",
+      "technology_landscape"
+    ],
+    "innovation_opportunities": [
+      "innovation_opportunity_identification",
+      "licensing_opportunity_assessment"
+    ],
+    "rd_directions": [
+      "rd_direction_prioritization",
+      "feasibility_assessment",
+      "solution_comparison"
+    ],
+    "patent_landscapes": [
+      "patent_landscape_analysis",
+      "ip_portfolio_planning"
+    ],
+    "product_ip_risks": [
+      "ip_risk_identification",
+      "design_risk_analysis",
+      "fto_evidence_search",
+      "collaboration_terms_review"
+    ],
+    "prior_art": [
+      "prior_art_search",
+      "novelty_comparison"
+    ],
+    "fto_design_risks": [
+      "fto_evidence_search",
+      "design_risk_analysis"
+    ],
+    "draft_review_patents": [
+      "application_drafting",
+      "application_review",
+      "claims_drafting",
+      "claims_refinement"
+    ],
+    "office_actions": [
+      "office_action_analysis",
+      "office_action_response"
+    ],
+    "fto_searches": [
+      "fto_evidence_search"
+    ],
+    "draft_review_applications": [
+      "application_drafting",
+      "application_review"
+    ],
+    "draft_refine_claims": [
+      "claims_drafting",
+      "claims_refinement"
+    ],
+    "technology_trends": [
+      "technology_trend_tracking",
+      "technology_landscape"
+    ],
+    "ideas_concepts": [
+      "product_ideation",
+      "research_ideation",
+      "innovation_opportunity_identification"
+    ],
+    "search_draft_patents": [
+      "prior_art_search",
+      "evidence_search",
+      "application_drafting",
+      "claims_drafting"
+    ],
+    "other": [
+      "task_clarification"
+    ]
+  },
+  "conditional_task_gates": {
+    "licensing_opportunity_assessment": "明确给出许可、转移或技术引入场景；仅 industry 和 role 不满足条件。",
+    "collaboration_terms_review": "明确给出合作或合同场景；仅 Legal 或产品 IP 风险输入不满足条件。"
+  },
+  "context_requirements": {
+    "none": {
+      "description": "无需额外项目材料即可生成一般性问题；不允许捏造具体项目事实。"
+    },
+    "disclosure": {
+      "description": "具体输出需给定技术披露及支持材料。",
+      "template_fallback": true
+    },
+    "application": {
+      "description": "具体输出需给定被审阅申请文件。",
+      "template_fallback": true
+    },
+    "claims_and_support": {
+      "description": "具体输出需给定原权利要求及技术支持材料。",
+      "template_fallback": true
+    },
+    "office_action_package": {
+      "description": "具体输出需给定审查意见、引证与相关申请材料；涉及日期和范围需明确。",
+      "template_fallback": true
+    },
+    "licensing_context": {
+      "description": "明确给出许可、转移或技术引入场景；仅 industry 和 role 不满足条件。",
+      "hard_gate": true
+    },
+    "collaboration_context": {
+      "description": "明确给出合作或合同场景；仅 Legal 或产品 IP 风险输入不满足条件。",
+      "hard_gate": true
+    },
+    "portfolio_scope": {
+      "description": "具体布局方案需给定资产组合范围及业务技术重点。",
+      "template_fallback": true
+    }
+  },
+  "tag_cardinality": {
+    "role_perspective": {
+      "type": "string",
+      "required": true,
+      "count": 1
+    },
+    "industry_segment": {
+      "type": "string_or_null",
+      "required": true,
+      "count": 1,
+      "null_reason_required": true
+    },
+    "technology_object": {
+      "type": "array_of_strings",
+      "required": true,
+      "min_items": 0,
+      "max_items": 2,
+      "unique": true,
+      "empty_reason_required": true
+    },
+    "jtbd_task": {
+      "type": "string",
+      "required": true,
+      "count": 1
+    },
+    "desired_output": {
+      "type": "string",
+      "required": true,
+      "count": 1
+    }
+  },
+  "metadata_enums": {
+    "perspective_selection": [
+      "role_preferred",
+      "task_override",
+      "task_exploration"
+    ],
+    "industry_selection": [
+      "explicit_context",
+      "within_input_exploration",
+      "cross_industry_explicit_context",
+      "unresolved"
+    ],
+    "object_selection": [
+      "explicit_context",
+      "within_segment_exploration",
+      "unresolved"
+    ],
+    "answer_mode": [
+      "general_guidance",
+      "template",
+      "case_specific"
+    ],
+    "industry_unresolved_reason": [
+      "input_other",
+      "not_in_catalog",
+      "broad_scope"
+    ],
+    "object_unresolved_reason": [
+      "not_in_catalog",
+      "broad_scope",
+      "industry_unresolved"
+    ]
+  },
+  "selection_rules": [
+    {
+      "id": "S01",
+      "name": "保持输入",
+      "rule": "input_profile 只保存经精确别名表转换后的三个原始选择；生成器不得改写。other 是用户选择，null 是内容尚未细分，二者不可混用。"
+    },
+    {
+      "id": "S02",
+      "name": "先任务后视角",
+      "rule": "jtbd_task 必须来自 jtbd_allowed_tasks[input_profile.jtbd_primary]。候选任务不是频率排序；只有一个主要任务，不把一项复合入口机械生成成复合问题。"
+    },
+    {
+      "id": "S03",
+      "name": "角色是偏好而非禁止",
+      "rule": "优先取所选任务 allowed_perspectives 与 role_preferred_perspectives 的交集。交集为空时从任务允许视角中选择并记录 task_override，保留原始 role；不把跨角色任务拒绝或偷换为角色默认任务。"
+    },
+    {
+      "id": "S04",
+      "name": "条件视角不代表身份",
+      "rule": "视角只描述内容工作立场，不推定独立发明人、高校身份、律师资格、客户委托或拥有专利组合。licensing_opportunity_assessment 与 collaboration_terms_review 必须满足明确场景门槛；不满足时删除该候选，改选同一原始 JTBD 下其他可用任务。"
+    },
+    {
+      "id": "S05",
+      "name": "行业候选范围",
+      "rule": "无额外上下文时，具名行业只允许选择 entry_industry 相同的细分行业，记录 within_input_exploration，或保持 null 并说明 broad_scope。其他行业明确作为主工作对象出现在提供的上下文时才可跨行业，记录 cross_industry_explicit_context 和依据。"
+    },
+    {
+      "id": "S06",
+      "name": "Other 与覆盖缺口",
+      "rule": "industry_type=other 且没有明确上下文时 industry_segment 必须为 null。aerospace_space 仅在明确航空航天工作场景时选择。具名输入下的未覆盖对象也不强塞给现有 42 项，记录 not_in_catalog；可使用问题正文中的原始对象词，但不创造枚举。"
+    },
+    {
+      "id": "S07",
+      "name": "技术对象",
+      "rule": "technology_object 为 0–2 个不重复对象，必须均允许出现在已选 industry_segment。industry_segment 为 null 时对象数组为空；问题主要研究对象不在目录时留空并记录 not_in_catalog，不用顺带提及的已知对象冒充。"
+    },
+    {
+      "id": "S08",
+      "name": "明确与探索的来源",
+      "rule": "只有传入上下文明确给出相应细分领域或对象时才可记录 explicit_context；否则记为探索。界面语言、模型猜测和本批次生成结果都不是用户确认依据。"
+    },
+    {
+      "id": "S09",
+      "name": "产出一致",
+      "rule": "desired_output 必须属于任务的 allowed_outputs；模板模式只允许 document_template。task_clarification 必须搭配 task_exploration 和 task_menu。内容 categories 或文件格式不得直接替代 desired_output。"
+    },
+    {
+      "id": "S10",
+      "name": "缺材料的回退",
+      "rule": "disclosure、application、claims_and_support、office_action_package、portfolio_scope 缺少所需材料时 answer_mode=template 且 desired_output=document_template，问题写成方法或模板请求；条件门槛 licensing_context/collaboration_context 不能靠模板回退绕过。"
+    },
+    {
+      "id": "S11",
+      "name": "三输入的默认边界",
+      "rule": "仅有三个输入时生成一般性问题或模板；不伪造具体竞争者、产品版本、客户预算、实验数据、国家或专利材料。具体项目答案另需提供上下文。原研究面向欧美不代表用户已选择美国。"
+    },
+    {
+      "id": "S12",
+      "name": "Other 任务",
+      "rule": "jtbd_primary=other 在本版只生成 task_clarification，以已有角色或行业解释任务选项。即使补充文本表达了其他任务，也先在入口层明确选择或保留原始输入并另作解析升级，不能悄悄改变本版映射。"
+    },
+    {
+      "id": "S13",
+      "name": "枚举不存在",
+      "rule": "未知枚举一律拒绝；不让模型即时增加 other、unknown 或同义 key。使用字段规定的 null/空数组及原因，或进入待新增标签清单。"
+    },
+    {
+      "id": "S14",
+      "name": "问题和答案匹配",
+      "rule": "先选择合法组合再生成问题和答案。除结构检查外还要复核语义：主视角、任务、对象与实际内容一致；只有顺带出现的概念不能获得标签。检索无结果也要如实记录，不能为满足标签编造答案。"
+    },
+    {
+      "id": "S15",
+      "name": "证据及范围",
+      "rule": "原文角色/行业 ID 是设计溯源，不是生成答案的事实引用。生成答案须另记录实际检索来源、时间及适用条件；趋势题需明确时间窗口，具体产品风险题需明确产品、地域和评估日期，否则保持通用证据框架。"
+    },
+    {
+      "id": "S16",
+      "name": "冻结版本",
+      "rule": "每次展示保存 content_id、question_version、answer_version、taxonomy_version 和标签快照；已曝光内容不得原地重写标签。重新分类产生新版本，历史曝光保持原快照。"
+    }
+  ],
+  "examples": [
+    {
+      "example_id": "Q01",
+      "taxonomy_version": "1.0.0",
+      "input_profile": {
+        "job_role": "rd_engineer",
+        "industry_type": "electronics_manufacturing",
+        "jtbd_primary": "technical_solutions"
+      },
+      "tags": {
+        "role_perspective": "product_design",
+        "industry_segment": "semiconductors",
+        "technology_object": [
+          "chip_interconnect"
+        ],
+        "jtbd_task": "solution_comparison",
+        "desired_output": "comparison_matrix"
+      },
+      "selection": {
+        "perspective": "role_preferred",
+        "industry": "within_input_exploration",
+        "objects": "within_segment_exploration",
+        "industry_unresolved_reason": null,
+        "object_unresolved_reason": null
+      },
+      "answer_mode": "general_guidance",
+      "provided_context": {},
+      "question": "哪些芯片互连方案可以在功耗、带宽与制造成本之间取得不同取舍？",
+      "answer_requirements": [
+        "按统一条件列出候选路线、比较维度与证据。",
+        "标明不可直接比较的数据及缺口，不编造统一实验结果。"
+      ],
+      "design_source_refs": [
+        "E01-R01"
+      ]
+    },
+    {
+      "example_id": "Q02",
+      "taxonomy_version": "1.0.0",
+      "input_profile": {
+        "job_role": "rd_engineer",
+        "industry_type": "electronics_manufacturing",
+        "jtbd_primary": "technical_solutions"
+      },
+      "tags": {
+        "role_perspective": "process_engineering",
+        "industry_segment": "semiconductors",
+        "technology_object": [
+          "chip_interconnect"
+        ],
+        "jtbd_task": "process_optimization",
+        "desired_output": "improvement_plan"
+      },
+      "selection": {
+        "perspective": "role_preferred",
+        "industry": "within_input_exploration",
+        "objects": "within_segment_exploration",
+        "industry_unresolved_reason": null,
+        "object_unresolved_reason": null
+      },
+      "answer_mode": "general_guidance",
+      "provided_context": {},
+      "question": "哪些工艺改进可以减少芯片互连制造缺陷、提高良率？",
+      "answer_requirements": [
+        "按缺陷类型整理工艺调整、证据及适用条件。",
+        "提出验证步骤，不假定知道用户的实际良率。"
+      ],
+      "design_source_refs": [
+        "E01-R01"
+      ]
+    },
+    {
+      "example_id": "Q03",
+      "taxonomy_version": "1.0.0",
+      "input_profile": {
+        "job_role": "rd_engineer",
+        "industry_type": "electronics_manufacturing",
+        "jtbd_primary": "technical_solutions"
+      },
+      "tags": {
+        "role_perspective": "reliability_engineering",
+        "industry_segment": "semiconductors",
+        "technology_object": [
+          "chip_interconnect"
+        ],
+        "jtbd_task": "failure_resolution",
+        "desired_output": "improvement_plan"
+      },
+      "selection": {
+        "perspective": "role_preferred",
+        "industry": "within_input_exploration",
+        "objects": "within_segment_exploration",
+        "industry_unresolved_reason": null,
+        "object_unresolved_reason": null
+      },
+      "answer_mode": "general_guidance",
+      "provided_context": {},
+      "question": "芯片互连在热循环下发生失效时，有哪些结构或材料改进方案？",
+      "answer_requirements": [
+        "关联失效现象、候选原因、改进措施和验证。",
+        "比较证据的工况，不把一般机理写成用户项目已确认根因。"
+      ],
+      "design_source_refs": [
+        "E01-R01",
+        "E01-R03"
+      ]
+    },
+    {
+      "example_id": "Q04",
+      "taxonomy_version": "1.0.0",
+      "input_profile": {
+        "job_role": "researcher",
+        "industry_type": "biotech",
+        "jtbd_primary": "research_methods"
+      },
+      "tags": {
+        "role_perspective": "research_methodology",
+        "industry_segment": "biologics_process_manufacturing",
+        "technology_object": [
+          "bioreactor_process"
+        ],
+        "jtbd_task": "research_method_comparison",
+        "desired_output": "comparison_matrix"
+      },
+      "selection": {
+        "perspective": "role_preferred",
+        "industry": "within_input_exploration",
+        "objects": "within_segment_exploration",
+        "industry_unresolved_reason": null,
+        "object_unresolved_reason": null
+      },
+      "answer_mode": "general_guidance",
+      "provided_context": {},
+      "question": "比较生物反应器放大前后传质差异，可以采用哪些实验与测量方法？",
+      "answer_requirements": [
+        "比较方法的测量对象、实验条件、局限与可复现性。"
+      ],
+      "design_source_refs": [
+        "H07-R03",
+        "H07-R04"
+      ]
+    },
+    {
+      "example_id": "Q05",
+      "taxonomy_version": "1.0.0",
+      "input_profile": {
+        "job_role": "innovation_product_strategy",
+        "industry_type": "energy",
+        "jtbd_primary": "innovation_opportunities"
+      },
+      "tags": {
+        "role_perspective": "technology_scouting",
+        "industry_segment": "batteries_stationary_storage",
+        "technology_object": [
+          "battery_management_system"
+        ],
+        "jtbd_task": "innovation_opportunity_identification",
+        "desired_output": "candidate_shortlist"
+      },
+      "selection": {
+        "perspective": "role_preferred",
+        "industry": "within_input_exploration",
+        "objects": "within_segment_exploration",
+        "industry_unresolved_reason": null,
+        "object_unresolved_reason": null
+      },
+      "answer_mode": "general_guidance",
+      "provided_context": {},
+      "question": "固定式储能电池管理系统中，有哪些值得进一步验证的技术创新机会？",
+      "answer_requirements": [
+        "机会须关联使用问题、技术证据和待验证条件。",
+        "不将研究信号直接写成已有商业需求。"
+      ],
+      "design_source_refs": [
+        "M05-R05"
+      ]
+    },
+    {
+      "example_id": "Q06",
+      "taxonomy_version": "1.0.0",
+      "input_profile": {
+        "job_role": "in_house_ip_legal",
+        "industry_type": "medical_devices",
+        "jtbd_primary": "fto_design_risks"
+      },
+      "tags": {
+        "role_perspective": "patent_risk_review",
+        "industry_segment": "in_vitro_diagnostics",
+        "technology_object": [
+          "microfluidic_cartridge"
+        ],
+        "jtbd_task": "fto_evidence_search",
+        "desired_output": "evidence_table"
+      },
+      "selection": {
+        "perspective": "role_preferred",
+        "industry": "within_input_exploration",
+        "objects": "within_segment_exploration",
+        "industry_unresolved_reason": null,
+        "object_unresolved_reason": null
+      },
+      "answer_mode": "general_guidance",
+      "provided_context": {},
+      "question": "为诊断微流控卡匣准备 FTO 相关证据检索，应如何界定技术特征、范围并组织结果？",
+      "answer_requirements": [
+        "先列待明确的实施方案、地域及评估日期。",
+        "给出检索与证据组织方法，不输出具体产品可自由实施的结论。"
+      ],
+      "design_source_refs": [
+        "H02-R08",
+        "H02-R11"
+      ]
+    },
+    {
+      "example_id": "Q07",
+      "taxonomy_version": "1.0.0",
+      "input_profile": {
+        "job_role": "patent_ip_services",
+        "industry_type": "electronics_manufacturing",
+        "jtbd_primary": "office_actions"
+      },
+      "tags": {
+        "role_perspective": "patent_prosecution",
+        "industry_segment": "semiconductors",
+        "technology_object": [
+          "semiconductor_packaging"
+        ],
+        "jtbd_task": "office_action_response",
+        "desired_output": "document_template"
+      },
+      "selection": {
+        "perspective": "role_preferred",
+        "industry": "within_input_exploration",
+        "objects": "within_segment_exploration",
+        "industry_unresolved_reason": null,
+        "object_unresolved_reason": null
+      },
+      "answer_mode": "template",
+      "provided_context": {},
+      "question": "针对半导体封装技术，如何建立关联审查意见、引证和原始披露的答复工作模板？",
+      "answer_requirements": [
+        "保留意见、引证、支持位置、答复路径等待填字段。",
+        "没有实际审查文件，所有占位内容均标明，不虚构期限。"
+      ],
+      "design_source_refs": [
+        "E01-R13"
+      ]
+    },
+    {
+      "example_id": "Q08",
+      "taxonomy_version": "1.0.0",
+      "input_profile": {
+        "job_role": "other",
+        "industry_type": "chemical",
+        "jtbd_primary": "technology_trends"
+      },
+      "tags": {
+        "role_perspective": "technology_scouting",
+        "industry_segment": "electronic_chemicals",
+        "technology_object": [
+          "photoresist"
+        ],
+        "jtbd_task": "technology_trend_tracking",
+        "desired_output": "trend_brief"
+      },
+      "selection": {
+        "perspective": "task_override",
+        "industry": "within_input_exploration",
+        "objects": "within_segment_exploration",
+        "industry_unresolved_reason": null,
+        "object_unresolved_reason": null
+      },
+      "answer_mode": "general_guidance",
+      "provided_context": {},
+      "question": "在选定的近十二个月观察窗口中，光刻胶技术有哪些值得跟踪的进展与验证难点？",
+      "answer_requirements": [
+        "执行时明确起止日期并核对实际来源。",
+        "将研发结果、产品公告与采用证据分别说明。"
+      ],
+      "design_source_refs": [
+        "M09-R05"
+      ]
+    },
+    {
+      "example_id": "Q09",
+      "taxonomy_version": "1.0.0",
+      "input_profile": {
+        "job_role": "other",
+        "industry_type": "other",
+        "jtbd_primary": "other"
+      },
+      "tags": {
+        "role_perspective": "task_exploration",
+        "industry_segment": null,
+        "technology_object": [],
+        "jtbd_task": "task_clarification",
+        "desired_output": "task_menu"
+      },
+      "selection": {
+        "perspective": "task_exploration",
+        "industry": "unresolved",
+        "objects": "unresolved",
+        "industry_unresolved_reason": "input_other",
+        "object_unresolved_reason": "industry_unresolved"
+      },
+      "answer_mode": "general_guidance",
+      "provided_context": {},
+      "question": "寻找技术方案、评估可行性和检索专利分别适用于什么工作，需要准备什么材料？",
+      "answer_requirements": [
+        "解释各任务的目的、输入和产出，供用户选择。",
+        "不填补用户的角色或行业。"
+      ],
+      "design_source_refs": [
+        "R00"
+      ]
+    },
+    {
+      "example_id": "Q10",
+      "taxonomy_version": "1.0.0",
+      "input_profile": {
+        "job_role": "rd_engineer",
+        "industry_type": "other",
+        "jtbd_primary": "technical_solutions"
+      },
+      "tags": {
+        "role_perspective": "system_integration",
+        "industry_segment": "aerospace_space",
+        "technology_object": [
+          "satellite_system"
+        ],
+        "jtbd_task": "solution_comparison",
+        "desired_output": "comparison_matrix"
+      },
+      "selection": {
+        "perspective": "role_preferred",
+        "industry": "explicit_context",
+        "objects": "within_segment_exploration",
+        "industry_unresolved_reason": null,
+        "object_unresolved_reason": null
+      },
+      "answer_mode": "general_guidance",
+      "provided_context": {
+        "work_domain": "卫星系统研发"
+      },
+      "question": "卫星系统方案比较中，应如何组织质量、功耗、接口与环境验证的取舍？",
+      "answer_requirements": [
+        "给出系统方案比较框架和需要补充的设计约束。"
+      ],
+      "design_source_refs": [
+        "E11-R01"
+      ]
+    },
+    {
+      "example_id": "Q11",
+      "taxonomy_version": "1.0.0",
+      "input_profile": {
+        "job_role": "rd_engineer",
+        "industry_type": "materials",
+        "jtbd_primary": "technical_feasibility"
+      },
+      "tags": {
+        "role_perspective": "product_design",
+        "industry_segment": null,
+        "technology_object": [],
+        "jtbd_task": "feasibility_assessment",
+        "desired_output": "assessment_brief"
+      },
+      "selection": {
+        "perspective": "role_preferred",
+        "industry": "unresolved",
+        "objects": "unresolved",
+        "industry_unresolved_reason": "broad_scope",
+        "object_unresolved_reason": "industry_unresolved"
+      },
+      "answer_mode": "general_guidance",
+      "provided_context": {},
+      "question": "评估当前材料方案的技术可行性，应准备哪些性能约束、加工条件与验证证据？",
+      "answer_requirements": [
+        "在材料大类层面给出评估框架，不擅自选定材料体系。"
+      ],
+      "design_source_refs": [
+        "R01"
+      ]
+    },
+    {
+      "example_id": "Q12",
+      "taxonomy_version": "1.0.0",
+      "input_profile": {
+        "job_role": "rd_engineer",
+        "industry_type": "electronics_manufacturing",
+        "jtbd_primary": "prior_art"
+      },
+      "tags": {
+        "role_perspective": "invention_development",
+        "industry_segment": "semiconductors",
+        "technology_object": [
+          "semiconductor_packaging"
+        ],
+        "jtbd_task": "prior_art_search",
+        "desired_output": "evidence_table"
+      },
+      "selection": {
+        "perspective": "role_preferred",
+        "industry": "within_input_exploration",
+        "objects": "within_segment_exploration",
+        "industry_unresolved_reason": null,
+        "object_unresolved_reason": null
+      },
+      "answer_mode": "general_guidance",
+      "provided_context": {},
+      "question": "检索半导体封装构思的现有技术时，应如何拆分技术特征并组织证据？",
+      "answer_requirements": [
+        "给出特征拆分、检索范围和记录方式。",
+        "角色与现有 UI 默认任务不同，仍保留明确选择的 prior_art。"
+      ],
+      "design_source_refs": [
+        "E01-R02",
+        "E01-R11"
+      ]
+    },
+    {
+      "example_id": "Q13",
+      "taxonomy_version": "1.0.0",
+      "input_profile": {
+        "job_role": "rd_engineer",
+        "industry_type": "materials",
+        "jtbd_primary": "technical_feasibility"
+      },
+      "tags": {
+        "role_perspective": "system_integration",
+        "industry_segment": "batteries_stationary_storage",
+        "technology_object": [
+          "battery_management_system"
+        ],
+        "jtbd_task": "feasibility_assessment",
+        "desired_output": "assessment_brief"
+      },
+      "selection": {
+        "perspective": "role_preferred",
+        "industry": "cross_industry_explicit_context",
+        "objects": "within_segment_exploration",
+        "industry_unresolved_reason": null,
+        "object_unresolved_reason": null
+      },
+      "answer_mode": "general_guidance",
+      "provided_context": {
+        "work_domain": "本次明确要评估固定式储能 BMS 系统集成"
+      },
+      "question": "为固定式储能系统评估 BMS 集成方案时，应核对哪些接口、保护与验证条件？",
+      "answer_requirements": [
+        "评估的主对象为已明确的系统集成，保留原始 materials 入口。",
+        "缺少具体规格时列出条件与证据要求，不给出项目已可行结论。"
+      ],
+      "design_source_refs": [
+        "M05-R01"
+      ]
+    },
+    {
+      "example_id": "Q14",
+      "taxonomy_version": "1.0.0",
+      "input_profile": {
+        "job_role": "researcher",
+        "industry_type": "electronics_manufacturing",
+        "jtbd_primary": "research_methods"
+      },
+      "tags": {
+        "role_perspective": "research_methodology",
+        "industry_segment": "semiconductors",
+        "technology_object": [],
+        "jtbd_task": "research_method_comparison",
+        "desired_output": "comparison_matrix"
+      },
+      "selection": {
+        "perspective": "role_preferred",
+        "industry": "within_input_exploration",
+        "objects": "unresolved",
+        "industry_unresolved_reason": null,
+        "object_unresolved_reason": "not_in_catalog"
+      },
+      "answer_mode": "general_guidance",
+      "provided_context": {},
+      "question": "比较半导体器件的电迁移模型时，应如何组织适用条件与验证数据？",
+      "answer_requirements": [
+        "当前对象字典没有专门的电迁移模型，正文保留对象名称，标签不强行换成顺带提及的部件。",
+        "明确模型假设、可比数据与证据缺口。"
+      ],
+      "design_source_refs": [
+        "E01-R03"
+      ]
+    }
+  ],
+  "negative_examples": [
+    {
+      "id": "N01",
+      "change_to": "Q01",
+      "change": {
+        "tags.role_perspective": "rd_engineer"
+      },
+      "expected": "reject",
+      "reason": "原始角色值不是工作视角枚举。"
+    },
+    {
+      "id": "N02",
+      "change_to": "Q01",
+      "change": {
+        "tags.technology_object": [
+          "battery_management_system"
+        ]
+      },
+      "expected": "reject",
+      "reason": "对象未在半导体细分行业的允许范围内。"
+    },
+    {
+      "id": "N03",
+      "change_to": "Q01",
+      "change": {
+        "tags.jtbd_task": "claims_drafting"
+      },
+      "expected": "reject",
+      "reason": "technical_solutions 的允许任务不包含权利要求起草。"
+    },
+    {
+      "id": "N04",
+      "change_to": "Q01",
+      "change": {
+        "tags.desired_output": "scout_report"
+      },
+      "expected": "reject",
+      "reason": "旧内容类别不是预期产出枚举。"
+    },
+    {
+      "id": "N05",
+      "change_to": "Q09",
+      "change": {
+        "tags.industry_segment": "aerospace_space",
+        "selection.industry": "within_input_exploration",
+        "selection.industry_unresolved_reason": null,
+        "selection.object_unresolved_reason": "broad_scope"
+      },
+      "expected": "reject",
+      "reason": "没有明确航空航天上下文，other 不自动映射航空航天。"
+    },
+    {
+      "id": "N06",
+      "change_to": "Q07",
+      "change": {
+        "tags.desired_output": "response_outline",
+        "answer_mode": "case_specific"
+      },
+      "expected": "reject",
+      "reason": "缺审查意见与申请材料，不得生成具体项目答复。"
+    },
+    {
+      "id": "N07",
+      "change_to": "Q05",
+      "change": {
+        "tags.jtbd_task": "licensing_opportunity_assessment",
+        "tags.desired_output": "transaction_brief"
+      },
+      "expected": "reject",
+      "reason": "虽然入口允许候选任务，但未满足明确许可或转移场景门槛。"
+    },
+    {
+      "id": "N08",
+      "change_to": "Q01",
+      "change": {
+        "tags.technology_object": [
+          "chip_interconnect",
+          "chip_interconnect"
+        ]
+      },
+      "expected": "reject",
+      "reason": "对象数组不得重复。"
+    },
+    {
+      "id": "N09",
+      "change_to": "Q01",
+      "change": {
+        "input_profile.job_role": "rd_engineer_inventor"
+      },
+      "expected": "normalize_then_validate",
+      "reason": "这是受支持的旧输入别名，入口转换为 rd_engineer 后再校验，不能原样进入标准输入。"
+    },
+    {
+      "id": "N10",
+      "change_to": "Q01",
+      "change": {
+        "question": "有哪些改善服务器机柜冷却的工艺？"
+      },
+      "expected": "semantic_review_reject",
+      "reason": "枚举可以通过结构检查，但问题对象与半导体芯片互连标签不一致。"
+    }
+  ],
+  "measurement_contract": {
+    "impression_required": [
+      "impression_id",
+      "content_id",
+      "question_version",
+      "answer_version",
+      "taxonomy_version",
+      "input_profile_snapshot",
+      "tags_snapshot",
+      "selection_snapshot",
+      "answer_mode",
+      "timestamp",
+      "placement",
+      "position",
+      "recommendation_policy_version"
+    ],
+    "click_required": [
+      "event_id",
+      "impression_id",
+      "content_id",
+      "timestamp"
+    ],
+    "optional_outcomes": [
+      "answer_view",
+      "evidence_saved",
+      "task_started",
+      "task_completed",
+      "useful_feedback"
+    ],
+    "ctr_definition": "有至少一次有效点击的曝光数 / 有效曝光数；按 impression_id 去重点击，保持同一观察窗口。",
+    "zero_exposure": "无曝光时 CTR 为不可估计，不写为 0。",
+    "overlapping_tags": "同一次曝光可进入多个单标签统计，但总体曝光只计一次；不同标签统计不可直接相加。"
+  }
+}

@@ -38,6 +38,7 @@ USAGE_HEADERS = [
     "case_index",
     "title",
     "industry",
+    "format",
     "status",
     "selected_at",
     "used_at",
@@ -378,6 +379,9 @@ def update_usage_after_run(
         row["used_at"] = now
     row["session_url"] = _string(result.get("session_url"))
     row["share_url"] = _string(result.get("share_url"))
+    row["format"] = _string(result.get("format")) or _string(item.get("format")) or _string(
+        item.get("generation_mode")
+    )
     row["isCompleted"] = _string(result.get("isCompleted"))
     row["completionStatus"] = ""
     row["completionError"] = ""
@@ -391,6 +395,7 @@ def _base_usage_row(case_index: int, item: dict[str, Any]) -> dict[str, str]:
         "case_index": str(case_index),
         "title": _string(item.get("title")),
         "industry": onboarding_industry_value(_case_industry(item)),
+        "format": _string(item.get("format")) or _string(item.get("generation_mode")),
         "status": "",
         "selected_at": "",
         "used_at": "",

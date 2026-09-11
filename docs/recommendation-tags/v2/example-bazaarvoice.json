@@ -1,0 +1,37 @@
+{
+  "briefs": [
+    {
+      "title": "Bazaarvoice 的竞争定位与动态观察",
+      "description": "从竞争情报视角研究 Bazaarvoice, Inc. 在 SaaS 领域的公司定位、产品与技术方向及竞争动态，形成标注待核实证据与持续观察事项的竞争动态简报。",
+      "entities": [
+        "Bazaarvoice, Inc."
+      ],
+      "keywords": [
+        "Bazaarvoice, Inc.",
+        "SaaS",
+        "竞争动态",
+        "产品方向"
+      ],
+      "audience": {
+        "role": "innovation_product_strategy",
+        "industry": "other",
+        "jtbd": "technology_competitors"
+      },
+      "tags": {
+        "role_perspective": "competitive_intelligence",
+        "industry_segment": null,
+        "technology_object": [],
+        "jtbd_task": "competitor_tracking",
+        "desired_output": "trend_brief"
+      },
+      "classification": {
+        "rationale": "面向负责创新与产品战略的竞争情报读者；SaaS 公司研究目前没有对应的细分行业与对象枚举，保留名称与主题词供后续补充。",
+        "industry_status": "not_in_catalog",
+        "object_status": "industry_unresolved"
+      },
+      "assumptions": [
+        "依据“Bazaarvoice, Inc. / SaaS”线索选择竞争动态观察切口；具体公司信息待后续研究核实。"
+      ]
+    }
+  ]
+}

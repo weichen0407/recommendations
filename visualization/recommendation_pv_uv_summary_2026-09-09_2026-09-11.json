@@ -1,0 +1,106 @@
+{
+  "generated_at": "2026-09-11",
+  "dataset_updated_at": "2026-09-11 11:09:18+0800",
+  "activation_dataset_updated_at": "2026-09-11 11:31:28+0800",
+  "date_range": ["2026-09-09", "2026-09-11"],
+  "metrics": [
+    {
+      "scope": "recommendation_events",
+      "date": "2026-09-09",
+      "metric": "plg_show_rc",
+      "label": "推荐板块展开",
+      "pv": 14,
+      "uv": 10
+    },
+    {
+      "scope": "recommendation_events",
+      "date": "2026-09-09",
+      "metric": "plg_click_rc",
+      "label": "RD Home 触发对话",
+      "pv": 6,
+      "uv": 1
+    },
+    {
+      "scope": "recommendation_events",
+      "date": "2026-09-10",
+      "metric": "plg_show_rc",
+      "label": "推荐板块展开",
+      "pv": 42,
+      "uv": 22
+    },
+    {
+      "scope": "recommendation_events",
+      "date": "2026-09-10",
+      "metric": "plg_click_rc",
+      "label": "RD Home 触发对话",
+      "pv": 2,
+      "uv": 1
+    },
+    {
+      "scope": "recommendation_events",
+      "date": "2026-09-11",
+      "metric": "plg_show_rc",
+      "label": "推荐板块展开",
+      "pv": 45,
+      "uv": 21
+    },
+    {
+      "scope": "recommendation_events",
+      "date": "2026-09-11",
+      "metric": "plg_click_rc",
+      "label": "RD Home 触发对话",
+      "pv": 4,
+      "uv": 3
+    },
+    {
+      "scope": "recommendation_events",
+      "date": "total",
+      "metric": "plg_show_rc",
+      "label": "推荐板块展开",
+      "pv": 101,
+      "uv": 53
+    },
+    {
+      "scope": "recommendation_events",
+      "date": "total",
+      "metric": "plg_click_rc",
+      "label": "RD Home 触发对话",
+      "pv": 12,
+      "uv": 5
+    }
+  ],
+  "click_summary": {
+    "total_click_pv": 12,
+    "distinct_share_id": 9,
+    "distinct_session_id": 11,
+    "missing_session_id_events": 1,
+    "true_activation_click_sessions": 2,
+    "true_activation_click_events": 2,
+    "true_activation_session_rate": 0.1818,
+    "pv_conversion_rate": 0.1188,
+    "uv_conversion_rate": 0.0943
+  },
+  "true_activation_matches": [
+    {
+      "click_send_ts": "2026-09-09 13:21:03",
+      "share_id": "42acb055b3e200bdf4be8e0903d60b64",
+      "user_id": "b104f27c2f0c463da94abe71332080f5",
+      "btu_id": "430a1abdf48c4ee9967d58b97fba2214",
+      "session_id": "sess_64c448dab585481c",
+      "first_activation_date": "2026-09-09"
+    },
+    {
+      "click_send_ts": "2026-09-09 14:20:29",
+      "share_id": "7cda8a6d139fae54270dc36ca292164e",
+      "user_id": "b104f27c2f0c463da94abe71332080f5",
+      "btu_id": "430a1abdf48c4ee9967d58b97fba2214",
+      "session_id": "sess_5927f1b4966246e6",
+      "first_activation_date": "2026-09-10"
+    }
+  ],
+  "notes": {
+    "recommendation_uv": "有效访客口径：优先 user_id，其次 btu_id、event_detail.session_id、raw_session_id，最后 resolved_session_id 行级兜底。",
+    "true_activation": "按推荐点击事件里的 session_id 精确匹配真激活表 resolved_session_id，且 is_true_activation_session=1。sess_5927f1b4966246e6 点击发生在 2026-09-09，真激活表记录激活日期为 2026-09-10。",
+    "today_data": "2026-09-11 数据截至数据集更新 2026-09-11 11:09:18+0800。"
+  }
+}

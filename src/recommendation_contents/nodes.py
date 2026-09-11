@@ -301,6 +301,7 @@ def finalize_result(state: TopicWorkflowState) -> dict[str, Any]:
             "generated_prompt": state.get("generated_prompt", ""),
             "session_url": state.get("session_link", ""),
             "share_url": state.get("share_link", ""),
+            "format": state.get("format", ""),
             "isCompleted": "",
             "completionStatus": "",
             "completionError": "",

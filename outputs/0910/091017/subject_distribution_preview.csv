@@ -1,0 +1,127 @@
+industry,industry_label,source_industry,parent_sub_industry,sub_industry,sub_industry_label,content_category,count
+automotive,Automotive,automotive,,automotive_manufacturing,Automotive Manufacturing,competitor_analysis,4
+automotive,Automotive,automotive,,automotive_manufacturing,Automotive Manufacturing,scout_report,1
+automotive,Automotive,automotive,,autonomous_and_connected_vehicle,Autonomous and Connected Vehicle,case,3
+automotive,Automotive,automotive,,autonomous_and_connected_vehicle,Autonomous and Connected Vehicle,risk_watch,1
+automotive,Automotive,automotive,,autonomous_and_connected_vehicle,Autonomous and Connected Vehicle,scout_report,1
+automotive,Automotive,automotive,,ev_and_battery_systems,Ev and Battery Systems,competitor_analysis,1
+automotive,Automotive,automotive,,ev_and_battery_systems,Ev and Battery Systems,opportunity_brief,1
+automotive,Automotive,automotive,,ev_and_battery_systems,Ev and Battery Systems,patent_landscape,1
+automotive,Automotive,automotive,,ev_and_battery_systems,Ev and Battery Systems,scout_report,3
+automotive,Automotive,automotive,,vehicle_components,Vehicle Components,competitor_analysis,11
+automotive,Automotive,automotive,,vehicle_components,Vehicle Components,opportunity_brief,1
+automotive,Automotive,automotive,,vehicle_components,Vehicle Components,scout_report,11
+biotech,Biotechnology,biotechnology,,bio_based_materials,Bio Based Materials,scout_report,1
+biotech,Biotechnology,biotechnology,,diagnostics_and_biomarkers,Diagnostics and Biomarkers,competitor_analysis,3
+biotech,Biotechnology,biotechnology,,diagnostics_and_biomarkers,Diagnostics and Biomarkers,trend_brief,1
+biotech,Biotechnology,biotechnology,,drug_discovery,Drug Discovery,competitor_analysis,6
+biotech,Biotechnology,biotechnology,,drug_discovery,Drug Discovery,market_landscape,1
+biotech,Biotechnology,biotechnology,,drug_discovery,Drug Discovery,scout_report,8
+biotech,Biotechnology,biotechnology,,drug_discovery,Drug Discovery,trend_brief,2
+biotech,Biotechnology,biotechnology,,synthetic_biology,Synthetic Biology,competitor_analysis,1
+biotech,Biotechnology,biotechnology,,synthetic_biology,Synthetic Biology,scout_report,1
+chemical,Chemical,chemical,,household_and_personal_care_chemistry,Household and Personal Care Chemistry,case,2
+chemical,Chemical,chemical,,household_and_personal_care_chemistry,Household and Personal Care Chemistry,competitor_analysis,2
+chemical,Chemical,chemical,,industrial_formulations,Industrial Formulations,competitor_analysis,1
+chemical,Chemical,chemical,,industrial_formulations,Industrial Formulations,scout_report,1
+chemical,Chemical,chemical,,polymers_and_additives,Polymers and Additives,competitor_analysis,1
+chemical,Chemical,chemical,,specialty_chemicals,Specialty Chemicals,competitor_analysis,9
+chemical,Chemical,chemical,,specialty_chemicals,Specialty Chemicals,opportunity_brief,1
+chemical,Chemical,chemical,,specialty_chemicals,Specialty Chemicals,risk_watch,7
+chemical,Chemical,chemical,,specialty_chemicals,Specialty Chemicals,scout_report,24
+chemical,Chemical,chemical,,specialty_chemicals,Specialty Chemicals,trend_brief,1
+construction,Construction,construction,,building_materials,Building Materials,competitor_analysis,2
+construction,Construction,construction,,building_materials,Building Materials,opportunity_brief,1
+construction,Construction,construction,,building_materials,Building Materials,scout_report,2
+construction,Construction,construction,,building_systems,Building Systems,scout_report,2
+construction,Construction,construction,,construction_methods,Construction Methods,opportunity_brief,1
+construction,Construction,construction,,construction_methods,Construction Methods,risk_watch,1
+construction,Construction,construction,,construction_methods,Construction Methods,scout_report,2
+construction,Construction,construction,,infrastructure,Infrastructure,competitor_analysis,2
+electronics_manufacturing,Electronics Manufacturing,electronics_manufacturing,,consumer_electronics_components,Consumer Electronics Components,case,3
+electronics_manufacturing,Electronics Manufacturing,electronics_manufacturing,,consumer_electronics_components,Consumer Electronics Components,competitor_analysis,2
+electronics_manufacturing,Electronics Manufacturing,electronics_manufacturing,,consumer_electronics_components,Consumer Electronics Components,scout_report,2
+electronics_manufacturing,Electronics Manufacturing,electronics_manufacturing,,photonics_and_optics,Photonics and Optics,case,4
+electronics_manufacturing,Electronics Manufacturing,electronics_manufacturing,,photonics_and_optics,Photonics and Optics,competitor_analysis,2
+electronics_manufacturing,Electronics Manufacturing,electronics_manufacturing,,photonics_and_optics,Photonics and Optics,opportunity_brief,1
+electronics_manufacturing,Electronics Manufacturing,electronics_manufacturing,,photonics_and_optics,Photonics and Optics,risk_watch,1
+electronics_manufacturing,Electronics Manufacturing,electronics_manufacturing,,photonics_and_optics,Photonics and Optics,scout_report,3
+electronics_manufacturing,Electronics Manufacturing,electronics_manufacturing,,semiconductor_and_packaging,Semiconductor and Packaging,case,1
+electronics_manufacturing,Electronics Manufacturing,electronics_manufacturing,,semiconductor_and_packaging,Semiconductor and Packaging,competitor_analysis,11
+electronics_manufacturing,Electronics Manufacturing,electronics_manufacturing,,semiconductor_and_packaging,Semiconductor and Packaging,opportunity_brief,3
+electronics_manufacturing,Electronics Manufacturing,electronics_manufacturing,,semiconductor_and_packaging,Semiconductor and Packaging,risk_watch,4
+electronics_manufacturing,Electronics Manufacturing,electronics_manufacturing,,semiconductor_and_packaging,Semiconductor and Packaging,scout_report,11
+energy,Energy,energy,,batteries_and_storage,Batteries and Storage,case,2
+energy,Energy,energy,,batteries_and_storage,Batteries and Storage,competitor_analysis,3
+energy,Energy,energy,,batteries_and_storage,Batteries and Storage,opportunity_brief,2
+energy,Energy,energy,,batteries_and_storage,Batteries and Storage,risk_watch,1
+energy,Energy,energy,,batteries_and_storage,Batteries and Storage,scout_report,11
+energy,Energy,energy,,carbon_and_efficiency,Carbon and Efficiency,competitor_analysis,4
+energy,Energy,energy,,carbon_and_efficiency,Carbon and Efficiency,scout_report,4
+energy,Energy,energy,,hydrogen_and_fuel_cells,Hydrogen and Fuel Cells,competitor_analysis,1
+energy,Energy,energy,,hydrogen_and_fuel_cells,Hydrogen and Fuel Cells,risk_watch,2
+energy,Energy,energy,,hydrogen_and_fuel_cells,Hydrogen and Fuel Cells,scout_report,5
+energy,Energy,energy,,solar_and_power_electronics,Solar and Power Electronics,case,3
+energy,Energy,energy,,solar_and_power_electronics,Solar and Power Electronics,competitor_analysis,3
+energy,Energy,energy,,solar_and_power_electronics,Solar and Power Electronics,opportunity_brief,2
+energy,Energy,energy,,solar_and_power_electronics,Solar and Power Electronics,risk_watch,1
+engineering,Engineering,engineering,,industrial_equipment,Industrial Equipment,case,10
+engineering,Engineering,engineering,,industrial_equipment,Industrial Equipment,competitor_analysis,13
+engineering,Engineering,engineering,,industrial_equipment,Industrial Equipment,opportunity_brief,2
+engineering,Engineering,engineering,,industrial_equipment,Industrial Equipment,risk_watch,4
+engineering,Engineering,engineering,,industrial_equipment,Industrial Equipment,scout_report,13
+engineering,Engineering,engineering,,manufacturing_process_engineering,Manufacturing Process Engineering,competitor_analysis,32
+engineering,Engineering,engineering,,manufacturing_process_engineering,Manufacturing Process Engineering,opportunity_brief,1
+engineering,Engineering,engineering,,manufacturing_process_engineering,Manufacturing Process Engineering,risk_watch,1
+engineering,Engineering,engineering,,manufacturing_process_engineering,Manufacturing Process Engineering,scout_report,3
+engineering,Engineering,engineering,,mechanical_systems,Mechanical Systems,case,32
+engineering,Engineering,engineering,,mechanical_systems,Mechanical Systems,competitor_analysis,18
+engineering,Engineering,engineering,,mechanical_systems,Mechanical Systems,market_landscape,1
+engineering,Engineering,engineering,,mechanical_systems,Mechanical Systems,opportunity_brief,6
+engineering,Engineering,engineering,,mechanical_systems,Mechanical Systems,risk_watch,5
+engineering,Engineering,engineering,,mechanical_systems,Mechanical Systems,scout_report,16
+food_farming_production,Farming Production,farming_production,,crop_science,Crop Science,competitor_analysis,1
+food_farming_production,Farming Production,farming_production,,crop_science,Crop Science,opportunity_brief,1
+food_farming_production,Farming Production,farming_production,,crop_science,Crop Science,risk_watch,1
+food_farming_production,Farming Production,farming_production,,crop_science,Crop Science,scout_report,1
+food_farming_production,Food,food,,food_formulation,Food Formulation,case,2
+food_farming_production,Food,food,,food_packaging,Food Packaging,case,1
+food_farming_production,Food,food,,food_packaging,Food Packaging,competitor_analysis,1
+food_farming_production,Food,food,,food_processing,Food Processing,case,6
+materials,Materials,materials,,advanced_materials,Advanced Materials,case,1
+materials,Materials,materials,,advanced_materials,Advanced Materials,competitor_analysis,1
+materials,Materials,materials,,advanced_materials,Advanced Materials,market_landscape,1
+materials,Materials,materials,,advanced_materials,Advanced Materials,opportunity_brief,3
+materials,Materials,materials,,advanced_materials,Advanced Materials,risk_watch,4
+materials,Materials,materials,,advanced_materials,Advanced Materials,scout_report,1
+materials,Materials,materials,,advanced_materials,Advanced Materials,trend_brief,1
+materials,Materials,materials,,coatings_and_surfaces,Coatings and Surfaces,case,5
+materials,Materials,materials,,coatings_and_surfaces,Coatings and Surfaces,competitor_analysis,2
+materials,Materials,materials,,coatings_and_surfaces,Coatings and Surfaces,risk_watch,3
+materials,Materials,materials,,coatings_and_surfaces,Coatings and Surfaces,scout_report,4
+materials,Materials,materials,,metals_and_alloys,Metals and Alloys,case,5
+materials,Materials,materials,,metals_and_alloys,Metals and Alloys,competitor_analysis,6
+materials,Materials,materials,,metals_and_alloys,Metals and Alloys,market_landscape,1
+materials,Materials,materials,,metals_and_alloys,Metals and Alloys,risk_watch,1
+materials,Materials,materials,,metals_and_alloys,Metals and Alloys,scout_report,2
+materials,Materials,materials,,polymers_and_resins,Polymers and Resins,case,2
+materials,Materials,materials,,polymers_and_resins,Polymers and Resins,competitor_analysis,3
+materials,Materials,materials,,polymers_and_resins,Polymers and Resins,opportunity_brief,1
+materials,Materials,materials,,polymers_and_resins,Polymers and Resins,risk_watch,2
+materials,Materials,materials,,polymers_and_resins,Polymers and Resins,scout_report,5
+materials,Materials,materials,,polymers_and_resins,Polymers and Resins,trend_brief,1
+medical_devices,Medical Devices,medical_devices,,device_materials_and_components,Device Materials and Components,scout_report,2
+medical_devices,Medical Devices,medical_devices,,device_materials_and_components,Device Materials and Components,trend_brief,2
+medical_devices,Medical Devices,medical_devices,,diagnostic_devices,Diagnostic Devices,competitor_analysis,2
+medical_devices,Medical Devices,medical_devices,,diagnostic_devices,Diagnostic Devices,scout_report,1
+medical_devices,Medical Devices,medical_devices,,surgical_and_interventional_devices,Surgical and Interventional Devices,competitor_analysis,1
+medical_devices,Medical Devices,medical_devices,,wearable_and_digital_health_devices,Wearable and Digital Health Devices,competitor_analysis,1
+medical_devices,Medical Devices,medical_devices,,wearable_and_digital_health_devices,Wearable and Digital Health Devices,scout_report,2
+other,Other,other,,consumer_products,Consumer Products,case,13
+other,Other,other,,consumer_products,Consumer Products,competitor_analysis,1
+other,Other,other,,general_strategy,General Strategy,case,4
+other,Other,other,,general_strategy,General Strategy,competitor_analysis,13
+other,Other,other,,general_strategy,General Strategy,opportunity_brief,3
+other,Other,other,,general_strategy,General Strategy,scout_report,7
+other,Other,other,,packaging_and_retail,Packaging and Retail,case,1
+other,Other,other,,packaging_and_retail,Packaging and Retail,competitor_analysis,4

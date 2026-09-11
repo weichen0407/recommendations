@@ -1,6 +1,32 @@
 # Topic Workflow LangGraph
 
-这是一个轻量的 LangGraph 主题任务框架，当前流程是：
+这是一个轻量的 LangGraph 主题任务框架，提供两个独立入口：
+
+- `content_brief_workflow`：运营侧第一阶段，idea → 内容描述、目标受众和标签。输入不需要个人画像，生成完成即可保存选题。
+- `topic_workflow`：原有主题扩展与 Eureka 执行流程。
+
+## 运营选题第一阶段
+
+```bash
+uv run python -m recommendation_contents.brief_cli "芯片互连" \
+  --count 2 --language zh-CN --output-file outputs/content_briefs/chip-interconnect.json
+```
+
+只需 `idea`；`role / industry / jtbd` 作为内容的目标受众输出。五个细分标签描述工作视角、细分行业、技术对象、具体任务和预期产出。生成结果经枚举与组合校验，不通过则最多修复一次；仍失败返回空选题与错误。
+
+规则和完整示例见 [运营选题_第一阶段生成规则.md](./运营选题_第一阶段生成规则.md)，模型响应 schema 见 [content-brief.schema.json](./docs/recommendation-tags/v2/content-brief.schema.json)。LangGraph Studio 中选择 `content_brief_workflow` 运行本阶段。执行提示词适配和第二阶段对接后续单独实现，选题文件不直接作为 `case-workflow` 的 curl 输入。
+
+离线查看结构和验证示例：
+
+```bash
+uv run python -m recommendation_contents.brief_cli --schema
+uv run python -m recommendation_contents.brief_cli --validate-file \
+  docs/recommendation-tags/v2/example-chip-interconnect-variants.json
+```
+
+## 原有主题执行流程
+
+`topic_workflow` 的流程是：
 
 1. 读取 `.env` 中的 OpenAI 和 Eureka curl 任务配置。
 2. 标准化输入主题。
@@ -331,17 +357,32 @@ EUREKA_COMPLETION_BODY_JSON={"limit":500}
 
 ### 生成产品 JSON
 
-产品侧默认推荐内容文件放在批次目录下：
+产品侧默认推荐内容文件放在当前格式目录下：
 
 ```text
-outputs/0910/091010/plg-rd-case-default-us.json
+outputs/0910/091010/report/plg-rd-case-default-us.json
+outputs/0910/091010/html/plg-rd-case-default-us.json
 ```
 
 它通常从完成后的 records CSV 转换得到。转换时需要：
 
 - `session_url` 改成 `session_id`，只保留 `sess_...`。
 - `share_url` 改成 `share_id`，只保留 `id=` 到 `&from` 中间的值。
+- `format` 标记内容格式，值为 `report` 或 `html`。
 - `categories`、`keywords`、`jtbd`、`sub_industry` 这类 list 字段写成真实 JSON 数组。
+
+从 records CSV 生成产品 JSON：
+
+```bash
+uv run records-to-plg outputs/0910/091017/html/recommend_content_091017_html_records.csv \
+  --update-records-format
+```
+
+脚本会从路径自动识别 `html` 或 `report`。如果路径里没有格式信息，可以手动指定：
+
+```bash
+uv run records-to-plg path/to/records.csv --format report --update-records-format
+```
 
 ### 旧 cases 输入
 
@@ -567,6 +608,18 @@ LANGSMITH_PROJECT=recommendation-contents
 直接跑 CLI 时，程序会先把 `.env` 注入当前进程环境，因此 LangSmith 可以读取到
 `LANGSMITH_*` 配置。为了兼容不同版本的 LangChain，程序也会自动补齐
 `LANGCHAIN_TRACING_V2`、`LANGCHAIN_API_KEY`、`LANGCHAIN_PROJECT` 等旧变量名。
+
+打开方式：
+
+1. 浏览器打开 [https://smith.langchain.com](https://smith.langchain.com)。
+2. 登录和 `LANGSMITH_API_KEY` 对应的 workspace。
+3. 进入 `Tracing` / `Projects`。
+4. 选择 `.env` 里配置的项目名，例如 `recommendation-contents`。
+5. 打开最近一次 run，可以看到 `topic_workflow`、`generate_prompt`、`check_user_token`、
+   `call_curl_task` 等节点链路。
+
+如果你想直接用 URL 打开项目，可以先进入 LangSmith 后在项目列表里点
+`recommendation-contents`。项目 URL 和 workspace 有关，第一次以页面里显示的真实地址为准。
 
 LangSmith UI 中的项目通常会在第一次成功上传 trace 后出现；如果运行环境无法访问
 `https://api.smith.langchain.com`，本地执行仍会完成，但 UI 里不会看到新项目或链路。
