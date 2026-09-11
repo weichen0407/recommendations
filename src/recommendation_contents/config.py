@@ -124,58 +124,6 @@ class OpenAISettings:
 
 
 @dataclass(frozen=True)
-class ProfileGateSettings:
-    endpoint: str = ""
-    signature_id: str = ""
-    site_lang: str = ""
-    source_type: str = ""
-    module_type: str = ""
-    event_type: str = ""
-    result_mode: str = ""
-    response_pass_path: str = ""
-    extra_headers: dict[str, str] = field(default_factory=dict)
-    token_refresh_cmd: str = ""
-    token_cache: str = ""
-    token_refresh_url: str = ""
-    token_refresh_method: str = "POST"
-    token_refresh_headers: dict[str, str] = field(default_factory=dict)
-    token_refresh_body: dict[str, Any] = field(default_factory=dict)
-    request_timeout_seconds: float = 20.0
-    concurrency: int = 4
-    retry_count: int = 2
-    retry_delay_seconds: float = 0.5
-
-    @classmethod
-    def from_env(cls, env: Mapping[str, str]) -> ProfileGateSettings:
-        return cls(
-            endpoint=env.get("PROFILE_GATE_ENDPOINT", ""),
-            signature_id=env.get("PROFILE_GATE_SIGNATURE_ID", ""),
-            site_lang=env.get("PROFILE_GATE_SITE_LANG", ""),
-            source_type=env.get("PROFILE_GATE_SOURCE_TYPE", ""),
-            module_type=env.get("PROFILE_GATE_MODULE_TYPE", ""),
-            event_type=env.get("PROFILE_GATE_EVENT_TYPE", ""),
-            result_mode=env.get("PROFILE_GATE_RESULT_MODE", ""),
-            response_pass_path=env.get("PROFILE_GATE_RESPONSE_PASS_PATH", ""),
-            extra_headers=_json_env(env, "PROFILE_GATE_EXTRA_HEADERS_JSON", {}) or {},
-            token_refresh_cmd=env.get("PROFILE_GATE_TOKEN_REFRESH_CMD", ""),
-            token_cache=env.get("PROFILE_GATE_TOKEN_CACHE", ""),
-            token_refresh_url=env.get("PROFILE_GATE_TOKEN_REFRESH_URL", ""),
-            token_refresh_method=env.get("PROFILE_GATE_TOKEN_REFRESH_METHOD", "POST") or "POST",
-            token_refresh_headers=_json_env(env, "PROFILE_GATE_TOKEN_REFRESH_HEADERS_JSON", {})
-            or {},
-            token_refresh_body=_json_env(env, "PROFILE_GATE_TOKEN_REFRESH_BODY_JSON", {}) or {},
-            request_timeout_seconds=_float_env(
-                env,
-                "PROFILE_GATE_REQUEST_TIMEOUT_SECONDS",
-                20.0,
-            ),
-            concurrency=_int_env(env, "PROFILE_GATE_CONCURRENCY", 4),
-            retry_count=_int_env(env, "PROFILE_GATE_RETRY_COUNT", 2),
-            retry_delay_seconds=_float_env(env, "PROFILE_GATE_RETRY_DELAY_SECONDS", 0.5),
-        )
-
-
-@dataclass(frozen=True)
 class EurekaSettings:
     query_endpoint: str = "https://eureka-service.patsnap.com/api/eureka/query/conversational"
     share_endpoint: str = "https://eureka-service.patsnap.com/eureka/secure-share/create"
@@ -212,8 +160,7 @@ class EurekaSettings:
         "?from=rd-home&start_from=eureka_landingpage"
     )
     share_link_template: str = (
-        "https://eureka.patsnap.com/share/"
-        "?id={share_id}&from=invite-eureakplg-result&content="
+        "https://eureka.patsnap.com/share/?id={share_id}&from=invite-eureakplg-result&content="
     )
 
     @classmethod
@@ -225,7 +172,9 @@ class EurekaSettings:
         authorization = env.get("EUREKA_AUTHORIZATION", "")
         if not authorization and bearer_token:
             authorization = (
-                bearer_token if bearer_token.lower().startswith("bearer ") else f"Bearer {bearer_token}"
+                bearer_token
+                if bearer_token.lower().startswith("bearer ")
+                else f"Bearer {bearer_token}"
             )
 
         return cls(
@@ -242,8 +191,7 @@ class EurekaSettings:
                 "https://eureka-service.patsnap.com/api/eureka/share/sessions/{session_id}/events",
             ),
             completion_method=env.get("EUREKA_COMPLETION_METHOD", "POST") or "POST",
-            completion_body=_json_env(env, "EUREKA_COMPLETION_BODY_JSON", {"limit": 500})
-            or {},
+            completion_body=_json_env(env, "EUREKA_COMPLETION_BODY_JSON", {"limit": 500}) or {},
             completion_timeout_seconds=_float_env(env, "EUREKA_COMPLETION_TIMEOUT_SECONDS", 600.0),
             completion_poll_interval_seconds=_float_env(
                 env,
@@ -253,7 +201,9 @@ class EurekaSettings:
             authorization=authorization,
             bearer_token=bearer_token,
             signature_id=env.get("EUREKA_SIGNATURE_ID") or env.get("PROFILE_GATE_SIGNATURE_ID", ""),
-            site_lang=env.get("EUREKA_SITE_LANG") or env.get("PROFILE_GATE_SITE_LANG", "CN") or "CN",
+            site_lang=env.get("EUREKA_SITE_LANG")
+            or env.get("PROFILE_GATE_SITE_LANG", "CN")
+            or "CN",
             extra_headers=extra_headers,
             timeout_seconds=_float_env(env, "EUREKA_TIMEOUT_SECONDS", 60.0),
             timezone=env.get("EUREKA_TIMEZONE", "Asia/Shanghai") or "Asia/Shanghai",
@@ -307,7 +257,6 @@ class EurekaSettings:
 @dataclass(frozen=True)
 class AppSettings:
     openai: OpenAISettings
-    profile_gate: ProfileGateSettings
     eureka: EurekaSettings
 
     @classmethod
@@ -315,6 +264,5 @@ class AppSettings:
         env = merged_env(env_file)
         return cls(
             openai=OpenAISettings.from_env(env),
-            profile_gate=ProfileGateSettings.from_env(env),
             eureka=EurekaSettings.from_env(env),
         )

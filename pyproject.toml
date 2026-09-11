@@ -27,6 +27,7 @@ dev = [
 recommendation-graph = "recommendation_contents.main:main"
 topic-workflow = "recommendation_contents.main:main"
 content-brief-workflow = "recommendation_contents.brief_cli:main"
+profile-topic-node1 = "recommendation_contents.profile_topic_cli:main"
 eureka-token = "recommendation_contents.token_cli:main"
 eureka-auth-watcher = "recommendation_contents.auth_watcher:main"
 eureka-completion = "recommendation_contents.completion_cli:main"

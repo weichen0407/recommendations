@@ -1,145 +1,119 @@
 # Topic Workflow LangGraph
 
-这是一个轻量的 LangGraph 主题任务框架，提供两个独立入口：
+日常入口为一个端到端图 `topic_workflow`，主图只有三个节点：
 
-- `content_brief_workflow`：运营侧第一阶段，idea → 内容描述、目标受众和标签。输入不需要个人画像，生成完成即可保存选题。
-- `topic_workflow`：原有主题扩展与 Eureka 执行流程。
-
-## 运营选题第一阶段
-
-```bash
-uv run python -m recommendation_contents.brief_cli "芯片互连" \
-  --count 2 --language zh-CN --output-file outputs/content_briefs/chip-interconnect.json
+```text
+输入 → generate_topic → generate_summary → call_curl_task → 结果
 ```
 
-只需 `idea`；`role / industry / jtbd` 作为内容的目标受众输出。五个细分标签描述工作视角、细分行业、技术对象、具体任务和预期产出。生成结果经枚举与组合校验，不通过则最多修复一次；仍失败返回空选题与错误。
+- `generate_topic`：idea → 完整选题描述、目标受众、五维标签。
+- `generate_summary`：基于已校验的选题生成研究执行要求，输出完整的 Eureka prompt；继承原标签。
+- `call_curl_task`：内部处理鉴权、提交、分享、完成状态查询与执行记录，返回每条内容的结果。
 
-规则和完整示例见 [运营选题_第一阶段生成规则.md](./运营选题_第一阶段生成规则.md)，模型响应 schema 见 [content-brief.schema.json](./docs/recommendation-tags/v2/content-brief.schema.json)。LangGraph Studio 中选择 `content_brief_workflow` 运行本阶段。执行提示词适配和第二阶段对接后续单独实现，选题文件不直接作为 `case-workflow` 的 curl 输入。
+两个生成阶段都把校验和一次格式修复放在内部，主图不再展示错误分支。`generate_summary` 的名称沿用节点约定，产出是执行提示词，不是已经生成的报告摘要。
 
-离线查看结构和验证示例：
+详细规则见 [端到端流程说明](./docs/workflows/topic-workflow.md)；标签定义见 [第一阶段生成规则](./运营选题_第一阶段生成规则.md)。
 
-```bash
-uv run python -m recommendation_contents.brief_cli --schema
-uv run python -m recommendation_contents.brief_cli --validate-file \
-  docs/recommendation-tags/v2/example-chip-interconnect-variants.json
-```
-
-## 原有主题执行流程
-
-`topic_workflow` 的流程是：
-
-1. 读取 `.env` 中的 OpenAI 和 Eureka curl 任务配置。
-2. 标准化输入主题。
-3. `generate_prompt` 节点使用模型把主题扩展成更完整的提示词。
-4. `check_user_token` 节点在调用 Eureka 前检查 token 是否存在、是否需要 refresh。
-5. 如果需要 refresh 且已配置 refresh 能力，进入 `refresh_user_token` 节点；否则继续。
-6. `call_curl_task` 节点调用 Eureka conversational 接口，`query` 使用 `generated_prompt`。
-7. 从响应中解析 `session_id`，生成 Eureka session 会话链接。
-8. `call_curl_task` 继续调用 secure-share/create，解析 `data.share_id`。
-9. 输出 Markdown 表格：输入、生成后的 prompt、session 会话链接、最终分享链接和报告元数据。
-10. 默认把本次结果追加到 `outputs/topic_workflow_records.csv`，并重新生成 `outputs/topic_workflow_records.md`。
-
-## 安装
+## 安装与运行
 
 ```bash
 uv sync --dev
+uv run topic-workflow "芯片互连" --language en --format html --output json --pretty
 ```
 
-项目会默认读取当前目录的 `.env`。真实密钥继续放在 `.env`，不要提交到版本库。
-
-如果使用 Claude/Bedrock 这类 OpenAI-compatible endpoint，默认不会传 `temperature`。后端明确要求时再在 `.env` 中设置：
-
-```env
-OPENAI_TEMPERATURE=1
-```
-
-## 运行
+也可以运行 `uv run python -m recommendation_contents.main`。模型及 Eureka 配置沿用项目 `.env`。输入只需要选题，不要求用户画像；默认中文、HTML、1 条内容。使用 `--count 2` 可一次生成两条描述，每条创建独立的 Eureka 任务。
 
 ```bash
-uv run python -m recommendation_contents.main "新能源汽车电池回收趋势"
+uv run topic-workflow "芯片互连" --count 2 --language zh-CN --format report
 ```
 
-也可以传入额外上下文：
+`--context-json` 保留兼容入口，目前仅使用其中的 `language` 和 `format`；直接传入同名命令行参数时优先采用命令行值。
 
-```bash
-uv run python -m recommendation_contents.main \
-  "新能源汽车电池回收趋势" \
-  --context-json '{"audience":"企业战略分析师","language":"zh-CN"}'
-```
-
-安装后也可以直接用脚本入口：
-
-```bash
-uv run topic-workflow "新能源汽车电池回收趋势"
-```
-
-默认输出 Markdown 表格。需要完整 JSON 状态时：
-
-```bash
-uv run topic-workflow "新能源汽车电池回收趋势" --output json --pretty
-```
-
-每次运行都会保存一行记录：
+正常运行会保存：
 
 ```text
+outputs/topic_workflow_runs/<generation_id>.json
 outputs/topic_workflow_records.csv
 outputs/topic_workflow_records.md
 ```
 
-记录表包含这些列：
+JSON 保存完整的选题、执行提示词、标签及接口返回结果。CSV 新增 `brief_id`、`generation_id`、`taxonomy_version`、`tags`、`classification`、`assumptions`、`status`，恢复任务时按 `brief_id` 更新同一行。
 
-```text
-input
-generated_prompt
-session_url
-share_url
-title
-categories
-keywords
-description
-role
-industry
-jtbd
-date
-sub_industry
-```
+`--records-csv`、`--records-md` 可指定汇总文件；`--runs-dir` 指定可恢复执行记录目录。`--no-save` 禁用这些本地记录，也就不支持基于本地记录恢复。
 
-其中 `categories`、`keywords`、`jtbd`、`sub_industry` 在 CSV 中保存为 JSON array 字符串。
+## 等待与恢复
 
-`generate_prompt` 节点会要求模型返回结构化 JSON：
+curl 节点默认持续查询完成状态，等待上限由 `EUREKA_COMPLETION_TIMEOUT_SECONDS` 控制，默认 600 秒，轮询间隔默认 5 秒。等待上限之外，在途 HTTP 请求还受单次请求超时约束。
 
-```json
-{
-  "title": "string",
-  "categories": ["scout_report"],
-  "keywords": ["keyword"],
-  "description": "string",
-  "role": "innovation_product_strategy",
-  "industry": "automotive",
-  "jtbd": ["identify_innovation_opportunities"],
-  "date": "2026-09-08",
-  "sub_industry": ["ev_and_battery_systems"],
-  "prompt": "给 Eureka 执行的完整提示词"
-}
-```
-
-枚举值维护在 `enum_entities.json`。
-
-如果模型第一次没有返回合法 JSON，`generate_prompt` 会自动做一次 JSON 修复重试。重试仍失败时，才会把原始回复当作 `generated_prompt` 兜底，并在 `errors` 中记录。
-
-临时运行、不想保存时：
+超过等待上限会返回 `pending`，不会把报告标为完成。用返回的 `generation_result.generation_id` 继续查询原任务：
 
 ```bash
-uv run topic-workflow "新能源汽车电池回收趋势" --no-save
+uv run topic-workflow --resume-run-id <generation_id> --output json --pretty
 ```
 
-也可以指定保存路径：
+恢复会复用描述、提示词和已保存的 session ID；任务完成后不会重复提交。提交响应不明确时返回 `submission_unknown`，需核对远端任务后再决定下一步，程序不自动重发。
+
+退出码：全部任务完成或按 `--stop-after` 正常停止为 0；生成失败、执行失败或等待未完成为 1；命令行参数错误为 2。
+
+## 中间暂停检查
+
+Studio 中点击 **Interrupt**，设置在 `generate_topic` 执行后暂停，检查 `generation_result.briefs`，再点 **Continue**。也可以在 `generate_summary` 执行后暂停，检查 `task_specs[].generated_prompt`，再继续到 curl。
+
+命令行支持把三个阶段分开运行，每一步读取上一步已生成的 JSON：
 
 ```bash
-uv run topic-workflow "新能源汽车电池回收趋势" \
-  --records-csv outputs/custom_records.csv \
-  --records-md outputs/custom_records.md
+uv run topic-workflow "芯片互连" --stop-after generate_topic \
+  --stage-output outputs/review/topic.json
+
+uv run topic-workflow --from-stage-file outputs/review/topic.json \
+  --stop-after generate_summary --stage-output outputs/review/summary.json
+
+uv run topic-workflow --from-stage-file outputs/review/summary.json --output json --pretty
 ```
+
+每条命令之间可打开对应 JSON 检查。第一阶段文件中的描述和标签可修改；下一阶段会重新校验，复用已有生成结果。`--from-stage-file` 也接受下方独立第一阶段 CLI 的完整输出。详见 [暂停、编辑和继续](./docs/workflows/topic-workflow.md#7-在两个阶段之间检查)。
+
+## 单独调试第一阶段
+
+第一阶段的 CLI 仍可独立使用，共用主流程的实现。Studio 只注册端到端图，不再单独列出 `content_brief_workflow`。
+
+```bash
+uv run content-brief-workflow "芯片互连" --count 2 --language zh-CN \
+  --output-file outputs/content_briefs/chip-interconnect.json
+uv run content-brief-workflow --schema
+uv run content-brief-workflow --validate-file \
+  docs/recommendation-tags/v2/example-chip-interconnect-variants.json
+```
+
+### 按目标受众三元组批量生成节点 1
+
+下面的命令按当前 role–JTBD 关联覆盖全部 11 个行业：396 个三元组，每组生成 10 个问题，共 3,960 行。它只运行 `generate_topic`，不生成 summary，也不执行 Eureka：
+
+```bash
+uv run profile-topic-node1 --cases-per-triple 10 --workers 4 \
+  --output-json outputs/profile_topics/node1_topics.json \
+  --output-csv outputs/profile_topics/node1_topics.csv
+```
+
+运行中断或部分三元组失败后，用相同参数加 `--resume`。程序会跳过已经成功的三元组，继续保存 JSON 和 CSV：
+
+```bash
+uv run profile-topic-node1 --cases-per-triple 10 --workers 4 --resume
+```
+
+先试一组三元组时，可传入三个筛选条件，并使用单独的预览文件：
+
+```bash
+uv run profile-topic-node1 \
+  --role rd_engineer \
+  --industry electronics_manufacturing \
+  --jtbd technical_solutions \
+  --cases-per-triple 10 \
+  --output-json outputs/profile_topics/node1_preview.json \
+  --output-csv outputs/profile_topics/node1_preview.csv
+```
+
+CSV 一行对应一个问题，保留固定三元组、问题、描述、五维标签、分类依据和 ID。`summary`、`content_category`、`generated_prompt`、执行状态及链接列由后续节点填写。JSON 保留每次模型调用的完整 generation result，供节点 2 批量读取。
 
 ## 推荐内容批量生成
 
@@ -446,20 +420,12 @@ EUREKA_TOKEN_REFRESH_EXPIRES_IN_PATH=expires_in
 
 `EUREKA_AUTHORIZATION` 可以填完整的 `Bearer ...`；或者只填 `EUREKA_BEARER_TOKEN`，代码会自动补成 `Bearer <token>`。如果没有 Eureka 专用配置，`EUREKA_SIGNATURE_ID` 和 `EUREKA_SITE_LANG` 会分别 fallback 到 `PROFILE_GATE_SIGNATURE_ID`、`PROFILE_GATE_SITE_LANG`。
 
-### Eureka token refresh 骨架
+### Eureka token refresh
 
-当前 refresh 链路已经接入 LangGraph，但默认不执行真实 refresh：
+主图的 `call_curl_task` 内部负责 token 检查和必要时的刷新，不增加额外图节点。默认不执行真实 refresh：
 
 ```text
-START
-  -> normalize_topic
-  -> generate_prompt
-  -> check_user_token
-  -> refresh_user_token?      # token 缺失/过期且 refresh 已启用时
-  -> check_user_token         # refresh 后重新判断
-  -> call_curl_task
-  -> finalize_result
-  -> END
+检查 token → 必要且可用时刷新一次 → 提交任务 → 分享与完成查询
 ```
 
 使用 passport refresh 接口时，`.env` 里只保留接口和非短期 token 配置：
@@ -595,6 +561,11 @@ uv run pytest
 
 安装 LangGraph CLI 后，可以在项目根目录继续接 `uv run langgraph dev`、LangGraph Studio 或部署流程。
 
+新增 graph 后，如果运行中的服务仍只显示旧图，需要在启动该服务的终端重启
+`uv run langgraph dev`，然后刷新
+[本地 Studio](https://smith.langchain.com/studio/?baseUrl=http://127.0.0.1:2024)，
+在 graph / assistant 选择器中选择 `topic_workflow`。
+
 ## LangSmith
 
 如果要在 LangSmith 里看链路，在 `.env` 中配置：
@@ -615,8 +586,9 @@ LANGSMITH_PROJECT=recommendation-contents
 2. 登录和 `LANGSMITH_API_KEY` 对应的 workspace。
 3. 进入 `Tracing` / `Projects`。
 4. 选择 `.env` 里配置的项目名，例如 `recommendation-contents`。
-5. 打开最近一次 run，可以看到 `topic_workflow`、`generate_prompt`、`check_user_token`、
-   `call_curl_task` 等节点链路。
+5. 打开 `topic_workflow` run，查看 `generate_topic`、`generate_summary`、`call_curl_task`。
+   单独调试第一阶段时，CLI run 名仍为 `content_brief_workflow`，内部只有 `generate_topic`。
+   Studio 可在运行前查看结构，Tracing 需运行并上传记录后才可查看。
 
 如果你想直接用 URL 打开项目，可以先进入 LangSmith 后在项目列表里点
 `recommendation-contents`。项目 URL 和 workspace 有关，第一次以页面里显示的真实地址为准。
@@ -629,22 +601,29 @@ LangSmith UI 中的项目通常会在第一次成功上传 trace 后出现；如
 ```text
 src/recommendation_contents/
   config.py                 # .env 和环境变量配置读取
-  graph.py                  # LangGraph 编排入口
+  graph.py                  # 三节点主图和状态定义
+  brief_generation.py       # 第一阶段：idea → 选题
+  brief_schema.py           # 第一阶段 schema 和枚举组合校验
+  brief_prompts.py          # 第一阶段生成与修复提示词
+  brief_graph.py            # 第一阶段独立调试入口
+  brief_cli.py              # 第一阶段 CLI、schema 导出和离线校验
+  summary_generation.py     # 第二阶段：选题 → 执行提示词
+  workflow_stages.py        # 暂停检查后的输入校验
+  workflow_execution.py     # Eureka 执行、轮询和恢复
   llm.py                    # OpenAI chat model 构造
   main.py                   # CLI 入口
   cases_cli.py              # 读取 cases JSON 并批量生成 Eureka 链接
   auth_watcher.py           # 从已登录浏览器同步 Eureka auth header 到本地 cache
-  nodes.py                  # 图节点逻辑
-  prompts.py                # 完整提示词生成模板
+  nodes.py                  # 公共鉴权与批处理辅助操作
   records.py                # 每次运行的表格记录落盘
-  services/eureka_curl.py   # Eureka 两步 curl 调用
-  services/eureka_token.py   # Eureka token 检查和 refresh 骨架
-  state.py                  # 图状态定义
+  services/eureka_curl.py    # Eureka curl 请求
+  services/eureka_token.py   # Eureka token 检查和刷新
+  state.py                  # 兼容批处理工具的状态定义
+  data/content_brief_catalog.json  # 当前标签定义与映射
 ```
 
-## 扩展方式
+根目录的 XLSX 和行业角色分析 MD 是规则来源；`cases/` 保存批处理输入和原始字段映射；`docs/` 保存当前规则契约与示例；`outputs/`、`visualization/` 保存业务产出和分析数据。
 
-- 新增业务节点：在 `nodes.py` 里加函数，并在 `graph.py` 中注册。
-- 更换模型：修改 `.env` 里的 `OPENAI_MODEL`、`OPENAI_BASE_URL`。
-- 更换 Eureka 目标：修改 `.env` 里的 `EUREKA_QUERY_ENDPOINT`、`EUREKA_SHARE_ENDPOINT` 和 `EUREKA_EXTRA_HEADERS_JSON`。
-# recommendations
+`.langgraph_api/` 是本机 Studio 的运行状态与检查点，保留本地文件但不纳入版本控制。`.venv/`、`__pycache__/`、测试和 lint 缓存同样不纳入版本控制。旧规则和已删除实现可从 Git 历史查看，工作区只保留当前版本。
+
+调整生成行为时，分别修改 `brief_prompts.py` / `summary_generation.py`；图的编排位于 `graph.py`。模型和 Eureka 接口仍通过 `.env` 中的 `OPENAI_*`、`EUREKA_*` 配置。

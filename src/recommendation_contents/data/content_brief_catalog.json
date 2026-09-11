@@ -17,7 +17,6 @@
       "purpose": "现有实现的输入别名与旧值映射；已逐项核对 XLSX"
     }
   ],
-  "derived_from": "docs/recommendation-tags/v1/tag-catalog.json",
   "evidence_status": "输入枚举为原表值；行业范围沿用给定研究；内容视角、任务拆分、对象分组和匹配规则是首版设计，未宣称由用户点击验证。",
   "audience": {
     "role": [
@@ -4417,6 +4416,56 @@
     ],
     "other": [
       "task_exploration"
+    ]
+  },
+  "role_allowed_jtbd": {
+    "rd_engineer": [
+      "technical_solutions",
+      "existing_technologies",
+      "product_ideas",
+      "technical_feasibility",
+      "patent_ip_risk",
+      "other"
+    ],
+    "researcher": [
+      "new_research_fields",
+      "research_methods",
+      "research_trends",
+      "research_ideas",
+      "patents_literature",
+      "other"
+    ],
+    "innovation_product_strategy": [
+      "technology_competitors",
+      "innovation_opportunities",
+      "rd_directions",
+      "patent_landscapes",
+      "product_ip_risks",
+      "other"
+    ],
+    "in_house_ip_legal": [
+      "prior_art",
+      "fto_design_risks",
+      "patent_landscapes",
+      "draft_review_patents",
+      "office_actions",
+      "other"
+    ],
+    "patent_ip_services": [
+      "prior_art",
+      "fto_searches",
+      "draft_review_applications",
+      "draft_refine_claims",
+      "office_actions",
+      "other"
+    ],
+    "other": [
+      "technical_solutions",
+      "technology_trends",
+      "ideas_concepts",
+      "technical_feasibility",
+      "search_draft_patents",
+      "other"
     ]
   },
   "jtbd_allowed_tasks": {

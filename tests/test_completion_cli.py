@@ -11,7 +11,6 @@ from recommendation_contents.config import (
     AppSettings,
     EurekaSettings,
     OpenAISettings,
-    ProfileGateSettings,
 )
 from recommendation_contents.nodes import RuntimeDependencies
 from recommendation_contents.services.eureka_curl import CurlResult
@@ -41,7 +40,6 @@ def test_validate_results_updates_completed_and_failed_sessions():
     runtime = RuntimeDependencies(
         settings=AppSettings(
             openai=OpenAISettings(),
-            profile_gate=ProfileGateSettings(),
             eureka=EurekaSettings(),
         ),
         eureka_client=FakeCompletionClient(),
@@ -85,7 +83,6 @@ def test_update_records_and_usage_csv(tmp_path):
         RuntimeDependencies(
             settings=AppSettings(
                 openai=OpenAISettings(),
-                profile_gate=ProfileGateSettings(),
                 eureka=EurekaSettings(),
             ),
             eureka_client=FakeCompletionClient(),
@@ -135,7 +132,6 @@ def test_validate_records_csv_scans_session_urls(tmp_path):
     runtime = RuntimeDependencies(
         settings=AppSettings(
             openai=OpenAISettings(),
-            profile_gate=ProfileGateSettings(),
             eureka=EurekaSettings(),
         ),
         eureka_client=FakeCompletionClient(),
@@ -164,7 +160,6 @@ def test_validate_records_csv_follows_stream_cursor_until_has_more_false(tmp_pat
     runtime = RuntimeDependencies(
         settings=AppSettings(
             openai=OpenAISettings(),
-            profile_gate=ProfileGateSettings(),
             eureka=EurekaSettings(),
         ),
         eureka_client=client,
@@ -194,7 +189,6 @@ def test_validate_records_csv_reports_pagination_error_when_max_pages_is_exceede
     runtime = RuntimeDependencies(
         settings=AppSettings(
             openai=OpenAISettings(),
-            profile_gate=ProfileGateSettings(),
             eureka=EurekaSettings(),
         ),
         eureka_client=FakeAlwaysMoreCompletionClient(),
@@ -220,7 +214,6 @@ def test_validate_records_csv_migrates_legacy_completion_columns(tmp_path):
     runtime = RuntimeDependencies(
         settings=AppSettings(
             openai=OpenAISettings(),
-            profile_gate=ProfileGateSettings(),
             eureka=EurekaSettings(),
         ),
         eureka_client=FakeCompletionClient(),

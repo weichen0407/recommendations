@@ -1,4 +1,4 @@
-"""LangGraph node implementations."""
+"""Shared runtime/auth helpers and the retained batch execution operations."""
 
 from __future__ import annotations
 
@@ -8,20 +8,12 @@ from typing import Any
 
 from .config import AppSettings
 from .dates import today_iso
-from .entities import (
-    content_category_values,
-    industry_values,
-    jtbd_values,
-    role_values,
-    sub_industry_values,
-)
 from .llm import create_chat_model
 from .onboarding_fields import (
     onboarding_industry_value,
     onboarding_jtbd_values,
     onboarding_role_value,
 )
-from .prompts import build_prompt_generation_prompt, build_prompt_repair_prompt
 from .records import build_markdown_table
 from .services.eureka_curl import EurekaCurlClient, find_first_value, parse_json_body
 from .services.eureka_token import EurekaTokenManager
@@ -49,25 +41,6 @@ class RuntimeDependencies:
         if self.eureka_token_manager is None:
             self.eureka_token_manager = EurekaTokenManager(self.settings.eureka)
         return self.eureka_token_manager
-
-
-def normalize_topic(state: TopicWorkflowState) -> dict[str, Any]:
-    topic = (state.get("topic") or "").strip()
-    context = state.get("request_context") or {}
-    errors = list(state.get("errors") or [])
-
-    if not topic:
-        errors.append("topic is empty")
-
-    return {
-        "topic": topic,
-        "request_context": context,
-        "errors": errors,
-        "debug": {
-            **(state.get("debug") or {}),
-            "normalized": True,
-        },
-    }
 
 
 def check_user_token(state: TopicWorkflowState, runtime: RuntimeDependencies) -> dict[str, Any]:
@@ -125,49 +98,6 @@ def refresh_user_token(state: TopicWorkflowState, runtime: RuntimeDependencies) 
             **(state.get("debug") or {}),
             "token_refreshed": refresh_result.success,
             "token_refresh_status": refresh_result.status,
-        },
-    }
-
-
-def generate_prompt(state: TopicWorkflowState, runtime: RuntimeDependencies) -> dict[str, Any]:
-    prompt = build_prompt_generation_prompt(state)
-    response = runtime.get_llm().invoke(prompt)
-    content = getattr(response, "content", str(response))
-    metadata, errors = _parse_prompt_generation_response(content, state)
-    repair_content = ""
-
-    if not metadata["parsed_json"]:
-        repair_prompt = build_prompt_repair_prompt(state, content)
-        repair_response = runtime.get_llm().invoke(repair_prompt)
-        repair_content = getattr(repair_response, "content", str(repair_response))
-        repaired_metadata, repaired_errors = _parse_prompt_generation_response(repair_content, state)
-        if repaired_metadata["parsed_json"]:
-            metadata = repaired_metadata
-            errors = list(state.get("errors") or [])
-        else:
-            errors = repaired_errors
-            errors.append("generate_prompt repair did not return valid JSON")
-
-    return {
-        "prompt_generation_raw_response": content.strip(),
-        "generated_prompt": metadata["generated_prompt"],
-        "title": metadata["title"],
-        "categories": metadata["categories"],
-        "keywords": metadata["keywords"],
-        "description": metadata["description"],
-        "role": metadata["role"],
-        "industry": metadata["industry"],
-        "jtbd": metadata["jtbd"],
-        "date": metadata["date"],
-        "sub_industry": metadata["sub_industry"],
-        "errors": errors,
-        "debug": {
-            **(state.get("debug") or {}),
-            "llm_model": runtime.settings.openai.model,
-            "prompt_generated": True,
-            "prompt_response_json": metadata["parsed_json"],
-            "prompt_response_repaired": bool(repair_content and metadata["parsed_json"]),
-            "prompt_repair_raw_response": repair_content.strip(),
         },
     }
 
@@ -256,7 +186,9 @@ def call_curl_task(state: TopicWorkflowState, runtime: RuntimeDependencies) -> d
                 )
             )
 
-    eureka_auth_status = _eureka_auth_status(query_result.status_code, share_result.status_code if share_result else 0)
+    eureka_auth_status = _eureka_auth_status(
+        query_result.status_code, share_result.status_code if share_result else 0
+    )
 
     return {
         "curl_payload": query_result.payload,
@@ -323,7 +255,7 @@ def finalize_result(state: TopicWorkflowState) -> dict[str, Any]:
         "debug": {
             **(state.get("debug") or {}),
             "finished": True,
-        }
+        },
     }
 
 
@@ -382,123 +314,6 @@ def _remove_retryable_401_errors(errors: list[str]) -> list[str]:
         "Eureka share returned HTTP 401",
     }
     return [error for error in errors if error not in retryable_messages]
-
-
-def _parse_prompt_generation_response(
-    content: str,
-    state: TopicWorkflowState,
-) -> tuple[dict[str, Any], list[str]]:
-    errors = list(state.get("errors") or [])
-    payload = _parse_json_object(content)
-    parsed_json = isinstance(payload, dict)
-
-    if not parsed_json:
-        errors.append("generate_prompt did not return valid JSON; using raw response as prompt")
-        payload = {}
-
-    topic = state.get("topic", "")
-    generated_prompt = _string_value(payload.get("prompt")) or content.strip()
-    title = _string_value(payload.get("title")) or topic
-    metadata = {
-        "generated_prompt": generated_prompt,
-        "title": title,
-        "categories": _enum_list(payload.get("categories"), content_category_values(), ["scout_report"]),
-        "keywords": _string_list(payload.get("keywords")),
-        "description": _string_value(payload.get("description")),
-        "role": _enum_value(payload.get("role"), role_values(), "other"),
-        "industry": _enum_value(payload.get("industry"), industry_values(), "other"),
-        "jtbd": _enum_list(payload.get("jtbd"), jtbd_values(), ["other"]),
-        "date": _string_value(payload.get("date")) or today_iso(),
-        "sub_industry": _enum_list(payload.get("sub_industry"), sub_industry_values(), []),
-        "parsed_json": parsed_json,
-    }
-    return metadata, errors
-
-
-def _parse_json_object(content: str) -> dict[str, Any] | None:
-    text = _strip_json_fence(content)
-    payload = _loads_json_object(text)
-    if payload is None:
-        extracted = _extract_first_json_object(text)
-        payload = _loads_json_object(extracted) if extracted else None
-    return payload if isinstance(payload, dict) else None
-
-
-def _loads_json_object(text: str) -> dict[str, Any] | None:
-    try:
-        payload = json.loads(text)
-    except json.JSONDecodeError:
-        return None
-    return payload if isinstance(payload, dict) else None
-
-
-def _extract_first_json_object(text: str) -> str:
-    start = text.find("{")
-    if start == -1:
-        return ""
-
-    depth = 0
-    in_string = False
-    escaped = False
-    for index, char in enumerate(text[start:], start=start):
-        if escaped:
-            escaped = False
-            continue
-        if char == "\\":
-            escaped = True
-            continue
-        if char == '"':
-            in_string = not in_string
-            continue
-        if in_string:
-            continue
-        if char == "{":
-            depth += 1
-        elif char == "}":
-            depth -= 1
-            if depth == 0:
-                return text[start : index + 1]
-    return ""
-
-
-def _strip_json_fence(content: str) -> str:
-    text = content.strip()
-    if not text.startswith("```"):
-        return text
-
-    lines = text.splitlines()
-    if lines and lines[0].startswith("```"):
-        lines = lines[1:]
-    if lines and lines[-1].strip() == "```":
-        lines = lines[:-1]
-    return "\n".join(lines).strip()
-
-
-def _string_value(value: Any) -> str:
-    return value.strip() if isinstance(value, str) else ""
-
-
-def _string_list(value: Any) -> list[str]:
-    if isinstance(value, str):
-        value = [value]
-    if not isinstance(value, list):
-        return []
-    return [item.strip() for item in value if isinstance(item, str) and item.strip()]
-
-
-def _enum_value(value: Any, allowed: list[str], default: str) -> str:
-    if isinstance(value, str) and value in allowed:
-        return value
-    return default
-
-
-def _enum_list(value: Any, allowed: list[str], default: list[str]) -> list[str]:
-    values = _string_list(value)
-    filtered = []
-    for item in values:
-        if item in allowed and item not in filtered:
-            filtered.append(item)
-    return filtered or default
 
 
 def _csv_list(values: list[str]) -> str:

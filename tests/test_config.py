@@ -14,7 +14,7 @@ def test_load_env_file_parses_simple_dotenv(tmp_path):
         """
         # comment
         OPENAI_MODEL="test-model"
-        PROFILE_GATE_RETRY_COUNT=3
+        EUREKA_TIMEOUT_SECONDS=30
         """,
         encoding="utf-8",
     )
@@ -22,7 +22,7 @@ def test_load_env_file_parses_simple_dotenv(tmp_path):
     values = load_env_file(str(env_file))
 
     assert values["OPENAI_MODEL"] == "test-model"
-    assert values["PROFILE_GATE_RETRY_COUNT"] == "3"
+    assert values["EUREKA_TIMEOUT_SECONDS"] == "30"
 
 
 def test_settings_from_env_file(tmp_path):
@@ -33,8 +33,6 @@ def test_settings_from_env_file(tmp_path):
         OPENAI_BASE_URL=https://example.test/v1
         OPENAI_MODEL=model-a
         OPENAI_TEMPERATURE=1
-        PROFILE_GATE_ENDPOINT=https://profile.test
-        PROFILE_GATE_EXTRA_HEADERS_JSON={"X-Test":"1"}
         EUREKA_QUERY_ENDPOINT=https://query.test
         EUREKA_SHARE_ENDPOINT=https://share.test
         EUREKA_COMPLETION_ENDPOINT=https://completion.test/{session_id}
@@ -60,8 +58,6 @@ def test_settings_from_env_file(tmp_path):
     assert settings.openai.model == "model-a"
     assert settings.openai.base_url == "https://example.test/v1"
     assert settings.openai.temperature == 1.0
-    assert settings.profile_gate.endpoint == "https://profile.test"
-    assert settings.profile_gate.extra_headers == {"X-Test": "1"}
     assert settings.eureka.query_endpoint == "https://query.test"
     assert settings.eureka.share_endpoint == "https://share.test"
     assert settings.eureka.completion_endpoint == "https://completion.test/{session_id}"

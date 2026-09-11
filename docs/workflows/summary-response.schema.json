@@ -1,0 +1,48 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "summaries"
+  ],
+  "properties": {
+    "summaries": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 10,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "brief_id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "content_category": {
+            "type": "string",
+            "enum": [
+              "scout_report",
+              "case",
+              "market_landscape",
+              "patent_landscape",
+              "competitor_analysis",
+              "opportunity_brief",
+              "risk_watch",
+              "trend_brief"
+            ]
+          },
+          "research_instructions": {
+            "type": "string",
+            "minLength": 20,
+            "maxLength": 12000
+          }
+        },
+        "required": [
+          "brief_id",
+          "content_category",
+          "research_instructions"
+        ]
+      }
+    }
+  }
+}

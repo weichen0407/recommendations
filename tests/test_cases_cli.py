@@ -19,7 +19,6 @@ from recommendation_contents.config import (
     AppSettings,
     EurekaSettings,
     OpenAISettings,
-    ProfileGateSettings,
 )
 from recommendation_contents.nodes import RuntimeDependencies
 from recommendation_contents.services.eureka_curl import CurlResult
@@ -232,7 +231,6 @@ def test_run_case_item_retries_when_auth_cache_changes_after_401(tmp_path, monke
     runtime = RuntimeDependencies(
         settings=AppSettings(
             openai=OpenAISettings(),
-            profile_gate=ProfileGateSettings(),
             eureka=EurekaSettings(token_cache=str(cache_path)),
         ),
         eureka_client=client,
@@ -287,7 +285,6 @@ def test_run_case_item_can_import_clipboard_curl_during_401_wait(tmp_path, monke
     runtime = RuntimeDependencies(
         settings=AppSettings(
             openai=OpenAISettings(),
-            profile_gate=ProfileGateSettings(),
             eureka=EurekaSettings(token_cache=str(cache_path)),
         ),
         eureka_client=client,
@@ -331,7 +328,6 @@ def test_run_case_item_can_skip_refresh_in_auth_import_mode():
     runtime = RuntimeDependencies(
         settings=AppSettings(
             openai=OpenAISettings(),
-            profile_gate=ProfileGateSettings(),
             eureka=EurekaSettings(),
         ),
         eureka_client=FakeEurekaClient(),
@@ -369,7 +365,6 @@ def test_ensure_auth_ready_waits_once_for_clipboard_import(tmp_path, monkeypatch
     runtime = RuntimeDependencies(
         settings=AppSettings(
             openai=OpenAISettings(),
-            profile_gate=ProfileGateSettings(),
             eureka=EurekaSettings(token_cache=str(cache_path)),
         ),
         eureka_client=FakeEurekaClient(),
@@ -454,7 +449,11 @@ class FakeEurekaClient:
 
     def create_conversation(self, _query):
         self.query_calls += 1
-        if self.authorization and self.authorization != "Bearer old" and self.signature_id == "pt_new":
+        if (
+            self.authorization
+            and self.authorization != "Bearer old"
+            and self.signature_id == "pt_new"
+        ):
             return CurlResult(
                 payload={},
                 body='{"session_id":"sess_retry"}',

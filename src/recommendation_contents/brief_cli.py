@@ -15,6 +15,7 @@ from .brief_schema import (
     parse_brief_response,
     validate_briefs,
 )
+from .config import apply_env_file_to_process
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -63,12 +64,14 @@ def main(argv: list[str] | None = None) -> int:
             parser.error("idea is required unless --schema or --validate-file is used")
         from .brief_graph import build_brief_graph
 
+        apply_env_file_to_process(args.env_file)
         data = build_brief_graph(env_file=args.env_file).invoke(
             {
                 "idea": args.idea,
                 "language": args.language,
                 "count": args.count,
-            }
+            },
+            config={"run_name": "content_brief_workflow"},
         )["result"]
         exit_code = 0 if data["status"] == "succeeded" else 1
     output = json.dumps(data, ensure_ascii=False, indent=2) + "\n"

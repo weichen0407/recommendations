@@ -1,4 +1,4 @@
-"""Shared graph state types."""
+"""State used by the retained case-workflow batch helpers (main graph types live in graph.py)."""
 
 from __future__ import annotations
 
@@ -10,7 +10,6 @@ from typing_extensions import TypedDict
 class TopicWorkflowState(TypedDict, total=False):
     topic: str
     request_context: dict[str, Any]
-    prompt_generation_raw_response: str
     generated_prompt: str
     title: str
     categories: list[str]

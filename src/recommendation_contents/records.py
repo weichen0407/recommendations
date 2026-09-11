@@ -24,6 +24,13 @@ RECORD_HEADERS = [
     "jtbd",
     "date",
     "sub_industry",
+    "brief_id",
+    "generation_id",
+    "taxonomy_version",
+    "tags",
+    "classification",
+    "assumptions",
+    "status",
 ]
 LEGACY_HEADER_MAP = {
     "输入": "input",
@@ -51,6 +58,17 @@ def append_csv_row(row: dict[str, str], csv_path: str) -> None:
     path = Path(csv_path)
     path.parent.mkdir(parents=True, exist_ok=True)
     _migrate_csv_schema(path)
+    brief_id = row.get("brief_id")
+    if brief_id and path.exists():
+        rows = read_csv_rows(str(path))
+        for index, existing in enumerate(rows):
+            if existing.get("brief_id") == brief_id:
+                rows[index] = _normalize_legacy_row(row)
+                with path.open("w", encoding="utf-8", newline="") as file:
+                    writer = csv.DictWriter(file, fieldnames=RECORD_HEADERS)
+                    writer.writeheader()
+                    writer.writerows(rows)
+                return
     file_exists = path.exists() and path.stat().st_size > 0
 
     with path.open("a", encoding="utf-8", newline="") as file:

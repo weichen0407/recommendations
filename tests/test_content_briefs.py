@@ -159,14 +159,16 @@ def test_model_response_schema_matches_the_exported_artifact():
 
 
 def test_catalog_keeps_onboarding_keys_and_all_references_valid():
-    old = json.loads((ROOT / "docs/recommendation-tags/v1/tag-catalog.json").read_text())
+    mapping = json.loads((ROOT / "cases/onboarding_field_mapping.json").read_text())
     catalog = load_brief_catalog()
     for current, original in [
         ("role", "job_role"),
         ("industry", "industry_type"),
         ("jtbd", "jtbd_primary"),
     ]:
-        assert catalog["audience"][current] == old["inputs"][original]
+        assert {row["label_en"]: row["value"] for row in catalog["audience"][current]} == (
+            mapping["by_field_label"][original]
+        )
     values = lambda key: {row["value"] for row in catalog[key]}
     for key in [
         "role_perspectives",
@@ -207,7 +209,11 @@ def test_request_is_separate_from_rules_and_has_no_profile_dependency():
     assert "content_category" not in messages[0]["content"]
 
 
-def test_cli_schema_and_validation_work_without_model_or_env(tmp_path, capsys):
+def test_cli_schema_and_validation_work_without_model_or_env(tmp_path, capsys, monkeypatch):
+    def forbidden(*args, **kwargs):
+        raise AssertionError("Offline inspection must not initialize environment or tracing")
+
+    monkeypatch.setattr("recommendation_contents.brief_cli.apply_env_file_to_process", forbidden)
     schema_file = tmp_path / "schema.json"
     assert main(["--schema", "--env-file", "missing", "--output-file", str(schema_file)]) == 0
     assert json.loads(schema_file.read_text())["properties"]["briefs"]["minItems"] == 1
@@ -218,18 +224,38 @@ def test_cli_schema_and_validation_work_without_model_or_env(tmp_path, capsys):
 def test_cli_saves_generated_result_and_returns_failure_code(payload, monkeypatch, tmp_path):
     import recommendation_contents.brief_graph as module
 
+    loaded_envs = []
+    monkeypatch.setattr(
+        "recommendation_contents.brief_cli.apply_env_file_to_process", loaded_envs.append
+    )
     graph = build_brief_graph(llm=FakeLlm(payload))
     monkeypatch.setattr(module, "build_brief_graph", lambda **kwargs: graph)
     output = tmp_path / "briefs.json"
     assert main(["芯片互连", "--output-file", str(output)]) == 0
+    assert loaded_envs == [".env"]
     assert main(["--validate-file", str(output)]) == 0
     assert main([" ", "--output-file", str(tmp_path / "failure.json")]) == 1
 
 
-def test_independent_graph_is_registered():
-    config = json.loads((ROOT / "langgraph.json").read_text())
-    assert (
-        config["graphs"]["content_brief_workflow"]
-        == "recommendation_contents.brief_graph:build_graph"
+def test_cli_sets_a_searchable_trace_name(payload, monkeypatch):
+    import recommendation_contents.brief_graph as module
+
+    captured = {}
+
+    class RecordingGraph:
+        def invoke(self, input_data, config):
+            captured.update(config)
+            return {"result": {"status": "succeeded", **payload}}
+
+    monkeypatch.setattr(
+        "recommendation_contents.brief_cli.apply_env_file_to_process", lambda _: None
     )
+    monkeypatch.setattr(module, "build_brief_graph", lambda **kwargs: RecordingGraph())
+    assert main(["芯片互连"]) == 0
+    assert captured["run_name"] == "content_brief_workflow"
+
+
+def test_only_end_to_end_graph_is_registered():
+    config = json.loads((ROOT / "langgraph.json").read_text())
+    assert set(config["graphs"]) == {"topic_workflow"}
     assert config["graphs"]["topic_workflow"] == "recommendation_contents.graph:build_graph"
