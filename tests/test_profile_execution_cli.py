@@ -8,7 +8,7 @@ import pytest
 import recommendation_contents.profile_execution_cli as module
 from recommendation_contents.brief_schema import load_brief_catalog
 from recommendation_contents.profile_topic_generation import default_profile_tag_bundle
-from recommendation_contents.research_prompt_generation import build_task_spec
+from recommendation_contents.research_prompt_generation import HTML_INSTRUCTION, build_task_spec
 from recommendation_contents.workflow_execution import write_run
 
 
@@ -77,7 +77,6 @@ def _node2_source(path):
                     "count": 2,
                 },
                 "briefs": briefs,
-                "format": "html",
                 "research_prompt_generated_at": now,
                 "task_specs": specs,
                 "errors": [],
@@ -99,6 +98,8 @@ def _args(source, output_json, output_csv, log_file, runs_dir, *extra):
         str(log_file),
         "--runs-dir",
         str(runs_dir),
+        "--format",
+        "html",
         "--env-file",
         str(source.parent / "missing.env"),
         *extra,
@@ -148,7 +149,7 @@ def test_dry_run_preserves_source_order_and_writes_nothing(tmp_path, monkeypatch
 
     assert module.main(_args(source, output_json, output_csv, log_file, runs_dir, "--dry-run")) == 0
     summary = json.loads(capsys.readouterr().out)
-    tasks, _ = module._validate_and_flatten_source(document, load_brief_catalog())
+    tasks, _ = module._validate_and_flatten_source(document, load_brief_catalog(), "html")
 
     assert summary["scheduled_tasks"] == 2
     assert summary["source_status"] == "succeeded"
@@ -166,7 +167,7 @@ def test_bounded_execution_checkpoints_and_resume_without_duplicate_submission(
     tmp_path, monkeypatch, capsys
 ):
     source = tmp_path / "node2.json"
-    _node2_source(source)
+    source_document = _node2_source(source)
     output_json, output_csv = tmp_path / "node3.json", tmp_path / "node3.csv"
     log_file, runs_dir = tmp_path / "node3.log", tmp_path / "runs"
     calls = []
@@ -178,6 +179,11 @@ def test_bounded_execution_checkpoints_and_resume_without_duplicate_submission(
     assert first["status"] == "paused"
     assert [record["source_row_no"] for record in first["executions"]] == [1]
     assert calls[0][0] == "ffffffff-ffff-4fff-8fff-fffffffffff1"
+    assert calls[0][1].startswith(f"{HTML_INSTRUCTION}\n\n")
+    assert (
+        HTML_INSTRUCTION
+        not in source_document["generations"][0]["task_specs"][0]["generated_prompt"]
+    )
     capsys.readouterr()
 
     assert module.main([*base, "--resume"]) == 0
@@ -217,6 +223,25 @@ def test_wait_for_completion_resumes_existing_session_without_resubmitting(
     assert all(record["isCompleted"] for record in completed["executions"])
 
 
+def test_resume_rejects_a_different_execution_format(tmp_path, monkeypatch, capsys):
+    source = tmp_path / "node2.json"
+    _node2_source(source)
+    output_json, output_csv = tmp_path / "node3.json", tmp_path / "node3.csv"
+    log_file, runs_dir = tmp_path / "node3.log", tmp_path / "runs"
+    calls = []
+    monkeypatch.setattr(module, "execute_tasks", _fake_executor(calls))
+    base = _args(source, output_json, output_csv, log_file, runs_dir)
+
+    assert module.main([*base, "--max-tasks", "1", "--resume"]) == 0
+    capsys.readouterr()
+    report_args = ["report" if value == "html" else value for value in base]
+
+    with pytest.raises(SystemExit) as error:
+        module.main([*report_args, "--resume"])
+    assert error.value.code == 2
+    assert len(calls) == 1
+
+
 def test_changed_prompt_is_rejected_before_execution(tmp_path, monkeypatch, capsys):
     source = tmp_path / "node2.json"
     document = _node2_source(source)
@@ -232,7 +257,7 @@ def test_changed_prompt_is_rejected_before_execution(tmp_path, monkeypatch, caps
     spec = generation["task_specs"][0]
     spec["research_instructions"] += " Include a new criterion."
     generation["task_specs"][0] = build_task_spec(
-        spec["brief"], spec, generation["input"]["language"], generation["format"]
+        spec["brief"], spec, generation["input"]["language"]
     )
     source.write_text(json.dumps(document), encoding="utf-8")
 

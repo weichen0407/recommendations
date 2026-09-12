@@ -143,7 +143,6 @@ CSV 一行对应一个问题，并保存 `tag_set_id`。同一个 `tag_set_id` �
 ```bash
 uv run profile-topic-node2 outputs/profile_topics/node1_topics.json \
   --workers 4 \
-  --format html \
   --output-json outputs/profile_topics/node2_research_prompts.json \
   --output-csv outputs/profile_topics/node2_research_prompts.csv
 ```
@@ -157,7 +156,6 @@ uv run profile-topic-node2 outputs/profile_topics/node1_topics.json \
 ```bash
 uv run profile-topic-node2 outputs/profile_topics/node1_topics.json \
   --workers 4 \
-  --format html \
   --output-json outputs/profile_topics/node2_research_prompts.json \
   --output-csv outputs/profile_topics/node2_research_prompts.csv \
   --dry-run
@@ -174,13 +172,12 @@ uv run profile-topic-node2 outputs/profile_topics/node1_topics.json \
 ```bash
 uv run profile-topic-node2 outputs/profile_topics/node1_topics.json \
   --workers 4 \
-  --format html \
   --output-json outputs/profile_topics/node2_research_prompts.json \
   --output-csv outputs/profile_topics/node2_research_prompts.csv \
   --resume
 ```
 
-不带 `--resume` 时，如果输出文件已存在，命令会拒绝覆盖。确认要从节点 1 重新生成整个节点 2 批次时使用 `--overwrite`。`--resume` 与 `--overwrite` 不能同时使用。恢复时会检查工作流版本、阶段、taxonomy、来源数据集和格式；每个标签组合另有来源指纹，节点 1 中已修改的组合会自动重新生成。
+不带 `--resume` 时，如果输出文件已存在，命令会拒绝覆盖。确认要从节点 1 重新生成整个节点 2 批次时使用 `--overwrite`。`--resume` 与 `--overwrite` 不能同时使用。恢复时会检查工作流版本、阶段、taxonomy 和来源数据集；每个标签组合另有来源指纹，节点 1 中已修改的组合会自动重新生成。
 
 想把一次运行限制为可审核的小批次，可以用 `--max-batches 20`；完成这 20 个后状态保持 `paused`，再用 `--resume` 继续。也可以用 `--role`、`--industry`、`--jtbd` 或可重复的 `--tag-set-id` 只处理选中的组合：
 
@@ -193,20 +190,22 @@ uv run profile-topic-node2 outputs/profile_topics/node1_topics.json \
 
 Node 2 JSON 支持维护成功结果：编辑对应 `task_specs[]` 的 `content_category` 或 `research_instructions`，再执行 `--resume`。程序会校验这两个结构化字段，并重新组装 `generated_prompt`，不会再次调用模型。不要直接维护 `generated_prompt`，因为它会根据结构化字段重建。要让模型重新生成已成功的选中组合，首次使用筛选参数配合 `--resume --regenerate-selected`；如果同时用 `--max-batches` 分段，后续继续时只用 `--resume`，否则会再次把已重生成的选中项重置为待处理。
 
-`--format html` 会在最终 prompt 中指定 `artifact-generator` 生成 HTML report；`--format report` 会指定 `report-writer` 生成 `parallel-report`。新批次默认 `html`；恢复时不传 `--format` 会沿用检查点中的格式，两种格式不能在同一个恢复批次中混用。如果同一批内容需要两种成品，应分别生成两份节点 2 JSON/CSV，再分别执行节点 3。节点 3 直接读取成功 generation 的 `task_specs[].generated_prompt`，不会改写格式指令；不要把 CSV 当作执行或恢复输入。
+节点 2 的 `generated_prompt` 完全不包含 HTML、report、`artifact-generator` 或 `report-writer` 指令。同一份节点 2 JSON 可以在节点 3 分别选择两种格式，无需重复生成研究 prompt。不要把 CSV 当作执行或恢复输入。
 
 ### 用节点 2 的 prompt 执行节点 3
 
 先做离线预检；这个命令只统计范围，不调用 Eureka，也不写 Node 3 文件：
 
 ```bash
-uv run profile-topic-node3 outputs/profile_topics/node2_research_prompts.json --dry-run
+uv run profile-topic-node3 outputs/profile_topics/node2_research_prompts.json \
+  --format html --dry-run
 ```
 
 先用一个任务做 canary，确认鉴权、Eureka 会话和分享链接都正常：
 
 ```bash
 uv run profile-topic-node3 outputs/profile_topics/node2_research_prompts.json \
+  --format html \
   --workers 1 \
   --max-tasks 1
 ```
@@ -215,6 +214,7 @@ uv run profile-topic-node3 outputs/profile_topics/node2_research_prompts.json \
 
 ```bash
 uv run profile-topic-node3 outputs/profile_topics/node2_research_prompts.json \
+  --format html \
   --workers 1 \
   --resume
 ```
@@ -223,6 +223,7 @@ uv run profile-topic-node3 outputs/profile_topics/node2_research_prompts.json \
 
 ```bash
 uv run profile-topic-node3 outputs/profile_topics/node2_research_prompts.json \
+  --format html \
   --workers 1 \
   --resume \
   --wait-for-completion
@@ -230,7 +231,7 @@ uv run profile-topic-node3 outputs/profile_topics/node2_research_prompts.json \
 
 执行结果默认保存到 `outputs/profile_topics/node3_eureka_results.json` 和 `outputs/profile_topics/node3_eureka_results.csv`，持久日志为 `outputs/profile_topics/node3_eureka_results.log`，每个任务的内部安全执行记录位于 `outputs/profile_topics/node3_runs/`。JSON 是聚合检查点；内部记录保证每次外部调用前后都能安全恢复；CSV 用于审阅，日志用于观察和排错。CSV 保留旧 records 表的 `input`、`description`、`categories`、`date` 等字段，并新增 `brief_id`、`tag_set_id`、`session_id`、`share_id`、对应链接及执行状态。
 
-同一批内容同时生成 HTML 与 parallel-report 时，两次节点 3 必须指定不同的 `--output-json`、`--output-csv`、`--log-file` 和 `--runs-dir`，否则会发生检查点冲突。完整的双格式命令见 [工作流说明](docs/workflows/topic-workflow.md#91-canary全量提交与完成查询)。
+节点 3 的 `--format html` 会在提交前把中性 prompt 包装为 `artifact-generator` 的 HTML 请求；`--format report` 会包装为 `report-writer` 的 `parallel-report` 请求。同一批内容两种格式各执行一次时，必须指定不同的 `--output-json`、`--output-csv`、`--log-file` 和 `--runs-dir`，否则会发生检查点冲突。完整命令见 [工作流说明](docs/workflows/topic-workflow.md#91-canary全量提交与完成查询)。
 
 另开一个终端可实时查看：
 
@@ -314,13 +315,13 @@ uv run case-workflow outputs/0910/091010/subject.json \
 `--mode html` 会在 prompt 后追加：
 
 ```text
-Use artifact-generator to generate the final result as an HTML report.
+Use artifact-generator to generate an HTML report for the following research request:
 ```
 
 `--mode report` 则追加：
 
 ```text
-Use report-writer to generate the final result in parallel-report format.
+Use report-writer to generate a parallel-report for the following research request:
 ```
 
 并默认写入：

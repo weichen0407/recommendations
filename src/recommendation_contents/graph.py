@@ -15,6 +15,7 @@ from .nodes import RuntimeDependencies
 from .records import build_markdown_table
 from .research_prompt_generation import (
     GenerationError,
+    format_execution_prompt,
     generate_research_prompt_specs,
 )
 from .workflow_execution import DEFAULT_RUNS_DIR, execute_tasks, read_run, run_path
@@ -91,11 +92,19 @@ def build_graph_with_dependencies(
             except (OSError, ValueError, TypeError, AttributeError):
                 raise GenerationError("generate_topic", ["Cannot read the saved run."]) from None
             generation, specs = saved.get("generation_result"), saved.get("task_specs")
+            if isinstance(specs, list):
+                saved_formats = {
+                    spec.get("format") for spec in specs if isinstance(spec, dict)
+                }
+                if len(saved_formats) == 1 and next(iter(saved_formats)) in ("html", "report"):
+                    output_format = next(iter(saved_formats))
+                try:
+                    specs = [_neutral_task_spec(spec) for spec in specs]
+                except ValueError as exc:
+                    raise GenerationError("generate_topic", [str(exc)]) from None
             validate_generation_result(generation, "generate_topic")
             if generation["generation_id"] != resume_id:
                 raise GenerationError("generate_topic", ["Saved generation ID is invalid."])
-            if isinstance(specs, list) and specs and isinstance(specs[0], dict):
-                output_format = specs[0].get("format")
             validate_task_specs(generation, specs, output_format, "generate_topic")
         elif stage_result is not None:
             if not isinstance(stage_result, dict):
@@ -161,7 +170,7 @@ def build_graph_with_dependencies(
         else:
             specs, attempts = generate_research_prompt_specs(
                 state["generation_result"],
-                state["format"],
+                "neutral",
                 runtime.get_llm,
             )
         return {
@@ -183,12 +192,23 @@ def build_graph_with_dependencies(
             eureka_token_manager=eureka_token_manager,
         )
         generation = state["generation_result"]
+        execution_specs = [
+            {
+                **spec,
+                "base_generated_prompt": spec["generated_prompt"],
+                "generated_prompt": format_execution_prompt(
+                    spec["generated_prompt"], state["format"]
+                ),
+                "format": state["format"],
+            }
+            for spec in state["task_specs"]
+        ]
         path = (
             run_path(Path(runs_dir), generation["generation_id"]) if runs_dir is not None else None
         )
         results, status = execute_tasks(
             generation,
-            state["task_specs"],
+            execution_specs,
             execution_runtime,
             path,
             sleep=sleep,
@@ -196,7 +216,7 @@ def build_graph_with_dependencies(
         )
         rows = [
             _result_row(generation, spec, result)
-            for spec, result in zip(state["task_specs"], results)
+            for spec, result in zip(execution_specs, results)
         ]
         first = results[0]
         return {
@@ -208,6 +228,7 @@ def build_graph_with_dependencies(
             "session_id": first["session_id"],
             "session_link": first["session_url"],
             "share_link": first["share_url"],
+            "generated_prompt": execution_specs[0]["generated_prompt"],
             "errors": [e for r in results for e in r["errors"]],
         }
 
@@ -252,3 +273,20 @@ def _result_row(generation, spec, result):
         "assumptions": encode(brief["assumptions"]),
         "status": result["status"],
     }
+
+
+def _neutral_task_spec(spec: Any) -> Any:
+    if not isinstance(spec, dict) or "base_generated_prompt" not in spec:
+        return spec
+    output_format = spec.get("format")
+    base_prompt = spec.get("base_generated_prompt")
+    if (
+        not isinstance(base_prompt, str)
+        or spec.get("generated_prompt")
+        != format_execution_prompt(base_prompt, output_format)
+    ):
+        raise ValueError("Saved execution prompt does not match its base prompt and format.")
+    neutral = dict(spec)
+    neutral["generated_prompt"] = neutral.pop("base_generated_prompt")
+    neutral.pop("format", None)
+    return neutral

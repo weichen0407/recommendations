@@ -68,7 +68,6 @@ CSV_COLUMNS = [
     "content_category",
     "research_instructions",
     "generated_prompt",
-    "format",
     "research_prompt_status",
     "research_prompt_errors",
     "research_prompt_attempts",
@@ -104,7 +103,6 @@ def main(argv: list[str] | None = None) -> int:
         default=None,
         help="Persistent progress log; defaults to the output JSON path with a .log suffix.",
     )
-    parser.add_argument("--format", choices=["html", "report"], default=None)
     parser.add_argument("--workers", type=int, choices=range(1, 17), default=4)
     parser.add_argument("--role", choices=_audience_values(catalog, "role"))
     parser.add_argument("--industry", choices=_audience_values(catalog, "industry"))
@@ -184,19 +182,12 @@ def main(argv: list[str] | None = None) -> int:
 
     if existing is not None and not isinstance(existing.get("scope"), dict):
         parser.error("Node 2 resume output scope must be an object")
-    output_format = args.format or (
-        existing["scope"].get("output_format") if existing else "html"
-    )
-    if output_format not in ("html", "report"):
-        parser.error("Resume output has an invalid format")
 
     try:
         document = (
-            _new_document(source, args.input_json, output_format)
+            _new_document(source, args.input_json)
             if existing is None
-            else _validate_resume_document(
-                existing, source, args.input_json, output_format, args.format is not None
-            )
+            else _validate_resume_document(existing, source, args.input_json)
         )
     except ValueError as exc:
         parser.error(str(exc))
@@ -223,7 +214,7 @@ def main(argv: list[str] | None = None) -> int:
     for tag_set_id in regenerate_ids:
         by_id.pop(tag_set_id, None)
     try:
-        _normalize_maintained_specs(by_id, eligible, output_format, regenerate_ids)
+        _normalize_maintained_specs(by_id, eligible, regenerate_ids)
     except ValueError as exc:
         parser.error(str(exc))
 
@@ -241,7 +232,7 @@ def main(argv: list[str] | None = None) -> int:
     scheduled = candidates[: args.max_batches or None]
     bounded_pause = len(scheduled) < len(candidates)
     document["source"] = _source_metadata(source, args.input_json)
-    document["scope"] = _scope(source, eligible, output_format)
+    document["scope"] = _scope(source, eligible)
     document["generations"] = [by_id[key] for key in sorted(by_id)]
     document["last_run"] = {
         "started_at": _now(),
@@ -321,16 +312,15 @@ def main(argv: list[str] | None = None) -> int:
     def generate(source_generation: dict[str, Any]) -> dict[str, Any]:
         try:
             specs, attempts = generate_research_prompt_specs(
-                source_generation, output_format, get_model
+                source_generation, "neutral", get_model
             )
-            return _completed_record(source_generation, specs, attempts, output_format)
+            return _completed_record(source_generation, specs, attempts)
         except GenerationError as exc:
-            return _failed_record(source_generation, exc.errors, output_format)
+            return _failed_record(source_generation, exc.errors)
         except Exception as exc:  # noqa: BLE001 - model/provider boundary
             return _failed_record(
                 source_generation,
                 [f"Research prompt generation failed ({type(exc).__name__})."],
-                output_format,
             )
 
     completed = succeeded_this_run = failed_this_run = 0
@@ -559,23 +549,18 @@ def _source_metadata(source: dict[str, Any], path: Path) -> dict[str, Any]:
     }
 
 
-def _scope(
-    source: dict[str, Any], eligible: list[dict[str, Any]], output_format: str
-) -> dict[str, Any]:
+def _scope(source: dict[str, Any], eligible: list[dict[str, Any]]) -> dict[str, Any]:
     generations = source["generations"]
     return {
         "source_tag_sets": len(generations),
         "source_successful_tag_sets": len(eligible),
         "source_failed_tag_sets": sum(item.get("status") != "succeeded" for item in generations),
         "source_successful_rows": sum(len(item["briefs"]) for item in eligible),
-        "output_format": output_format,
         "language_values": sorted({item["input"]["language"] for item in eligible}),
     }
 
 
-def _new_document(
-    source: dict[str, Any], source_path: Path, output_format: str
-) -> dict[str, Any]:
+def _new_document(source: dict[str, Any], source_path: Path) -> dict[str, Any]:
     now = _now()
     return {
         "workflow_version": WORKFLOW_VERSION,
@@ -585,7 +570,7 @@ def _new_document(
         "updated_at": now,
         "taxonomy_version": source["taxonomy_version"],
         "source": _source_metadata(source, source_path),
-        "scope": _scope(source, [], output_format),
+        "scope": _scope(source, []),
         "progress": {},
         "last_run": {},
         "generations": [],
@@ -596,8 +581,6 @@ def _validate_resume_document(
     document: dict[str, Any],
     source: dict[str, Any],
     source_path: Path,
-    output_format: str,
-    format_was_explicit: bool,
 ) -> dict[str, Any]:
     if document.get("workflow_version") != WORKFLOW_VERSION:
         raise BatchFileError(f"Resume output must use {WORKFLOW_VERSION}")
@@ -610,10 +593,7 @@ def _validate_resume_document(
         raise BatchFileError(
             "Resume output belongs to a different Node 1 dataset; use --overwrite"
         )
-    old_format = (document.get("scope") or {}).get("output_format")
-    if old_format != output_format:
-        detail = "explicit --format" if format_was_explicit else "saved format"
-        raise BatchFileError(f"{detail} does not match the Node 2 resume output")
+    document["scope"].pop("output_format", None)
     generations = document.get("generations")
     if not isinstance(generations, list):
         raise BatchFileError("Resume output generations must be an array")
@@ -652,7 +632,6 @@ def _select_sources(
 def _normalize_maintained_specs(
     by_id: dict[str, dict[str, Any]],
     selected: list[dict[str, Any]],
-    output_format: str,
     regenerate_ids: set[str],
 ) -> None:
     """Rebuild prompt text from editable structured fields without another model call."""
@@ -691,16 +670,15 @@ def _normalize_maintained_specs(
                 "source_fingerprint": _source_fingerprint(source),
                 "input": source["input"],
                 "briefs": source["briefs"],
-                "format": output_format,
                 "errors": [],
             }
         )
+        record.pop("format", None)
         record["task_specs"] = [
             build_task_spec(
                 brief,
                 summaries[brief["brief_id"]],
                 source["input"]["language"],
-                output_format,
             )
             for brief in source["briefs"]
         ]
@@ -720,7 +698,6 @@ def _completed_record(
     source: dict[str, Any],
     specs: list[dict[str, Any]],
     attempts: int,
-    output_format: str,
 ) -> dict[str, Any]:
     return {
         "status": "succeeded",
@@ -729,7 +706,6 @@ def _completed_record(
         "source_fingerprint": _source_fingerprint(source),
         "input": source["input"],
         "briefs": source["briefs"],
-        "format": output_format,
         "research_prompt_attempts": attempts,
         "research_prompt_generated_at": _now(),
         "task_specs": specs,
@@ -737,9 +713,7 @@ def _completed_record(
     }
 
 
-def _failed_record(
-    source: dict[str, Any], errors: list[str], output_format: str
-) -> dict[str, Any]:
+def _failed_record(source: dict[str, Any], errors: list[str]) -> dict[str, Any]:
     return {
         "status": "failed",
         "tag_set_id": source["tag_set_id"],
@@ -747,7 +721,6 @@ def _failed_record(
         "source_fingerprint": _source_fingerprint(source),
         "input": source["input"],
         "briefs": source["briefs"],
-        "format": output_format,
         "research_prompt_attempts": None,
         "research_prompt_generated_at": _now(),
         "task_specs": [],
@@ -854,7 +827,6 @@ def _rows(
                 "content_category": spec.get("content_category", ""),
                 "research_instructions": spec.get("research_instructions", ""),
                 "generated_prompt": spec.get("generated_prompt", ""),
-                "format": record.get("format", ""),
                 "research_prompt_status": record["status"],
                 "research_prompt_errors": _json_cell(record.get("errors") or []),
                 "research_prompt_attempts": record.get("research_prompt_attempts", 0),
@@ -889,7 +861,6 @@ def _command_summary(
         "output_json": str(args.output_json),
         "output_csv": str(args.output_csv),
         "log_file": str(args.log_file),
-        "format": document["scope"]["output_format"],
         "source_successful_tag_sets": len(eligible),
         "selected_tag_sets": len(selected),
         "already_succeeded": already_succeeded,

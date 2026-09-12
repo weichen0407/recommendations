@@ -10,9 +10,11 @@ from .brief_schema import parse_brief_response
 from .entities import content_category_values
 from .llm import format_llm_error
 
-HTML_INSTRUCTION = "Use artifact-generator to generate the final result as an HTML report."
+HTML_INSTRUCTION = (
+    "Use artifact-generator to generate an HTML report for the following research request:"
+)
 REPORT_INSTRUCTION = (
-    "Use report-writer to generate the final result in parallel-report format."
+    "Use report-writer to generate a parallel-report for the following research request:"
 )
 RESEARCH_PROMPT_RULES = """You write research execution instructions for Eureka from approved content briefs.
 This is stage two. The brief already defines the topic, audience, tags and scope assumptions.
@@ -110,6 +112,7 @@ def generate_research_prompt_specs(
     output_format: str,
     get_model: Callable[[], Any],
 ) -> tuple[list[dict[str, Any]], int]:
+    del output_format  # Compatibility only; Node 2 prompts are format-neutral.
     briefs = generation["briefs"]
     language = generation["input"]["language"]
     messages = [
@@ -147,7 +150,7 @@ def generate_research_prompt_specs(
         if not errors:
             by_id = {item["brief_id"]: item for item in payload["research_prompts"]}
             return [
-                build_task_spec(brief, by_id[brief["brief_id"]], language, output_format)
+                build_task_spec(brief, by_id[brief["brief_id"]], language)
                 for brief in briefs
             ], attempt + 1
         messages.extend(
@@ -162,7 +165,8 @@ def generate_research_prompt_specs(
     raise GenerationError("generate_research_prompt", errors)
 
 
-def build_task_spec(brief, research_prompt, language, output_format):
+def build_task_spec(brief, research_prompt, language, output_format=None):
+    del output_format  # Kept temporarily for callers using the former four-argument API.
     target_language = "English" if language == "en" else "Simplified Chinese"
     metadata = {
         "title": brief["title"],
@@ -183,8 +187,7 @@ def build_task_spec(brief, research_prompt, language, output_format):
         + "\n\nPreserve the approved topic, audience, tags and primary desired output. "
         "Support factual claims with identifiable sources; distinguish evidence, inference and gaps. "
         "Do not invent project materials or claim certainty beyond the available evidence. "
-        f"Write the final result in {target_language}.\n"
-        + (HTML_INSTRUCTION if output_format == "html" else REPORT_INSTRUCTION)
+        f"Write the final result in {target_language}."
     )
     return {
         "brief_id": brief["brief_id"],
@@ -193,5 +196,18 @@ def build_task_spec(brief, research_prompt, language, output_format):
         "research_instructions": research_prompt["research_instructions"],
         "content_category": research_prompt["content_category"],
         "language": language,
-        "format": output_format,
     }
+
+
+def format_execution_prompt(generated_prompt: str, output_format: str) -> str:
+    """Add the selected renderer only at the Node 3 execution boundary."""
+    prompt = generated_prompt.strip()
+    if not prompt:
+        raise ValueError("generated_prompt must not be empty")
+    if output_format == "html":
+        instruction = HTML_INSTRUCTION
+    elif output_format == "report":
+        instruction = REPORT_INSTRUCTION
+    else:
+        raise ValueError("format must be html or report")
+    return f"{instruction}\n\n{prompt}"

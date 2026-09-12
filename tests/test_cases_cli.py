@@ -120,7 +120,7 @@ def test_apply_generation_mode_html_appends_artifact_instruction_once():
     first = apply_generation_mode(item, "html")
     second = apply_generation_mode(first, "html")
 
-    assert first["output"].endswith(HTML_ARTIFACT_INSTRUCTION)
+    assert first["output"].startswith(HTML_ARTIFACT_INSTRUCTION)
     assert second["output"].count(HTML_ARTIFACT_INSTRUCTION) == 1
     assert item["output"] == "Write a report."
 
@@ -131,7 +131,7 @@ def test_apply_generation_mode_report_replaces_artifact_instruction():
     result = apply_generation_mode(item, "report")
     repeated = apply_generation_mode(result, "report")
 
-    assert result["output"].endswith(REPORT_WRITER_INSTRUCTION)
+    assert result["output"].startswith(REPORT_WRITER_INSTRUCTION)
     assert repeated["output"].count(REPORT_WRITER_INSTRUCTION) == 1
     assert HTML_ARTIFACT_INSTRUCTION not in result["output"]
 
@@ -141,7 +141,7 @@ def test_apply_generation_mode_html_replaces_report_writer_instruction():
 
     result = apply_generation_mode(item, "html")
 
-    assert result["output"].endswith(HTML_ARTIFACT_INSTRUCTION)
+    assert result["output"].startswith(HTML_ARTIFACT_INSTRUCTION)
     assert REPORT_WRITER_INSTRUCTION not in result["output"]
 
 

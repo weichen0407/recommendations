@@ -275,14 +275,14 @@ def _with_html_artifact_instruction(prompt: str) -> str:
     prompt = _without_format_instruction(prompt)
     if not prompt:
         return HTML_ARTIFACT_INSTRUCTION
-    return f"{prompt} {HTML_ARTIFACT_INSTRUCTION}"
+    return f"{HTML_ARTIFACT_INSTRUCTION}\n\n{prompt}"
 
 
 def _with_report_writer_instruction(prompt: str) -> str:
     prompt = _without_format_instruction(prompt)
     if not prompt:
         return REPORT_WRITER_INSTRUCTION
-    return f"{prompt} {REPORT_WRITER_INSTRUCTION}"
+    return f"{REPORT_WRITER_INSTRUCTION}\n\n{prompt}"
 
 
 def _without_format_instruction(prompt: str) -> str:

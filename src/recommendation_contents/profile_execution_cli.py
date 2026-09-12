@@ -23,7 +23,7 @@ from uuid import UUID, uuid4
 from .brief_schema import load_brief_catalog, parse_brief_response
 from .config import AppSettings, apply_env_file_to_process
 from .nodes import RuntimeDependencies
-from .research_prompt_generation import GenerationError
+from .research_prompt_generation import GenerationError, format_execution_prompt
 from .workflow_execution import execute_tasks, read_run
 from .workflow_stages import validate_task_specs
 
@@ -100,6 +100,12 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--output-csv", type=Path, default=DEFAULT_CSV)
     parser.add_argument("--log-file", type=Path, default=DEFAULT_LOG)
     parser.add_argument("--runs-dir", type=Path, default=DEFAULT_RUNS_DIR)
+    parser.add_argument(
+        "--format",
+        choices=["html", "report"],
+        required=True,
+        help="Renderer to add immediately before submitting each neutral Node 2 prompt",
+    )
     parser.add_argument("--workers", type=int, choices=range(1, 17), default=1)
     parser.add_argument("--max-tasks", type=int, default=0, help="Execute at most N pending prompts")
     parser.add_argument("--role", choices=_audience_values(catalog, "role"))
@@ -146,7 +152,9 @@ def _run_locked(
 ) -> int:
     try:
         source = _load_json(args.input_json, "Node 2 input")
-        tasks, failed_source_tag_sets = _validate_and_flatten_source(source, catalog)
+        tasks, failed_source_tag_sets = _validate_and_flatten_source(
+            source, catalog, args.format
+        )
     except ValueError as exc:
         parser.error(str(exc))
 
@@ -166,7 +174,7 @@ def _run_locked(
         try:
             existing = _load_json(args.output_json, "Node 3 checkpoint")
             existing = _validate_resume_document(
-                existing, source, tasks, args.input_json, args.runs_dir
+                existing, source, tasks, args.input_json, args.runs_dir, args.format
             )
         except ValueError as exc:
             parser.error(str(exc))
@@ -177,7 +185,7 @@ def _run_locked(
         if conflicts:
             parser.error("Output exists; use --resume or --overwrite: " + ", ".join(conflicts))
 
-    document = _new_document(source, args.input_json, args.runs_dir)
+    document = _new_document(source, args.input_json, args.runs_dir, args.format)
     by_id: dict[str, dict[str, Any]] = {}
     if existing is not None:
         by_id = {record["brief_id"]: record for record in existing["executions"]}
@@ -200,7 +208,7 @@ def _run_locked(
     already_satisfied = len(selected) - len(candidates)
 
     document["source"] = _source_metadata(source, args.input_json)
-    document["scope"] = _scope(tasks, failed_source_tag_sets, args.runs_dir)
+    document["scope"] = _scope(tasks, failed_source_tag_sets, args.runs_dir, args.format)
     document["executions"] = _ordered_records(by_id, tasks)
     document["last_run"] = {
         "started_at": _now(),
@@ -458,7 +466,7 @@ def _load_json(path: Path, label: str) -> dict[str, Any]:
 
 
 def _validate_and_flatten_source(
-    document: dict[str, Any], catalog: dict[str, Any]
+    document: dict[str, Any], catalog: dict[str, Any], output_format: str
 ) -> tuple[list[dict[str, Any]], int]:
     if document.get("workflow_version") != NODE2_VERSION:
         raise BatchFileError(f"Input must use {NODE2_VERSION}")
@@ -495,7 +503,6 @@ def _validate_and_flatten_source(
         request = generation.get("input")
         briefs = generation.get("briefs")
         specs = generation.get("task_specs")
-        output_format = generation.get("format")
         if not isinstance(request, dict) or not isinstance(briefs, list):
             raise BatchFileError(f"{tag_set_id}: input and briefs are required")
         try:
@@ -535,7 +542,13 @@ def _validate_and_flatten_source(
                 "research_prompt_generated_at": generation.get(
                     "research_prompt_generated_at", ""
                 ),
-                "task_spec": spec,
+                "task_spec": {
+                    **spec,
+                    "generated_prompt": format_execution_prompt(
+                        spec["generated_prompt"], output_format
+                    ),
+                    "format": output_format,
+                },
             }
             task["source_fingerprint"] = _task_fingerprint(task)
             tasks.append(task)
@@ -580,18 +593,23 @@ def _source_metadata(source: dict[str, Any], path: Path) -> dict[str, Any]:
 
 
 def _scope(
-    tasks: list[dict[str, Any]], failed_source_tag_sets: int, runs_dir: Path
+    tasks: list[dict[str, Any]],
+    failed_source_tag_sets: int,
+    runs_dir: Path,
+    output_format: str,
 ) -> dict[str, Any]:
     return {
         "eligible_tasks": len(tasks),
         "successful_source_tag_sets": len({task["tag_set_id"] for task in tasks}),
         "failed_source_tag_sets": failed_source_tag_sets,
         "runs_dir": str(runs_dir.resolve()),
-        "formats": sorted({task["format"] for task in tasks}),
+        "format": output_format,
     }
 
 
-def _new_document(source: dict[str, Any], source_path: Path, runs_dir: Path) -> dict[str, Any]:
+def _new_document(
+    source: dict[str, Any], source_path: Path, runs_dir: Path, output_format: str
+) -> dict[str, Any]:
     now = _now()
     return {
         "workflow_version": WORKFLOW_VERSION,
@@ -601,7 +619,7 @@ def _new_document(source: dict[str, Any], source_path: Path, runs_dir: Path) -> 
         "updated_at": now,
         "taxonomy_version": source["taxonomy_version"],
         "source": _source_metadata(source, source_path),
-        "scope": _scope([], 0, runs_dir),
+        "scope": _scope([], 0, runs_dir, output_format),
         "progress": {},
         "last_run": {},
         "executions": [],
@@ -614,6 +632,7 @@ def _validate_resume_document(
     tasks: list[dict[str, Any]],
     source_path: Path,
     runs_dir: Path,
+    output_format: str,
 ) -> dict[str, Any]:
     if document.get("workflow_version") != WORKFLOW_VERSION:
         raise BatchFileError(f"Resume output must use {WORKFLOW_VERSION}")
@@ -630,6 +649,8 @@ def _validate_resume_document(
     saved_runs_dir = scope.get("runs_dir")
     if saved_runs_dir and _resolved(Path(saved_runs_dir)) != _resolved(runs_dir):
         raise BatchFileError("--runs-dir does not match the Node 3 checkpoint")
+    if scope.get("format") != output_format:
+        raise BatchFileError("--format does not match the Node 3 checkpoint")
     executions = document.get("executions")
     if not isinstance(executions, list):
         raise BatchFileError("Resume output executions must be an array")
@@ -1056,6 +1077,7 @@ def _summary(
         "output_csv": str(args.output_csv),
         "log_file": str(args.log_file),
         "runs_dir": str(args.runs_dir),
+        "format": args.format,
         "wait_for_completion": args.wait_for_completion,
         "source_status": document["source"].get("status", ""),
         "successful_source_tag_sets": document["scope"].get(

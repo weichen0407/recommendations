@@ -54,22 +54,22 @@ Studio 只注册 `topic_workflow`。图中没有额外的校验、修复、鉴�
 1. 按第一阶段的主要任务设计研究重点和成果结构，不扩展成无关的全景报告。
 2. 继承实体、范围假设及目标受众。模型不自行重新分类，也不声称这些是实际用户已填写的资料。
 3. 补充适当的证据要求、比较维度、限制和待核实事项；不输出研究结论，不编造项目材料、市场数据或专利结果。
-4. 按指定语言生成研究指令。格式和固定分类信息由程序统一装配，不交给模型决定。
+4. 按指定语言生成研究指令。输出形式不属于节点 2，由节点 3 执行时选择。
 5. 响应字段、类别或 ID 校验失败时，最多修复一次；仍失败则停止，原始响应不会兜底成执行 prompt。
 
-程序把模型生成的研究要求与原始描述、固定标签、关键词、假设、语言要求组合为 `task_specs[].generated_prompt`。HTML 模式固定添加：
+程序把模型生成的研究要求与原始描述、固定标签、关键词、假设和语言要求组合为中性的 `task_specs[].generated_prompt`。其中不出现 HTML、report 或工具选择指令。执行节点 3 时，`--format html` 会在原 prompt 前添加：
 
 ```text
-Use artifact-generator to generate the final result as an HTML report.
+Use artifact-generator to generate an HTML report for the following research request:
 ```
 
-report 模式固定添加：
+`--format report` 会在原 prompt 前添加：
 
 ```text
-Use report-writer to generate the final result in parallel-report format.
+Use report-writer to generate a parallel-report for the following research request:
 ```
 
-两种工具指令都由程序根据 `format` 装配，第二阶段 LLM 不负责选择或输出工具名。这是执行指令，是否实际产出相应文件取决于 Eureka 的执行结果。
+两种执行文本都只在节点 3 的内存任务及其执行记录中出现。第二阶段 LLM 不负责选择工具，同一份节点 2 文件可以分别执行两种格式。
 
 代码与契约：[research_prompt_generation.py](../../src/recommendation_contents/research_prompt_generation.py)、[响应 schema](./research-prompt-response.schema.json)。`summary_generation.py` 和 `summary-response.schema.json` 仅保留旧导入名与旧文件路径，不是新的规范入口；模型响应根字段已经统一迁移为 `research_prompts`，旧的 `summaries` 响应不再接受。
 
@@ -183,24 +183,11 @@ CLI 暂停时使用进程内 checkpointer，到下一次命令通过 JSON 导入
 ```bash
 uv run profile-topic-node2 outputs/profile_topics/node1_topics.json \
   --workers 4 \
-  --format html \
   --output-json outputs/profile_topics/node2_research_prompts.json \
   --output-csv outputs/profile_topics/node2_research_prompts.csv
 ```
 
-一份节点 2 检查点只能使用一种 `format`。需要同时生产 HTML report 和 parallel report 时，使用同一节点 1 输入分别写入两个目录，例如：
-
-```bash
-uv run profile-topic-node2 outputs/profile_topics/node1_topics.json \
-  --workers 4 --format html \
-  --output-json outputs/profile_topics/html/node2_research_prompts.json \
-  --output-csv outputs/profile_topics/html/node2_research_prompts.csv
-
-uv run profile-topic-node2 outputs/profile_topics/node1_topics.json \
-  --workers 4 --format report \
-  --output-json outputs/profile_topics/report/node2_research_prompts.json \
-  --output-csv outputs/profile_topics/report/node2_research_prompts.csv
-```
+节点 2 没有 `--format` 参数，只需生成一次。需要 HTML 和 parallel-report 时，两次节点 3 都读取这一份检查点。
 
 处理单位是 generation/tag set。一个正常 generation 触发一次第二阶段模型调用，同时为其中全部 brief 返回结果；如果响应校验失败，节点内部最多再调用一次进行格式修复。节点 1 中标记失败的 generation 不进入可执行范围；成功项如果缺少 briefs 或不符合当前 schema/标签规则，命令会在调用模型前报错。
 
@@ -211,9 +198,9 @@ uv run profile-topic-node2 outputs/profile_topics/node1_topics.json \
 | `brief_id` | 继承节点 1，用于稳定关联同一个问题。 |
 | `research_instructions` | 模型生成的研究重点、分析步骤、结构与证据要求。 |
 | `content_category` | 第二阶段受控内容类别。 |
-| `generated_prompt` | 节点 3 可以原样提交的完整 prompt。 |
+| `generated_prompt` | 与输出形式无关的完整研究 prompt；节点 3 提交前再添加工具指令。 |
 | `brief` | 节点 1 的问题、描述、受众、标签、实体、关键词和假设。 |
-| `language` / `format` | 生成语言和最终交付格式。 |
+| `language` | 研究内容的生成语言。 |
 
 批次 JSON 使用 `workflow_version=profile-topic-node2/1.0.0`、`stage=generate_research_prompt`，保留 generation 级状态、错误和完整 task specs，是恢复和维护的数据源。CSV 一行对应一个 brief，仅用于运营抽样和导出；恢复时不读取 CSV，下一次保存还会从 JSON 重新生成 CSV。节点 2 只生成 prompt，保持执行状态、session URL 和 share URL 为空，不初始化或调用 Eureka。
 
@@ -221,12 +208,11 @@ uv run profile-topic-node2 outputs/profile_topics/node1_topics.json \
 
 ### 8.1 预检、进度、日志和停止
 
-在正式调用模型前可运行 `--dry-run`，检查输入批次、可执行与待调度 generation 数、格式和输出路径：
+在正式调用模型前可运行 `--dry-run`，检查输入批次、可执行与待调度 generation 数和输出路径：
 
 ```bash
 uv run profile-topic-node2 outputs/profile_topics/node1_topics.json \
   --workers 4 \
-  --format html \
   --output-json outputs/profile_topics/node2_research_prompts.json \
   --output-csv outputs/profile_topics/node2_research_prompts.csv \
   --dry-run
@@ -270,13 +256,12 @@ uv run profile-topic-node2 outputs/profile_topics/node1_topics.json \
 ```bash
 uv run profile-topic-node2 outputs/profile_topics/node1_topics.json \
   --workers 4 \
-  --format html \
   --output-json outputs/profile_topics/node2_research_prompts.json \
   --output-csv outputs/profile_topics/node2_research_prompts.csv \
   --resume
 ```
 
-恢复会跳过来源内容未变化的成功 generation，并继续失败、尚未处理或来源指纹已变化的项。同一个节点 1 数据集后续增加成功 generation 或修正原 generation 时可以继续使用原检查点；数据集身份由节点 1 的工作流版本、`created_at` 和 taxonomy 确定，每个 generation 另有内容指纹。换成另一个数据集、taxonomy 或显式传入不同格式时，命令会拒绝续跑。恢复时省略 `--format` 会沿用已保存格式；并发数 `--workers` 只影响本次调度，可以按模型限流调整。
+恢复会跳过来源内容未变化的成功 generation，并继续失败、尚未处理或来源指纹已变化的项。同一个节点 1 数据集后续增加成功 generation 或修正原 generation 时可以继续使用原检查点；数据集身份由节点 1 的工作流版本、`created_at` 和 taxonomy 确定，每个 generation 另有内容指纹。换成另一个数据集或 taxonomy 时，命令会拒绝续跑；并发数 `--workers` 只影响本次调度，可以按模型限流调整。
 
 可以按画像或精确 tag set 缩小本次处理范围；`--tag-set-id` 可以重复：
 
@@ -295,7 +280,6 @@ uv run profile-topic-node2 outputs/profile_topics/node1_topics.json \
 ```bash
 uv run profile-topic-node2 outputs/profile_topics/node1_topics.json \
   --workers 4 \
-  --format html \
   --output-json outputs/profile_topics/node2_research_prompts.json \
   --output-csv outputs/profile_topics/node2_research_prompts.csv \
   --overwrite
@@ -305,7 +289,7 @@ uv run profile-topic-node2 outputs/profile_topics/node1_topics.json \
 
 节点 1 是问题和标签的来源。如果修改节点 1 的问题、描述、受众或标签，同一数据集内对应 generation 的来源指纹会变化；下一次 `--resume` 会只重新生成这些变化项。不要修改 Node 2 中复制的 `brief`，它不是输入来源。
 
-人工维护必须编辑 Node 2 JSON 中对应的 `generations[].task_specs[]`，只修改 `content_category` 或 `research_instructions`。再次运行 `--resume` 时，程序会校验这些结构化字段，按当前 brief、语言和格式重新组装 `generated_prompt`，不会为仍然成功且来源未变化的项调用模型。不要直接编辑 `generated_prompt`，因为恢复时它会被结构化字段重建；不要编辑 CSV，下一次导出会覆盖它。
+人工维护必须编辑 Node 2 JSON 中对应的 `generations[].task_specs[]`，只修改 `content_category` 或 `research_instructions`。再次运行 `--resume` 时，程序会校验这些结构化字段，按当前 brief 和语言重新组装中性的 `generated_prompt`，不会为仍然成功且来源未变化的项调用模型。不要直接编辑 `generated_prompt`，因为恢复时它会被结构化字段重建；不要编辑 CSV，下一次导出会覆盖它。
 
 要让模型重新生成已经成功的组合，使用筛选条件配合 `--resume --regenerate-selected`：
 
@@ -324,14 +308,15 @@ uv run profile-topic-node2 outputs/profile_topics/node1_topics.json \
 
 ## 9. 画像标签批次的节点 3
 
-`profile-topic-node3` 读取节点 2 中成功 generation 的 `task_specs[].generated_prompt`，逐条提交 Eureka conversational query，并保存会话和分享链接。节点 2 失败的 generation 不进入执行范围。
+`profile-topic-node3` 读取节点 2 中成功 generation 的中性 `task_specs[].generated_prompt`，根据必填的 `--format html|report` 添加工具执行指令，再逐条提交 Eureka conversational query，并保存会话和分享链接。节点 2 失败的 generation 不进入执行范围。
 
 ### 9.1 Canary、全量提交与完成查询
 
 先离线核对可执行任务数量；`--dry-run` 不读取 Eureka 鉴权、不发请求、不写输出：
 
 ```bash
-uv run profile-topic-node3 outputs/profile_topics/node2_research_prompts.json --dry-run
+uv run profile-topic-node3 outputs/profile_topics/node2_research_prompts.json \
+  --format html --dry-run
 ```
 
 输出同时显示节点 2 的状态、成功 tag set 数和失败 tag set 数。节点 2 仍在运行时可以预检当前快照，但建议等节点 2 停在稳定检查点后再执行真实任务。
@@ -340,6 +325,7 @@ uv run profile-topic-node3 outputs/profile_topics/node2_research_prompts.json --
 
 ```bash
 uv run profile-topic-node3 outputs/profile_topics/node2_research_prompts.json \
+  --format html \
   --workers 1 \
   --max-tasks 1
 ```
@@ -348,6 +334,7 @@ uv run profile-topic-node3 outputs/profile_topics/node2_research_prompts.json \
 
 ```bash
 uv run profile-topic-node3 outputs/profile_topics/node2_research_prompts.json \
+  --format html \
   --workers 1 \
   --resume
 ```
@@ -356,6 +343,7 @@ uv run profile-topic-node3 outputs/profile_topics/node2_research_prompts.json \
 
 ```bash
 uv run profile-topic-node3 outputs/profile_topics/node2_research_prompts.json \
+  --format html \
   --workers 1 \
   --resume \
   --wait-for-completion
@@ -363,18 +351,18 @@ uv run profile-topic-node3 outputs/profile_topics/node2_research_prompts.json \
 
 `--wait-for-completion` 查询的是已经保存的同一 `session_id`，不会为已有会话再创建任务。未到终态的会话保留为可恢复状态，下次执行同一命令继续查询。
 
-如果同一批节点 1 内容同时生成了 HTML 与 parallel-report 两份节点 2 检查点，节点 3 也必须使用独立的输出、日志和运行记录目录。例如先各提交一个 canary：
+同一份节点 2 检查点可以执行为 HTML 或 parallel-report。两次节点 3 必须使用独立的输出、日志和运行记录目录。例如先各提交一个 canary：
 
 ```bash
-uv run profile-topic-node3 outputs/profile_topics/html/node2_research_prompts.json \
-  --workers 1 --max-tasks 1 \
+uv run profile-topic-node3 outputs/profile_topics/node2_research_prompts.json \
+  --format html --workers 1 --max-tasks 1 \
   --output-json outputs/profile_topics/html/node3_eureka_results.json \
   --output-csv outputs/profile_topics/html/node3_eureka_results.csv \
   --log-file outputs/profile_topics/html/node3_eureka_results.log \
   --runs-dir outputs/profile_topics/html/node3_runs
 
-uv run profile-topic-node3 outputs/profile_topics/report/node2_research_prompts.json \
-  --workers 1 --max-tasks 1 \
+uv run profile-topic-node3 outputs/profile_topics/node2_research_prompts.json \
+  --format report --workers 1 --max-tasks 1 \
   --output-json outputs/profile_topics/report/node3_eureka_results.json \
   --output-csv outputs/profile_topics/report/node3_eureka_results.csv \
   --log-file outputs/profile_topics/report/node3_eureka_results.log \

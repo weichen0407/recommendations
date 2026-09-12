@@ -173,7 +173,7 @@ def test_only_three_nodes_and_two_generation_calls(tmp_path):
     assert [stage for stage, _ in model.calls] == ["topic", "summary"]
     assert result["status"] == "succeeded"
     assert result["generated_prompt"] == client.queries[0]
-    assert result["generated_prompt"].endswith(HTML_INSTRUCTION)
+    assert result["generated_prompt"].startswith(HTML_INSTRUCTION)
     assert "in English" in result["generated_prompt"]
     assert result["results"][0]["isCompleted"] is True
     assert result["results"][0]["completion_response"]["events"]
@@ -211,7 +211,7 @@ def test_batch_keeps_two_llm_calls_and_separate_sessions(tmp_path):
     assert len(model.calls) == 2
     assert len(client.queries) == 2
     assert all(HTML_INSTRUCTION not in query for query in client.queries)
-    assert all(query.endswith(REPORT_INSTRUCTION) for query in client.queries)
+    assert all(query.startswith(REPORT_INSTRUCTION) for query in client.queries)
     assert {r["session_id"] for r in result["results"]} == {"sess_1", "sess_2"}
     assert len({r["brief_id"] for r in result["results"]}) == 2
 
@@ -499,7 +499,9 @@ def test_breakpoints_review_edit_and_continue_without_regenerating_topic(tmp_pat
 
     final = graph.invoke(None, config=config)
     assert final["status"] == "succeeded"
-    assert client.queries == [second["task_specs"][0]["generated_prompt"]]
+    assert client.queries == [
+        f"{REPORT_INSTRUCTION}\n\n{second['task_specs'][0]['generated_prompt']}"
+    ]
     assert len(model.calls) == 2
 
 
@@ -660,7 +662,9 @@ def test_cli_review_files_continue_in_separate_processes(tmp_path, monkeypatch, 
     )
     assert json.loads(capsys.readouterr().out)["status"] == "succeeded"
     assert graphs[2][0].calls == []
-    assert graphs[2][1].queries == [second["task_specs"][0]["generated_prompt"]]
+    assert graphs[2][1].queries == [
+        f"{REPORT_INSTRUCTION}\n\n{second['task_specs'][0]['generated_prompt']}"
+    ]
 
 
 def test_cli_accepts_legacy_stage_two_name_but_saves_canonical_name(

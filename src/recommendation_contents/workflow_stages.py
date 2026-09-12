@@ -61,8 +61,7 @@ def validate_generation_result(value: Any, stage: str) -> None:
 
 
 def validate_task_specs(generation: dict, specs: Any, output_format: Any, stage: str) -> None:
-    if output_format not in ("html", "report"):
-        raise GenerationError(stage, ["format must be html or report."])
+    del output_format  # Rendering format is selected at the Node 3 execution boundary.
     if not isinstance(specs, list) or not all(isinstance(spec, dict) for spec in specs):
         raise GenerationError(stage, ["task_specs must be an array of objects."])
     research_prompts = {
@@ -77,9 +76,9 @@ def validate_task_specs(generation: dict, specs: Any, output_format: Any, stage:
     errors = validate_research_prompts(research_prompts, generation["briefs"])
     if not errors:
         for brief, spec in zip(generation["briefs"], specs):
-            if spec != build_task_spec(brief, spec, generation["input"]["language"], output_format):
+            if spec != build_task_spec(brief, spec, generation["input"]["language"]):
                 errors.append(
-                    "Task prompt or metadata does not match its brief, language, format or order. "
+                    "Task prompt or metadata does not match its brief, language or order. "
                     "To revise a topic, clear task_specs and regenerate_research_prompt."
                 )
     if errors:
