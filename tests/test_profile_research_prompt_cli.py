@@ -150,6 +150,11 @@ def test_bounded_run_checkpoints_and_resume_complete_the_remaining_batches(
     assert rows[0]["research_instructions"]
     assert rows[0]["execution_status"] == "not_started"
     assert "rows=1" in first_capture.err
+    log_path = output_json.with_suffix(".log")
+    first_log = log_path.read_text()
+    assert "generate_research_prompt: selected=2" in first_log
+    assert "rows=1" in first_log
+    assert "run_finished:" in first_log
 
     assert (
         module.main(_args(source_path, output_json, output_csv, "--resume", "--max-batches", "1"))
@@ -161,6 +166,9 @@ def test_bounded_run_checkpoints_and_resume_complete_the_remaining_batches(
     assert second["progress"]["succeeded_tag_sets"] == 2
     assert second["progress"]["generated_rows"] == 2
     assert len(calls) == 2
+    resumed_log = log_path.read_text()
+    assert resumed_log.startswith(first_log)
+    assert resumed_log.count("generate_research_prompt:") == 2
 
     assert module.main(_args(source_path, output_json, output_csv, "--resume")) == 0
     final_summary = json.loads(capsys.readouterr().out)
@@ -337,6 +345,7 @@ def test_dry_run_does_not_write_or_call_model(tmp_path, monkeypatch, capsys):
     assert summary["status"] == "dry_run"
     assert summary["scheduled_batches"] == 1
     assert not output_json.exists() and not output_csv.exists()
+    assert not output_json.with_suffix(".log").exists()
     assert calls == []
 
 

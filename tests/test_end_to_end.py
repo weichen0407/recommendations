@@ -10,9 +10,11 @@ from recommendation_contents.config import (
     OpenAISettings,
 )
 from recommendation_contents.graph import build_graph_with_dependencies
+from recommendation_contents.nodes import RuntimeDependencies
 from recommendation_contents.research_prompt_generation import HTML_INSTRUCTION, GenerationError
 from recommendation_contents.services.eureka_curl import CurlResult, EurekaCurlClient
 from recommendation_contents.services.eureka_token import TokenCheckResult, TokenRefreshResult
+from recommendation_contents.workflow_execution import execute_tasks, read_run, write_run
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -127,6 +129,27 @@ def setup(tmp_path, model=None, responses=None, auth=None, no_journal=False, che
     return graph, model, client
 
 
+def execution_setup(tmp_path, responses=None):
+    settings = AppSettings(
+        openai=OpenAISettings(api_key="test"),
+        eureka=EurekaSettings(authorization="Bearer test", completion_timeout_seconds=0),
+    )
+    client = Client(settings.eureka, responses)
+    runtime = RuntimeDependencies(
+        settings=settings,
+        eureka_client=client,
+        eureka_token_manager=Auth(),
+    )
+    generation = {"generation_id": "generation-test", "input": {"idea": "test"}}
+    specs = [
+        {
+            "brief_id": "00000000-0000-4000-8000-000000000001",
+            "generated_prompt": "Generate the reviewed research deliverable.",
+        }
+    ]
+    return runtime, client, generation, specs, tmp_path / "execution.json"
+
+
 def test_only_three_nodes_and_two_generation_calls(tmp_path):
     graph, model, client = setup(tmp_path)
     assert set(graph.get_graph().nodes) == {
@@ -239,6 +262,76 @@ def test_wait_limit_preserves_session_and_resume_skips_both_generations(tmp_path
     assert resumed["status"] == "succeeded"
     assert len(model.calls) == 2 and len(client.queries) == 1 and len(client.shares) == 1
     assert resumed["session_id"] == result["session_id"]
+
+
+def test_submit_only_then_completion_resume_reuses_session_and_share(tmp_path):
+    runtime, client, generation, specs, path = execution_setup(tmp_path)
+
+    submitted, status = execute_tasks(
+        generation, specs, runtime, path, wait_for_completion=False
+    )
+    assert status == "pending"
+    assert submitted[0]["status"] == "submitted"
+    assert submitted[0]["session_id"] and submitted[0]["share_id"]
+    assert len(client.queries) == 1 and len(client.shares) == 1 and client.polls == []
+
+    completed, status = execute_tasks(
+        generation, specs, runtime, path, wait_for_completion=True
+    )
+    assert status == "succeeded"
+    assert completed[0]["status"] == "completed"
+    assert len(client.queries) == 1 and len(client.shares) == 1 and len(client.polls) == 1
+
+
+def test_uncertain_share_is_recorded_and_never_recreated(tmp_path):
+    runtime, client, generation, specs, path = execution_setup(tmp_path)
+
+    def interrupted_share(session_id):
+        client.shares.append(session_id)
+        raise RuntimeError("lost share response")
+
+    client.create_share = interrupted_share
+    submitted, _ = execute_tasks(generation, specs, runtime, path, wait_for_completion=False)
+    assert submitted[0]["session_id"]
+    assert submitted[0]["share_status"] == "submission_unknown"
+    assert "verify" in submitted[0]["share_error"]
+    assert len(client.queries) == 1 and len(client.shares) == 1
+
+    submitted_again, _ = execute_tasks(
+        generation, specs, runtime, path, wait_for_completion=False
+    )
+    assert submitted_again[0]["share_status"] == "submission_unknown"
+    assert len(client.queries) == 1 and len(client.shares) == 1
+
+
+def test_persisted_submitting_state_becomes_durable_unknown_without_resubmit(tmp_path):
+    runtime, client, generation, specs, path = execution_setup(tmp_path)
+    result = {
+        "brief_id": specs[0]["brief_id"],
+        "status": "submitting",
+        "session_id": "",
+        "session_url": "",
+        "share_id": "",
+        "share_url": "",
+        "share_status": "pending",
+        "isCompleted": False,
+        "completion_status": "",
+        "errors": [],
+    }
+    write_run(
+        path,
+        {
+            "workflow_version": "2.0.0",
+            "generation_result": generation,
+            "task_specs": specs,
+            "results": [result],
+        },
+    )
+
+    resumed, _ = execute_tasks(generation, specs, runtime, path, wait_for_completion=False)
+    assert resumed[0]["status"] == "submission_unknown"
+    assert read_run(path)["results"][0]["status"] == "submission_unknown"
+    assert client.queries == []
 
 
 @pytest.mark.parametrize("reply", [CurlResult({}, "{}", 200, 0), RuntimeError("lost response")])

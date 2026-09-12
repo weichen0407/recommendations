@@ -199,7 +199,7 @@ uv run profile-topic-node2 outputs/profile_topics/node1_topics.json \
 
 顶层 `status` 在写入过程中为 `running`；仍有待处理项或主动停止时为 `paused`；全部处理完成但存在失败项时为 `failed`；所有可执行项成功时为 `succeeded`。`progress` 保存 eligible、成功、失败、待处理 tag set 数及成功行数，`last_run` 保存本次筛选、调度和完成统计。
 
-### 8.1 预检、进度和停止
+### 8.1 预检、进度、日志和停止
 
 在正式调用模型前可运行 `--dry-run`，检查输入批次、可执行与待调度 generation 数、格式和输出路径：
 
@@ -218,7 +218,16 @@ uv run profile-topic-node2 outputs/profile_topics/node1_topics.json \
 [42/396 |  10.6%] succeeded=41 failed=1 rows=410 elapsed=08:17 eta=1:09:50 <tag_set_id>: succeeded
 ```
 
-终端按一次 `Ctrl+C` 可以安全停止批次。程序立即保存 `status=paused`，取消尚未开始的 future，然后等待最多 `--workers` 个已经开始的 provider 请求返回，并逐个写入检查点。等待期间再按一次 `Ctrl+C` 会停止等待并完成最新检查点；Python 线程不能强制终止已进入模型 provider 的 HTTP 请求，因此进程仍可能等待这些请求按 provider 的网络超时退出。中断命令最终以退出码 130 结束。以输出 JSON 为准，中断时仍未落盘的调用会在下次恢复时重新处理。节点 2 没有提交外部 Eureka 任务，因此重复处理这一项不会创建报告或会话。
+非 `--dry-run` 运行会把带时间戳的启动信息、逐项进度、错误和最终汇总同时输出到终端标准错误流并写入日志。默认日志路径取自 `--output-json`，将文件后缀替换为 `.log`；默认输出因此写到 `outputs/profile_topics/node2_research_prompts.log`。需要单独指定时使用：
+
+```bash
+uv run profile-topic-node2 outputs/profile_topics/node1_topics.json \
+  --log-file outputs/profile_topics/node2-custom.log
+```
+
+新批次会清空目标日志，`--resume` 会继续追加，因此同一个检查点的多次终端运行可以在一份日志中追踪；使用自定义日志路径时，续跑也要传入同一个 `--log-file`。日志用于观察与排错；跨进程恢复读取的是 JSON 检查点，CSV 和日志都不能单独用于恢复。
+
+终端按一次 `Ctrl+C` 可以安全停止批次。程序立即保存 `status=paused`，取消尚未开始的 future，然后等待最多 `--workers` 个已经开始的 provider 请求返回，并逐个写入 JSON/CSV 检查点。等待期间再按一次 `Ctrl+C` 会停止等待并完成最新检查点；Python 线程不能强制终止已进入模型 provider 的 HTTP 请求，因此进程仍可能等待这些请求按 provider 的网络超时退出。中断命令最终以退出码 130 结束。关闭终端后重新执行相同命令并加 `--resume` 即可继续；以输出 JSON 为准，中断时仍未落盘的调用会在下次恢复时重新处理。节点 2 没有提交外部 Eureka 任务，因此重复处理这一项不会创建报告或会话。
 
 正常完成、`--dry-run` 或达到 `--max-batches` 的主动检查点返回 0；本次有生成失败返回 1；命令行或输入校验错误返回 2。
 
@@ -236,7 +245,7 @@ uv run profile-topic-node2 outputs/profile_topics/node1_topics.json \
 
 ### 8.2 跨进程继续
 
-使用同一个节点 1 数据集和节点 2 JSON 输出路径，加 `--resume`。CSV 不能单独作为恢复数据源；如果只剩 CSV，命令会拒绝续跑：
+使用同一个节点 1 数据集和节点 2 JSON 输出路径，加 `--resume`。CSV 或日志不能单独作为恢复数据源；如果缺少 JSON，命令会拒绝续跑：
 
 ```bash
 uv run profile-topic-node2 outputs/profile_topics/node1_topics.json \
@@ -291,4 +300,70 @@ uv run profile-topic-node2 outputs/profile_topics/node1_topics.json \
 
 只需要重试失败或缺失项时，直接使用 `--resume`，不要加 `--regenerate-selected`。
 
-批量节点 2 完成即是第二个人工检查点。此时没有 curl 请求；确认 `research_instructions`、`content_category` 和 `generated_prompt` 的质量后，才把节点 2 JSON 交给后续节点 3 执行器，或抽取 CSV 的 `generated_prompt` 手动执行。
+批量节点 2 完成即是第二个人工检查点。此时没有 curl 请求；确认 `research_instructions`、`content_category` 和 `generated_prompt` 的质量后，把完整节点 2 JSON 交给 `profile-topic-node3`。CSV 只用于审阅，不是节点 3 的输入或恢复依据。
+
+## 9. 画像标签批次的节点 3
+
+`profile-topic-node3` 读取节点 2 中成功 generation 的 `task_specs[].generated_prompt`，逐条提交 Eureka conversational query，并保存会话和分享链接。节点 2 失败的 generation 不进入执行范围。
+
+### 9.1 Canary、全量提交与完成查询
+
+先离线核对可执行任务数量；`--dry-run` 不读取 Eureka 鉴权、不发请求、不写输出：
+
+```bash
+uv run profile-topic-node3 outputs/profile_topics/node2_research_prompts.json --dry-run
+```
+
+输出同时显示节点 2 的状态、成功 tag set 数和失败 tag set 数。节点 2 仍在运行时可以预检当前快照，但建议等节点 2 停在稳定检查点后再执行真实任务。
+
+先提交一个任务验证真实链路：
+
+```bash
+uv run profile-topic-node3 outputs/profile_topics/node2_research_prompts.json \
+  --workers 1 \
+  --max-tasks 1
+```
+
+默认模式在获得 `session_id` 并尝试创建分享链接后结束，该任务状态为 `submitted`；它不会等待报告最终完成。检查 canary 的会话和分享链接后，恢复同一批次并提交其余 prompt：
+
+```bash
+uv run profile-topic-node3 outputs/profile_topics/node2_research_prompts.json \
+  --workers 1 \
+  --resume
+```
+
+全部提交后，再查询已有会话直至终态或等待上限：
+
+```bash
+uv run profile-topic-node3 outputs/profile_topics/node2_research_prompts.json \
+  --workers 1 \
+  --resume \
+  --wait-for-completion
+```
+
+`--wait-for-completion` 查询的是已经保存的同一 `session_id`，不会为已有会话再创建任务。未到终态的会话保留为可恢复状态，下次执行同一命令继续查询。
+
+正式调用前可以使用 `--dry-run` 检查输入、筛选范围和待调度数量。`--role`、`--industry`、`--jtbd`、可重复的 `--tag-set-id` 与 `--brief-id` 按交集筛选任务；`--max-tasks` 用于 canary 或分批放量。默认并发为 `--workers 1`，只有确认 Eureka 的容量和限流后再提高。
+
+### 9.2 输出、日志和恢复
+
+默认文件为：
+
+| 路径 | 用途 |
+| --- | --- |
+| `outputs/profile_topics/node3_eureka_results.json` | 权威执行检查点，保存每条 prompt 的提交、分享和完成状态。 |
+| `outputs/profile_topics/node3_eureka_results.csv` | 一行一条 brief 的运营审阅导出，含来源字段、标签、session/share ID 与链接。 |
+| `outputs/profile_topics/node3_eureka_results.log` | 跨终端追加的运行与进度日志。 |
+| `outputs/profile_topics/node3_runs/` | 每个任务在外部副作用前后的内部安全记录。 |
+
+使用 `--log-file` 可以修改日志路径，使用 `--runs-dir` 可以修改内部记录目录。另一个终端可持续查看默认日志：
+
+```bash
+tail -f outputs/profile_topics/node3_eureka_results.log
+```
+
+终端按一次 `Ctrl+C` 后，执行器停止继续调度并保存最新 JSON 检查点。重新打开终端后，使用同一个节点 2 JSON 加 `--resume`；程序跳过已完成项，已有 `session_id` 的项只继续分享或完成查询，不会重新提交 query。CSV 和日志不能单独恢复任务。
+
+为避免重复创建远端报告，query 调用前会先保存 `submitting`。如果请求可能已经到达 Eureka，但进程在 `session_id` 落盘前中断，恢复时该项变为 `submission_unknown`；执行器不会自动重发，需要人工从 Eureka 核对任务。已经明确保存的会话则始终复用原 `session_id`。
+
+恢复时会校验节点 2 数据集以及每条执行 prompt 的来源指纹。来源 prompt 已变化时，程序拒绝把旧 session/share 结果关联到新内容。已有输出文件时，不带 `--resume` 会拒绝覆盖。`--overwrite` 重建聚合 JSON/CSV 和本次运行元数据，但复用同一 `--runs-dir` 中已有的任务记录，因此不会自动重新提交已有 session。若确实要建立独立远端批次，需要同时使用新的输出路径与新的 `--runs-dir`；旧任务不会被撤销，并可能产生重复报告。

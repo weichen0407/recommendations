@@ -150,6 +150,8 @@ uv run profile-topic-node2 outputs/profile_topics/node1_topics.json \
 
 这个命令只运行 `generate_research_prompt`，**不会调用 Eureka，也不会执行 curl**。因此完成节点 2 后可以停下来，在 JSON 中按 generation 检查完整结构，或在 CSV 中逐行筛选和审阅问题、标签、研究要求与最终 prompt。需要人工维护时编辑 JSON，CSV 只是导出结果。
 
+正式运行会把带时间戳的启动信息、逐项进度、错误和最终汇总同时写到终端标准错误流与持久日志。默认日志路径由 `--output-json` 派生，把后缀改成 `.log`；以上命令对应 `outputs/profile_topics/node2_research_prompts.log`。也可以用 `--log-file PATH` 指定其他位置，续跑时需再次传入同一路径。新批次会清空同名日志，`--resume` 会追加，便于跨终端追踪多次运行；JSON/CSV 仍是恢复所依据的检查点，日志仅用于排查和观察。
+
 先确认规模和文件参数，不调用模型：
 
 ```bash
@@ -167,7 +169,7 @@ uv run profile-topic-node2 outputs/profile_topics/node1_topics.json \
 [42/396 |  10.6%] succeeded=41 failed=1 rows=410 elapsed=08:17 eta=1:09:50 <tag_set_id>: succeeded
 ```
 
-需要中途停止时按一次 `Ctrl+C`。程序立即写入 `status=paused`，取消尚未开始的调用，然后等待最多 `--workers` 个已经开始的请求返回，并逐个保存结果；等待期间再按一次 `Ctrl+C` 会停止等待并完成最新检查点。Python 线程不能强制终止已经进入模型 provider 的 HTTP 请求，因此进程仍可能等待这些请求按 provider 的网络超时退出。中断命令最终以退出码 130 结束。之后使用**同一个节点 1 数据集和节点 2 输出文件**加 `--resume`，程序会跳过来源未变化的成功项，并继续失败、输入已变化或尚未处理的项：
+需要中途停止时按一次 `Ctrl+C`。程序立即写入 `status=paused`，取消尚未开始的调用，然后等待最多 `--workers` 个已经开始的请求返回，并逐个保存 JSON/CSV 检查点；等待期间再按一次 `Ctrl+C` 会停止等待并完成最新检查点。Python 线程不能强制终止已经进入模型 provider 的 HTTP 请求，因此进程仍可能等待这些请求按 provider 的网络超时退出。中断命令最终以退出码 130 结束。关闭终端或重新启动进程后，使用**同一个节点 1 数据集和节点 2 输出文件**加 `--resume`；程序会跳过来源未变化的成功项，继续失败、输入已变化或尚未处理的项，并把新日志追加到原日志：
 
 ```bash
 uv run profile-topic-node2 outputs/profile_topics/node1_topics.json \
@@ -191,7 +193,54 @@ uv run profile-topic-node2 outputs/profile_topics/node1_topics.json \
 
 Node 2 JSON 支持维护成功结果：编辑对应 `task_specs[]` 的 `content_category` 或 `research_instructions`，再执行 `--resume`。程序会校验这两个结构化字段，并重新组装 `generated_prompt`，不会再次调用模型。不要直接维护 `generated_prompt`，因为它会根据结构化字段重建。要让模型重新生成已成功的选中组合，首次使用筛选参数配合 `--resume --regenerate-selected`；如果同时用 `--max-batches` 分段，后续继续时只用 `--resume`，否则会再次把已重生成的选中项重置为待处理。
 
-`--format html` 会在最终 prompt 中加入 HTML artifact 指令；`--format report` 会要求 Markdown 报告。新批次默认 `html`；恢复时不传 `--format` 会沿用检查点中的格式，两种格式不能在同一个恢复批次中混用。节点 2 JSON 为后续批量执行节点 3 保留机器结构；当前可以直接从 CSV 的 `generated_prompt` 列抽样并手动执行 curl。
+`--format html` 会在最终 prompt 中加入 HTML artifact 指令；`--format report` 会要求 Markdown 报告。新批次默认 `html`；恢复时不传 `--format` 会沿用检查点中的格式，两种格式不能在同一个恢复批次中混用。节点 2 JSON 为后续批量执行节点 3 保留机器结构，节点 3 直接读取其中成功 generation 的 `task_specs[].generated_prompt`；不要把 CSV 当作执行或恢复输入。
+
+### 用节点 2 的 prompt 执行节点 3
+
+先做离线预检；这个命令只统计范围，不调用 Eureka，也不写 Node 3 文件：
+
+```bash
+uv run profile-topic-node3 outputs/profile_topics/node2_research_prompts.json --dry-run
+```
+
+先用一个任务做 canary，确认鉴权、Eureka 会话和分享链接都正常：
+
+```bash
+uv run profile-topic-node3 outputs/profile_topics/node2_research_prompts.json \
+  --workers 1 \
+  --max-tasks 1
+```
+
+默认模式只提交 conversational query、保存 `session_id`，再创建并保存分享链接；任务状态停在 `submitted`，不会为每个报告等待完成。确认 canary 后，用同一个节点 2 JSON 和 `--resume` 提交其余任务：
+
+```bash
+uv run profile-topic-node3 outputs/profile_topics/node2_research_prompts.json \
+  --workers 1 \
+  --resume
+```
+
+所有会话提交后，再恢复同一个检查点并等待完成状态：
+
+```bash
+uv run profile-topic-node3 outputs/profile_topics/node2_research_prompts.json \
+  --workers 1 \
+  --resume \
+  --wait-for-completion
+```
+
+执行结果默认保存到 `outputs/profile_topics/node3_eureka_results.json` 和 `outputs/profile_topics/node3_eureka_results.csv`，持久日志为 `outputs/profile_topics/node3_eureka_results.log`，每个任务的内部安全执行记录位于 `outputs/profile_topics/node3_runs/`。JSON 是聚合检查点；内部记录保证每次外部调用前后都能安全恢复；CSV 用于审阅，日志用于观察和排错。CSV 保留旧 records 表的 `input`、`description`、`categories`、`date` 等字段，并新增 `brief_id`、`tag_set_id`、`session_id`、`share_id`、对应链接及执行状态。
+
+另开一个终端可实时查看：
+
+```bash
+tail -f outputs/profile_topics/node3_eureka_results.log
+```
+
+正式调用前可加 `--dry-run` 检查范围。`--role`、`--industry`、`--jtbd`、可重复的 `--tag-set-id` 和 `--brief-id` 可以缩小本次任务集合；`--max-tasks` 适合分批放量。`--runs-dir` 和 `--log-file` 可以修改内部记录目录和日志路径。
+
+运行时按一次 `Ctrl+C` 会停止继续调度并保存当前检查点；关闭终端后执行相同命令并加 `--resume` 即可继续。已经保存 `session_id` 的任务只会继续创建分享或查询完成状态，不会重新提交 query。程序会在提交前先保存 `submitting`；如果进程在请求发出后、`session_id` 落盘前中断，该任务会标记为 `submission_unknown`，必须人工核对远端，恢复时不会自动重发。`--resume` 也会核对节点 2 来源及 prompt 指纹，来源 prompt 变化时会拒绝把旧会话关联到新 prompt。
+
+已有输出时，不带 `--resume` 的命令会拒绝覆盖。`--overwrite` 只重建聚合文件和运行元数据，仍会复用同一 `--runs-dir` 中已经确认的 session/share，不会自动重提。只有同时改用新的输出路径和新的 `--runs-dir` 才会形成独立远端批次；这可能重复创建已有报告。
 
 ## 推荐内容批量生成
 

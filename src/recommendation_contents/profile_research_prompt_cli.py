@@ -98,6 +98,12 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("input_json", type=Path, help="The profile-topic-node1 JSON checkpoint.")
     parser.add_argument("--output-json", type=Path, default=DEFAULT_JSON)
     parser.add_argument("--output-csv", type=Path, default=DEFAULT_CSV)
+    parser.add_argument(
+        "--log-file",
+        type=Path,
+        default=None,
+        help="Persistent progress log; defaults to the output JSON path with a .log suffix.",
+    )
     parser.add_argument("--format", choices=["html", "report"], default=None)
     parser.add_argument("--workers", type=int, choices=range(1, 17), default=4)
     parser.add_argument("--role", choices=_audience_values(catalog, "role"))
@@ -136,6 +142,8 @@ def main(argv: list[str] | None = None) -> int:
         help="Validate and show the pending scope without writing files or calling the model.",
     )
     args = parser.parse_args(argv)
+    if args.log_file is None:
+        args.log_file = args.output_json.with_suffix(".log")
 
     if args.resume and args.overwrite:
         parser.error("--resume and --overwrite cannot be combined")
@@ -149,6 +157,11 @@ def main(argv: list[str] | None = None) -> int:
         parser.error("Node 2 outputs must not overwrite the Node 1 input")
     if _same_path(args.output_json, args.output_csv):
         parser.error("--output-json and --output-csv must be different paths")
+    if any(
+        _same_path(args.log_file, path)
+        for path in (args.input_json, args.output_json, args.output_csv)
+    ):
+        parser.error("--log-file must be different from the input and output files")
 
     try:
         source = _load_json(args.input_json, "Node 1 input")
@@ -264,12 +277,14 @@ def main(argv: list[str] | None = None) -> int:
         print(json.dumps(summary, ensure_ascii=False, indent=2))
         return 0
 
+    _prepare_log(args.log_file, append=existing is not None)
     document["status"] = "running"
     _save(document, args.output_json, args.output_csv, eligible)
     _log(
         f"generate_research_prompt: selected={len(selected)} "
         f"already_succeeded={already_succeeded} scheduled={len(scheduled)} "
-        f"remaining_after_limit={len(candidates) - len(scheduled)} workers={args.workers}"
+        f"remaining_after_limit={len(candidates) - len(scheduled)} workers={args.workers}",
+        args.log_file,
     )
 
     if not scheduled:
@@ -281,21 +296,17 @@ def main(argv: list[str] | None = None) -> int:
             }
         )
         _save(document, args.output_json, args.output_csv, eligible)
-        print(
-            json.dumps(
-                _command_summary(
-                    document,
-                    args,
-                    eligible,
-                    selected,
-                    already_succeeded,
-                    scheduled,
-                    bounded_pause,
-                ),
-                ensure_ascii=False,
-                indent=2,
-            )
+        summary = _command_summary(
+            document,
+            args,
+            eligible,
+            selected,
+            already_succeeded,
+            scheduled,
+            bounded_pause,
         )
+        _log("run_finished: " + json.dumps(summary, ensure_ascii=False), args.log_file)
+        print(json.dumps(summary, ensure_ascii=False, indent=2))
         return 0
 
     apply_env_file_to_process(args.env_file)
@@ -363,7 +374,8 @@ def main(argv: list[str] | None = None) -> int:
                 current_id=source_generation["tag_set_id"],
                 current_status=record["status"],
                 current_error=(record.get("errors") or [None])[0],
-            )
+            ),
+            args.log_file,
         )
 
     try:
@@ -383,14 +395,18 @@ def main(argv: list[str] | None = None) -> int:
         ]
         _log(
             "Stop requested; queued batches were cancelled. Waiting for "
-            f"{len(remaining)} in-flight batch(es) so their results can be checkpointed."
+            f"{len(remaining)} in-flight batch(es) so their results can be checkpointed.",
+            args.log_file,
         )
         try:
             for future in as_completed(remaining):
                 commit(future)
         except KeyboardInterrupt:
             second_interrupt = True
-            _log("Second stop requested; leaving after the latest completed checkpoint.")
+            _log(
+                "Second stop requested; leaving after the latest completed checkpoint.",
+                args.log_file,
+            )
     finally:
         executor.shutdown(wait=not second_interrupt, cancel_futures=interrupted)
 
@@ -416,6 +432,7 @@ def main(argv: list[str] | None = None) -> int:
         bounded_pause,
         interrupted=interrupted,
     )
+    _log("run_finished: " + json.dumps(summary, ensure_ascii=False), args.log_file)
     print(json.dumps(summary, ensure_ascii=False, indent=2))
     if interrupted:
         return 130
@@ -871,6 +888,7 @@ def _command_summary(
         "source_json": str(args.input_json),
         "output_json": str(args.output_json),
         "output_csv": str(args.output_csv),
+        "log_file": str(args.log_file),
         "format": document["scope"]["output_format"],
         "source_successful_tag_sets": len(eligible),
         "selected_tag_sets": len(selected),
@@ -931,8 +949,17 @@ def _now() -> str:
     return datetime.now(timezone.utc).isoformat()
 
 
-def _log(message: str) -> None:
-    print(message, file=sys.stderr, flush=True)
+def _prepare_log(path: Path, *, append: bool) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    if not append:
+        path.write_text("", encoding="utf-8")
+
+
+def _log(message: str, path: Path) -> None:
+    line = f"{_now()} {message}"
+    print(line, file=sys.stderr, flush=True)
+    with path.open("a", encoding="utf-8") as file:
+        file.write(line + "\n")
 
 
 if __name__ == "__main__":

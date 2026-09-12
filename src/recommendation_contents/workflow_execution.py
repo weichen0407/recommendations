@@ -2,10 +2,12 @@
 
 from __future__ import annotations
 
+import copy
 import fcntl
 import json
 import os
 import time
+from collections.abc import Callable
 from contextlib import contextmanager
 from pathlib import Path
 from typing import Any
@@ -116,6 +118,8 @@ def execute_tasks(
     *,
     sleep=time.sleep,
     monotonic=time.monotonic,
+    wait_for_completion: bool = True,
+    on_update: Callable[[list[dict[str, Any]]], None] | None = None,
 ) -> tuple[list[dict[str, Any]], str]:
     with _run_lock(path):
         previous = read_run(path) if path is not None and path.exists() else None
@@ -140,6 +144,11 @@ def execute_tasks(
             )
             for spec in specs
         ]
+        for result in results:
+            # Keep v2 journals written by older builds readable as the execution
+            # record gains more detailed share diagnostics.
+            result.setdefault("share_status", "pending")
+            result.setdefault("share_error", "")
 
         def save():
             write_run(
@@ -151,6 +160,8 @@ def execute_tasks(
                     "results": results,
                 },
             )
+            if on_update is not None:
+                on_update(copy.deepcopy(results))
 
         save()
         auth = check_user_token({}, runtime)
@@ -159,21 +170,39 @@ def execute_tasks(
             auth.update(check_user_token(auth, runtime))
         client = runtime.get_eureka_client()
         for spec, result in zip(specs, results):
-            if result["status"] in {"completed", "failed", "submission_unknown", "submitting"}:
-                if result["status"] == "submitting":
-                    result.update(
-                        status="submission_unknown",
-                        errors=[
-                            "Submission was interrupted; verify the remote task before creating another."
-                        ],
-                    )
+            if result["status"] in {"completed", "failed", "submission_unknown"}:
                 continue
+            if result["status"] == "submitting":
+                result.update(
+                    status="submission_unknown",
+                    errors=[
+                        "Submission was interrupted; verify the remote task before creating another."
+                    ],
+                )
+                save()
+                continue
+            if result.get("share_status") == "submitting":
+                # The share endpoint has no idempotency key. Preserve the session, but do not
+                # blindly repeat a share request whose outcome is unknown after interruption.
+                result["share_status"] = "submission_unknown"
+                result["share_error"] = (
+                    "Share creation was interrupted; verify the remote share before retrying it."
+                )
+                save()
             if not client.has_authorization_header():
                 result.update(
                     status="needs_auth", errors=["Eureka authorization is missing or expired."]
                 )
+                save()
                 continue
             result["errors"] = []
+            if result.get("share_status") == "submission_unknown":
+                result["errors"].append(
+                    result.get("share_error")
+                    or "Share creation is uncertain; verify the remote share before retrying it."
+                )
+            elif result.get("share_status") == "unavailable" and result.get("share_error"):
+                result["errors"].append(result["share_error"])
             if not result["session_id"]:
                 result["status"] = "submitting"
                 save()  # Persist intent BEFORE the side effect; never blindly retry ambiguous submits.
@@ -223,6 +252,10 @@ def execute_tasks(
                 try:
                     response = client.create_share(result["session_id"])
                     share_payload = parse_json_body(response.body)
+                    rejected = isinstance(share_payload, dict) and (
+                        share_payload.get("status") is False
+                        or share_payload.get("success") is False
+                    )
                     share_id = (
                         find_first_value(share_payload, {"share_id", "shareId"})
                         if response.success
@@ -233,12 +266,49 @@ def execute_tasks(
                             share_id=share_id,
                             share_url=client.build_share_link(share_id),
                             share_status="created",
+                            share_error="",
                         )
+                    elif response.status_code == 401:
+                        result.update(
+                            status="needs_auth",
+                            share_status="pending",
+                            share_error="Eureka rejected share authorization (401).",
+                        )
+                        result["errors"].append(result["share_error"])
+                    elif rejected or 400 <= response.status_code < 500:
+                        result.update(
+                            share_status="unavailable",
+                            share_error=(
+                                "Eureka rejected share creation"
+                                f" (HTTP {response.status_code or 'unknown'})."
+                            ),
+                        )
+                        result["errors"].append(result["share_error"])
                     else:
-                        result["share_status"] = "unavailable"
-                except Exception:  # noqa: BLE001 - a share failure must not discard the session ID
-                    result["share_status"] = "unavailable"
+                        result.update(
+                            share_status="submission_unknown",
+                            share_error=(
+                                "Share creation returned no confirmed share ID; "
+                                "verify the remote share before retrying it."
+                            ),
+                        )
+                        result["errors"].append(result["share_error"])
+                except Exception as exc:  # noqa: BLE001 - preserve the confirmed session ID
+                    result.update(
+                        share_status="submission_unknown",
+                        share_error=(
+                            f"Share creation was interrupted ({type(exc).__name__}); "
+                            "verify the remote share before retrying it."
+                        ),
+                    )
+                    result["errors"].append(result["share_error"])
                 save()
+            if result["status"] == "needs_auth":
+                continue
+            if not wait_for_completion:
+                result["status"] = "submitted"
+                save()
+                continue
             if not client.has_completion_endpoint():
                 result.update(status="submitted", errors=["No completion endpoint is configured."])
                 save()
