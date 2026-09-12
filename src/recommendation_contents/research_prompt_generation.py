@@ -10,7 +10,10 @@ from .brief_schema import parse_brief_response
 from .entities import content_category_values
 from .llm import format_llm_error
 
-HTML_INSTRUCTION = "Use artifact-generator to generate the final result as HTML."
+HTML_INSTRUCTION = "Use artifact-generator to generate the final result as an HTML report."
+REPORT_INSTRUCTION = (
+    "Use report-writer to generate the final result in parallel-report format."
+)
 RESEARCH_PROMPT_RULES = """You write research execution instructions for Eureka from approved content briefs.
 This is stage two. The brief already defines the topic, audience, tags and scope assumptions.
 Preserve those decisions. Do not infer a new user profile, broaden the main task, change entities,
@@ -181,11 +184,7 @@ def build_task_spec(brief, research_prompt, language, output_format):
         "Support factual claims with identifiable sources; distinguish evidence, inference and gaps. "
         "Do not invent project materials or claim certainty beyond the available evidence. "
         f"Write the final result in {target_language}.\n"
-        + (
-            HTML_INSTRUCTION
-            if output_format == "html"
-            else "Return the final result as a Markdown report."
-        )
+        + (HTML_INSTRUCTION if output_format == "html" else REPORT_INSTRUCTION)
     )
     return {
         "brief_id": brief["brief_id"],

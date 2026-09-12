@@ -193,7 +193,7 @@ uv run profile-topic-node2 outputs/profile_topics/node1_topics.json \
 
 Node 2 JSON 支持维护成功结果：编辑对应 `task_specs[]` 的 `content_category` 或 `research_instructions`，再执行 `--resume`。程序会校验这两个结构化字段，并重新组装 `generated_prompt`，不会再次调用模型。不要直接维护 `generated_prompt`，因为它会根据结构化字段重建。要让模型重新生成已成功的选中组合，首次使用筛选参数配合 `--resume --regenerate-selected`；如果同时用 `--max-batches` 分段，后续继续时只用 `--resume`，否则会再次把已重生成的选中项重置为待处理。
 
-`--format html` 会在最终 prompt 中加入 HTML artifact 指令；`--format report` 会要求 Markdown 报告。新批次默认 `html`；恢复时不传 `--format` 会沿用检查点中的格式，两种格式不能在同一个恢复批次中混用。节点 2 JSON 为后续批量执行节点 3 保留机器结构，节点 3 直接读取其中成功 generation 的 `task_specs[].generated_prompt`；不要把 CSV 当作执行或恢复输入。
+`--format html` 会在最终 prompt 中指定 `artifact-generator` 生成 HTML report；`--format report` 会指定 `report-writer` 生成 `parallel-report`。新批次默认 `html`；恢复时不传 `--format` 会沿用检查点中的格式，两种格式不能在同一个恢复批次中混用。如果同一批内容需要两种成品，应分别生成两份节点 2 JSON/CSV，再分别执行节点 3。节点 3 直接读取成功 generation 的 `task_specs[].generated_prompt`，不会改写格式指令；不要把 CSV 当作执行或恢复输入。
 
 ### 用节点 2 的 prompt 执行节点 3
 
@@ -229,6 +229,8 @@ uv run profile-topic-node3 outputs/profile_topics/node2_research_prompts.json \
 ```
 
 执行结果默认保存到 `outputs/profile_topics/node3_eureka_results.json` 和 `outputs/profile_topics/node3_eureka_results.csv`，持久日志为 `outputs/profile_topics/node3_eureka_results.log`，每个任务的内部安全执行记录位于 `outputs/profile_topics/node3_runs/`。JSON 是聚合检查点；内部记录保证每次外部调用前后都能安全恢复；CSV 用于审阅，日志用于观察和排错。CSV 保留旧 records 表的 `input`、`description`、`categories`、`date` 等字段，并新增 `brief_id`、`tag_set_id`、`session_id`、`share_id`、对应链接及执行状态。
+
+同一批内容同时生成 HTML 与 parallel-report 时，两次节点 3 必须指定不同的 `--output-json`、`--output-csv`、`--log-file` 和 `--runs-dir`，否则会发生检查点冲突。完整的双格式命令见 [工作流说明](docs/workflows/topic-workflow.md#91-canary全量提交与完成查询)。
 
 另开一个终端可实时查看：
 
@@ -312,7 +314,13 @@ uv run case-workflow outputs/0910/091010/subject.json \
 `--mode html` 会在 prompt 后追加：
 
 ```text
-Use artifact-generator to generate the final result as HTML.
+Use artifact-generator to generate the final result as an HTML report.
+```
+
+`--mode report` 则追加：
+
+```text
+Use report-writer to generate the final result in parallel-report format.
 ```
 
 并默认写入：

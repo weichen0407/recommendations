@@ -5,6 +5,7 @@ New code should import :mod:`recommendation_contents.research_prompt_generation`
 
 from .research_prompt_generation import (
     HTML_INSTRUCTION,
+    REPORT_INSTRUCTION,
     RESEARCH_PROMPT_RULES,
     GenerationError,
     build_task_spec,
@@ -21,6 +22,7 @@ validate_summaries = validate_research_prompts
 
 __all__ = [
     "HTML_INSTRUCTION",
+    "REPORT_INSTRUCTION",
     "RESEARCH_PROMPT_RULES",
     "SUMMARY_RULES",
     "GenerationError",

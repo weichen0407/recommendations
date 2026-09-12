@@ -11,7 +11,11 @@ from recommendation_contents.config import (
 )
 from recommendation_contents.graph import build_graph_with_dependencies
 from recommendation_contents.nodes import RuntimeDependencies
-from recommendation_contents.research_prompt_generation import HTML_INSTRUCTION, GenerationError
+from recommendation_contents.research_prompt_generation import (
+    HTML_INSTRUCTION,
+    REPORT_INSTRUCTION,
+    GenerationError,
+)
 from recommendation_contents.services.eureka_curl import CurlResult, EurekaCurlClient
 from recommendation_contents.services.eureka_token import TokenCheckResult, TokenRefreshResult
 from recommendation_contents.workflow_execution import execute_tasks, read_run, write_run
@@ -207,6 +211,7 @@ def test_batch_keeps_two_llm_calls_and_separate_sessions(tmp_path):
     assert len(model.calls) == 2
     assert len(client.queries) == 2
     assert all(HTML_INSTRUCTION not in query for query in client.queries)
+    assert all(query.endswith(REPORT_INSTRUCTION) for query in client.queries)
     assert {r["session_id"] for r in result["results"]} == {"sess_1", "sess_2"}
     assert len({r["brief_id"] for r in result["results"]}) == 2
 

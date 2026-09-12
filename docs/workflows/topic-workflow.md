@@ -60,10 +60,16 @@ Studio 只注册 `topic_workflow`。图中没有额外的校验、修复、鉴�
 程序把模型生成的研究要求与原始描述、固定标签、关键词、假设、语言要求组合为 `task_specs[].generated_prompt`。HTML 模式固定添加：
 
 ```text
-Use artifact-generator to generate the final result as HTML.
+Use artifact-generator to generate the final result as an HTML report.
 ```
 
-report 模式要求 Markdown 报告。这是执行指令，是否实际产出相应文件取决于 Eureka 的执行结果；本流程没有凭空新增其工具能力。
+report 模式固定添加：
+
+```text
+Use report-writer to generate the final result in parallel-report format.
+```
+
+两种工具指令都由程序根据 `format` 装配，第二阶段 LLM 不负责选择或输出工具名。这是执行指令，是否实际产出相应文件取决于 Eureka 的执行结果。
 
 代码与契约：[research_prompt_generation.py](../../src/recommendation_contents/research_prompt_generation.py)、[响应 schema](./research-prompt-response.schema.json)。`summary_generation.py` 和 `summary-response.schema.json` 仅保留旧导入名与旧文件路径，不是新的规范入口；模型响应根字段已经统一迁移为 `research_prompts`，旧的 `summaries` 响应不再接受。
 
@@ -180,6 +186,20 @@ uv run profile-topic-node2 outputs/profile_topics/node1_topics.json \
   --format html \
   --output-json outputs/profile_topics/node2_research_prompts.json \
   --output-csv outputs/profile_topics/node2_research_prompts.csv
+```
+
+一份节点 2 检查点只能使用一种 `format`。需要同时生产 HTML report 和 parallel report 时，使用同一节点 1 输入分别写入两个目录，例如：
+
+```bash
+uv run profile-topic-node2 outputs/profile_topics/node1_topics.json \
+  --workers 4 --format html \
+  --output-json outputs/profile_topics/html/node2_research_prompts.json \
+  --output-csv outputs/profile_topics/html/node2_research_prompts.csv
+
+uv run profile-topic-node2 outputs/profile_topics/node1_topics.json \
+  --workers 4 --format report \
+  --output-json outputs/profile_topics/report/node2_research_prompts.json \
+  --output-csv outputs/profile_topics/report/node2_research_prompts.csv
 ```
 
 处理单位是 generation/tag set。一个正常 generation 触发一次第二阶段模型调用，同时为其中全部 brief 返回结果；如果响应校验失败，节点内部最多再调用一次进行格式修复。节点 1 中标记失败的 generation 不进入可执行范围；成功项如果缺少 briefs 或不符合当前 schema/标签规则，命令会在调用模型前报错。
@@ -342,6 +362,26 @@ uv run profile-topic-node3 outputs/profile_topics/node2_research_prompts.json \
 ```
 
 `--wait-for-completion` 查询的是已经保存的同一 `session_id`，不会为已有会话再创建任务。未到终态的会话保留为可恢复状态，下次执行同一命令继续查询。
+
+如果同一批节点 1 内容同时生成了 HTML 与 parallel-report 两份节点 2 检查点，节点 3 也必须使用独立的输出、日志和运行记录目录。例如先各提交一个 canary：
+
+```bash
+uv run profile-topic-node3 outputs/profile_topics/html/node2_research_prompts.json \
+  --workers 1 --max-tasks 1 \
+  --output-json outputs/profile_topics/html/node3_eureka_results.json \
+  --output-csv outputs/profile_topics/html/node3_eureka_results.csv \
+  --log-file outputs/profile_topics/html/node3_eureka_results.log \
+  --runs-dir outputs/profile_topics/html/node3_runs
+
+uv run profile-topic-node3 outputs/profile_topics/report/node2_research_prompts.json \
+  --workers 1 --max-tasks 1 \
+  --output-json outputs/profile_topics/report/node3_eureka_results.json \
+  --output-csv outputs/profile_topics/report/node3_eureka_results.csv \
+  --log-file outputs/profile_topics/report/node3_eureka_results.log \
+  --runs-dir outputs/profile_topics/report/node3_runs
+```
+
+确认后分别对原命令追加 `--resume` 并移除 `--max-tasks 1`。这样两种成品各自维护 `session_id`、`share_id` 和恢复状态。
 
 正式调用前可以使用 `--dry-run` 检查输入、筛选范围和待调度数量。`--role`、`--industry`、`--jtbd`、可重复的 `--tag-set-id` 与 `--brief-id` 按交集筛选任务；`--max-tasks` 用于 canary 或分批放量。默认并发为 `--workers 1`，只有确认 Eureka 的容量和限流后再提高。
 

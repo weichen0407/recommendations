@@ -21,11 +21,14 @@ from .nodes import (
     route_after_token_check,
 )
 from .records import save_result_table
+from .research_prompt_generation import HTML_INSTRUCTION, REPORT_INSTRUCTION
 from .state import TopicWorkflowState
 
 DEFAULT_CASE_RECORDS_CSV = "outputs/case_workflow_records.csv"
 DEFAULT_CASE_RESULTS_JSON = "outputs/case_workflow_results.json"
-HTML_ARTIFACT_INSTRUCTION = "Use artifact-generator to generate the final result as HTML."
+HTML_ARTIFACT_INSTRUCTION = HTML_INSTRUCTION
+REPORT_WRITER_INSTRUCTION = REPORT_INSTRUCTION
+LEGACY_HTML_ARTIFACT_INSTRUCTION = "Use artifact-generator to generate the final result as HTML."
 
 
 def main() -> None:
@@ -257,7 +260,7 @@ def apply_generation_mode(item: dict[str, Any], mode: str) -> dict[str, Any]:
     if mode == "html":
         prompt = _with_html_artifact_instruction(prompt)
     else:
-        prompt = _without_html_artifact_instruction(prompt)
+        prompt = _with_report_writer_instruction(prompt)
     item_for_mode["output"] = prompt
     item_for_mode["generation_mode"] = mode
     item_for_mode["format"] = mode
@@ -269,19 +272,32 @@ def _option_was_provided(argv: list[str], option: str) -> bool:
 
 
 def _with_html_artifact_instruction(prompt: str) -> str:
-    prompt = _without_html_artifact_instruction(prompt)
+    prompt = _without_format_instruction(prompt)
     if not prompt:
         return HTML_ARTIFACT_INSTRUCTION
     return f"{prompt} {HTML_ARTIFACT_INSTRUCTION}"
 
 
-def _without_html_artifact_instruction(prompt: str) -> str:
-    cleaned = re.sub(
-        r"\s*Use artifact-generator to generate the final result as HTML\.?",
-        "",
-        prompt,
-        flags=re.IGNORECASE,
-    )
+def _with_report_writer_instruction(prompt: str) -> str:
+    prompt = _without_format_instruction(prompt)
+    if not prompt:
+        return REPORT_WRITER_INSTRUCTION
+    return f"{prompt} {REPORT_WRITER_INSTRUCTION}"
+
+
+def _without_format_instruction(prompt: str) -> str:
+    cleaned = prompt
+    for instruction in (
+        LEGACY_HTML_ARTIFACT_INSTRUCTION,
+        HTML_ARTIFACT_INSTRUCTION,
+        REPORT_WRITER_INSTRUCTION,
+    ):
+        cleaned = re.sub(
+            rf"\s*{re.escape(instruction)}",
+            "",
+            cleaned,
+            flags=re.IGNORECASE,
+        )
     return cleaned.strip()
 
 
