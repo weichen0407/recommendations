@@ -1,0 +1,46 @@
+[
+  {
+    "btu_id": "430a1abdf48c4ee9967d58b97fba2214",
+    "product_line": "Engineering",
+    "product_agent": "SuperAgent",
+    "resolved_session_id": "sess_64c448dab585481c",
+    "session_date": "2026-09-09",
+    "first_activation_date": "2026-09-09",
+    "first_activation_time": "2026-09-09 13:34:48",
+    "is_true_activation_session": "1",
+    "full_query_with_round": "[2] 概述一下"
+  },
+  {
+    "btu_id": "07c3a819c20540b4a823c2d013dcd897",
+    "product_line": "Engineering",
+    "product_agent": "SuperAgent",
+    "resolved_session_id": "sess_0d429f5501ca48fd",
+    "session_date": "2026-09-10",
+    "first_activation_date": "2026-09-10",
+    "first_activation_time": "2026-09-10 20:42:40",
+    "is_true_activation_session": "1",
+    "full_query_with_round": ""
+  },
+  {
+    "btu_id": "88b77826bf0e40929fe50fe1bace8d90",
+    "product_line": "Engineering",
+    "product_agent": "SuperAgent",
+    "resolved_session_id": "sess_f44383c2d5374f13",
+    "session_date": "2026-09-10",
+    "first_activation_date": "",
+    "first_activation_time": "",
+    "is_true_activation_session": "0",
+    "full_query_with_round": "[2] I am anurag from Rajasthan\n[3] /Regulatory Analysis\n[4] AI photo editing has changed the way people create and share images online. One of the most interesting trends right now is transforming ordinary modern photographs into 1980s -style retro portraits. Instead of simply adding an old filter, this style recreates the fashion, streets, architecture, vehicles, hairstyles, and atmosphere associated with several decades ago."
+  },
+  {
+    "btu_id": "430a1abdf48c4ee9967d58b97fba2214",
+    "product_line": "Engineering",
+    "product_agent": "SuperAgent",
+    "resolved_session_id": "sess_5927f1b4966246e6",
+    "session_date": "2026-09-10",
+    "first_activation_date": "2026-09-10",
+    "first_activation_time": "2026-09-10 07:09:44",
+    "is_true_activation_session": "1",
+    "full_query_with_round": ""
+  }
+]

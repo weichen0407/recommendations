@@ -1,0 +1,133 @@
+{
+  "generated_at": "2026-09-12",
+  "dataset_updated_at": "2026-09-12 04:12:02+0800",
+  "activation_dataset_updated_at": "2026-09-12 04:30:32+0800",
+  "date_range": [
+    "2026-09-09",
+    "2026-09-12"
+  ],
+  "metrics": [
+    {
+      "scope": "recommendation_events",
+      "date": "2026-09-09",
+      "metric": "plg_show_rc",
+      "label": "推荐板块展开",
+      "pv": 14,
+      "uv": 10
+    },
+    {
+      "scope": "recommendation_events",
+      "date": "2026-09-09",
+      "metric": "plg_click_rc",
+      "label": "RD Home 触发对话",
+      "pv": 6,
+      "uv": 1
+    },
+    {
+      "scope": "recommendation_events",
+      "date": "2026-09-10",
+      "metric": "plg_show_rc",
+      "label": "推荐板块展开",
+      "pv": 116,
+      "uv": 72
+    },
+    {
+      "scope": "recommendation_events",
+      "date": "2026-09-10",
+      "metric": "plg_click_rc",
+      "label": "RD Home 触发对话",
+      "pv": 10,
+      "uv": 8
+    },
+    {
+      "scope": "recommendation_events",
+      "date": "2026-09-11",
+      "metric": "plg_show_rc",
+      "label": "推荐板块展开",
+      "pv": 142,
+      "uv": 52
+    },
+    {
+      "scope": "recommendation_events",
+      "date": "2026-09-11",
+      "metric": "plg_click_rc",
+      "label": "RD Home 触发对话",
+      "pv": 8,
+      "uv": 3
+    },
+    {
+      "scope": "recommendation_events",
+      "date": "2026-09-12",
+      "metric": "plg_show_rc",
+      "label": "推荐板块展开",
+      "pv": 0,
+      "uv": 0
+    },
+    {
+      "scope": "recommendation_events",
+      "date": "2026-09-12",
+      "metric": "plg_click_rc",
+      "label": "RD Home 触发对话",
+      "pv": 0,
+      "uv": 0
+    },
+    {
+      "scope": "recommendation_events",
+      "date": "total",
+      "metric": "plg_show_rc",
+      "label": "推荐板块展开",
+      "pv": 272,
+      "uv": 132
+    },
+    {
+      "scope": "recommendation_events",
+      "date": "total",
+      "metric": "plg_click_rc",
+      "label": "RD Home 触发对话",
+      "pv": 24,
+      "uv": 11
+    }
+  ],
+  "click_summary": {
+    "total_click_pv": 24,
+    "distinct_share_id": 13,
+    "distinct_session_id": 22,
+    "missing_session_id_events": 2,
+    "true_activation_click_sessions": 3,
+    "true_activation_click_events": 3,
+    "true_activation_session_rate": 0.1364,
+    "pv_conversion_rate": 0.0882,
+    "uv_conversion_rate": 0.0833
+  },
+  "true_activation_matches": [
+    {
+      "click_send_ts": "2026-09-09 13:21:03",
+      "share_id": "42acb055b3e200bdf4be8e0903d60b64",
+      "user_id": "b104f27c2f0c463da94abe71332080f5",
+      "btu_id": "430a1abdf48c4ee9967d58b97fba2214",
+      "session_id": "sess_64c448dab585481c",
+      "first_activation_date": "2026-09-09"
+    },
+    {
+      "click_send_ts": "2026-09-09 14:20:29",
+      "share_id": "7cda8a6d139fae54270dc36ca292164e",
+      "user_id": "b104f27c2f0c463da94abe71332080f5",
+      "btu_id": "430a1abdf48c4ee9967d58b97fba2214",
+      "session_id": "sess_5927f1b4966246e6",
+      "first_activation_date": "2026-09-10"
+    },
+    {
+      "click_send_ts": "2026-09-10 20:41:53",
+      "share_id": "0c542aea5dd7063ef2660cdd642748cc",
+      "user_id": "08b0545909f04be99d3dc608f8b7d990",
+      "btu_id": "07c3a819c20540b4a823c2d013dcd897",
+      "session_id": "sess_0d429f5501ca48fd",
+      "first_activation_date": "2026-09-10"
+    }
+  ],
+  "notes": {
+    "recommendation_uv": "有效访客口径：优先 user_id，其次 btu_id、event_detail.session_id、raw_session_id，最后 resolved_session_id 行级兜底。",
+    "true_activation": "按推荐点击事件里的 session_id 精确匹配真激活表 resolved_session_id，且 is_true_activation_session=1。",
+    "latest_data": "2026-09-12 数据截至推荐事件数据集更新 2026-09-12 04:12:02+0800；当前 2026-09-12 未查询到 plg_show_rc/plg_click_rc。"
+  }
+}

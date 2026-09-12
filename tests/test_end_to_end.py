@@ -10,9 +10,9 @@ from recommendation_contents.config import (
     OpenAISettings,
 )
 from recommendation_contents.graph import build_graph_with_dependencies
+from recommendation_contents.research_prompt_generation import HTML_INSTRUCTION, GenerationError
 from recommendation_contents.services.eureka_curl import CurlResult, EurekaCurlClient
 from recommendation_contents.services.eureka_token import TokenCheckResult, TokenRefreshResult
-from recommendation_contents.summary_generation import HTML_INSTRUCTION, GenerationError
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -40,7 +40,7 @@ class Model:
             return (ROOT / "docs/recommendation-tags/v2" / name).read_text()
         return json.dumps(
             {
-                "summaries": [
+                "research_prompts": [
                     {
                         "brief_id": brief["brief_id"],
                         "content_category": "scout_report",
@@ -132,14 +132,14 @@ def test_only_three_nodes_and_two_generation_calls(tmp_path):
     assert set(graph.get_graph().nodes) == {
         "__start__",
         "generate_topic",
-        "generate_summary",
+        "generate_research_prompt",
         "call_curl_task",
         "__end__",
     }
     assert {(e.source, e.target) for e in graph.get_graph().edges} == {
         ("__start__", "generate_topic"),
-        ("generate_topic", "generate_summary"),
-        ("generate_summary", "call_curl_task"),
+        ("generate_topic", "generate_research_prompt"),
+        ("generate_research_prompt", "call_curl_task"),
         ("call_curl_task", "__end__"),
     }
     result = graph.invoke({"topic": "芯片互连", "language": "en"})
@@ -208,7 +208,8 @@ def test_one_repair_stays_inside_its_generation_node(tmp_path, stage):
 @pytest.mark.parametrize("stage", ["topic", "summary"])
 def test_failed_generation_never_reaches_curl(tmp_path, stage):
     graph, _, client = setup(tmp_path, Model(stage))
-    with pytest.raises(GenerationError, match=f"generate_{stage}"):
+    error_stage = "generate_research_prompt" if stage == "summary" else "generate_topic"
+    with pytest.raises(GenerationError, match=error_stage):
         graph.invoke({"topic": "芯片互连"})
     assert client.queries == []
 
@@ -360,12 +361,16 @@ def test_resumed_record_updates_instead_of_counting_as_new_content(tmp_path):
 
 
 def test_stage_two_schema_is_exported_from_the_runtime_contract():
-    from recommendation_contents.summary_generation import summary_response_schema
-
-    assert (
-        json.loads((ROOT / "docs/workflows/summary-response.schema.json").read_text())
-        == summary_response_schema()
+    from recommendation_contents.research_prompt_generation import (
+        research_prompt_response_schema,
     )
+
+    schema = research_prompt_response_schema()
+    assert (
+        json.loads((ROOT / "docs/workflows/research-prompt-response.schema.json").read_text())
+        == schema
+    )
+    assert json.loads((ROOT / "docs/workflows/summary-response.schema.json").read_text()) == schema
 
 
 def test_breakpoints_review_edit_and_continue_without_regenerating_topic(tmp_path):
@@ -379,14 +384,14 @@ def test_breakpoints_review_edit_and_continue_without_regenerating_topic(tmp_pat
         interrupt_after=["generate_topic"],
     )
     assert [stage for stage, _ in model.calls] == ["topic"]
-    assert graph.get_state(config).next == ("generate_summary",)
+    assert graph.get_state(config).next == ("generate_research_prompt",)
     assert client.queries == []
     assert not list(tmp_path.glob("*.json"))
     generation = copy.deepcopy(first["generation_result"])
     generation["briefs"][0]["description"] += "重点比较封装尺寸约束。"
     graph.update_state(config, {"generation_result": generation}, as_node="generate_topic")
 
-    second = graph.invoke(None, config=config, interrupt_after=["generate_summary"])
+    second = graph.invoke(None, config=config, interrupt_after=["generate_research_prompt"])
     assert [stage for stage, _ in model.calls] == ["topic", "summary"]
     request = json.loads(model.calls[-1][1][1]["content"])
     assert request["briefs"] == generation["briefs"]
@@ -409,7 +414,7 @@ def test_invalid_manual_topic_edit_stops_before_second_model_call(tmp_path):
     generation = copy.deepcopy(result["generation_result"])
     generation["briefs"][0]["tags"]["role_perspective"] = "invented_tag"
     graph.update_state(config, {"generation_result": generation}, as_node="generate_topic")
-    with pytest.raises(GenerationError, match="generate_summary"):
+    with pytest.raises(GenerationError, match="generate_research_prompt"):
         graph.invoke(None, config)
     assert len(model.calls) == 1
     assert client.queries == []
@@ -420,10 +425,14 @@ def test_manual_prompt_mismatch_stops_before_curl(tmp_path):
 
     graph, _, client = setup(tmp_path, checkpointer=InMemorySaver())
     config = {"configurable": {"thread_id": "bad-prompt"}}
-    result = graph.invoke({"topic": "芯片互连"}, config, interrupt_after=["generate_summary"])
+    result = graph.invoke(
+        {"topic": "芯片互连"},
+        config,
+        interrupt_after=["generate_research_prompt"],
+    )
     specs = copy.deepcopy(result["task_specs"])
     specs[0]["generated_prompt"] = "mismatched metadata"
-    graph.update_state(config, {"task_specs": specs}, as_node="generate_summary")
+    graph.update_state(config, {"task_specs": specs}, as_node="generate_research_prompt")
     with pytest.raises(GenerationError, match="call_curl_task"):
         graph.invoke(None, config)
     assert client.queries == []
@@ -515,7 +524,7 @@ def test_cli_review_files_continue_in_separate_processes(tmp_path, monkeypatch, 
                 "--from-stage-file",
                 str(first_path),
                 "--stop-after",
-                "generate_summary",
+                "generate_research_prompt",
                 "--stage-output",
                 str(second_path),
                 "--output",
@@ -525,7 +534,10 @@ def test_cli_review_files_continue_in_separate_processes(tmp_path, monkeypatch, 
         == 0
     )
     second = json.loads(second_path.read_text())
-    assert json.loads(capsys.readouterr().out)["stopped_after"] == "generate_summary"
+    assert (
+        json.loads(capsys.readouterr().out)["stopped_after"]
+        == "generate_research_prompt"
+    )
     assert [stage for stage, _ in graphs[1][0].calls] == ["summary"]
     assert graphs[1][1].queries == []
     assert second["generation_result"] == first["generation_result"]
@@ -551,3 +563,52 @@ def test_cli_review_files_continue_in_separate_processes(tmp_path, monkeypatch, 
     assert json.loads(capsys.readouterr().out)["status"] == "succeeded"
     assert graphs[2][0].calls == []
     assert graphs[2][1].queries == [second["task_specs"][0]["generated_prompt"]]
+
+
+def test_cli_accepts_legacy_stage_two_name_but_saves_canonical_name(
+    tmp_path, monkeypatch, capsys
+):
+    import recommendation_contents.main as module
+
+    stage_path = tmp_path / "topic.json"
+    stage_path.write_text("{}")
+    output_path = tmp_path / "research-prompt.json"
+    invocation = {}
+
+    class Graph:
+        def invoke(self, input_data, config=None, **kwargs):
+            invocation.update(kwargs)
+            return {"generation_result": {"generation_id": "test-generation"}}
+
+    monkeypatch.setattr(module, "apply_env_file_to_process", lambda _: None)
+    monkeypatch.setattr(module.AppSettings, "from_env_file", lambda _: None)
+    monkeypatch.setattr(module, "build_graph_with_dependencies", lambda **_: Graph())
+
+    assert (
+        module.main(
+            [
+                "--from-stage-file",
+                str(stage_path),
+                "--stop-after",
+                "generate_summary",
+                "--stage-output",
+                str(output_path),
+                "--output",
+                "json",
+            ]
+        )
+        == 0
+    )
+    saved = json.loads(output_path.read_text())
+    assert invocation["interrupt_after"] == ["generate_research_prompt"]
+    assert saved["stopped_after"] == "generate_research_prompt"
+    assert json.loads(capsys.readouterr().out)["stopped_after"] == "generate_research_prompt"
+
+
+def test_former_stage_two_module_reexports_canonical_implementation():
+    from recommendation_contents import research_prompt_generation as canonical
+    from recommendation_contents import summary_generation as legacy
+
+    assert legacy.generate_task_specs is canonical.generate_research_prompt_specs
+    assert legacy.summary_response_schema is canonical.research_prompt_response_schema
+    assert legacy.validate_summaries is canonical.validate_research_prompts

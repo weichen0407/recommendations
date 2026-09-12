@@ -3,14 +3,14 @@
 日常入口为一个端到端图 `topic_workflow`，主图只有三个节点：
 
 ```text
-输入 → generate_topic → generate_summary → call_curl_task → 结果
+输入 → generate_topic → generate_research_prompt → call_curl_task → 结果
 ```
 
 - `generate_topic`：idea → 完整选题描述、目标受众和受控标签。
-- `generate_summary`：基于已校验的选题生成研究执行要求，输出完整的 Eureka prompt；继承原标签。
+- `generate_research_prompt`：基于已校验的选题生成研究执行要求，输出完整的 Eureka prompt；继承原标签。
 - `call_curl_task`：内部处理鉴权、提交、分享、完成状态查询与执行记录，返回每条内容的结果。
 
-两个生成阶段都把校验和一次格式修复放在内部，主图不再展示错误分支。`generate_summary` 的名称沿用节点约定，产出是执行提示词，不是已经生成的报告摘要。
+两个生成阶段都把校验和一次格式修复放在内部，主图不再展示错误分支。`generate_research_prompt` 产出的是供后续研究执行的提示词，不是文章摘要或最终答案。
 
 详细规则见 [端到端流程说明](./docs/workflows/topic-workflow.md)；标签定义见 [第一阶段生成规则](./运营选题_第一阶段生成规则.md)。
 
@@ -57,7 +57,7 @@ uv run topic-workflow --resume-run-id <generation_id> --output json --pretty
 
 ## 中间暂停检查
 
-Studio 中点击 **Interrupt**，设置在 `generate_topic` 执行后暂停，检查 `generation_result.briefs`，再点 **Continue**。也可以在 `generate_summary` 执行后暂停，检查 `task_specs[].generated_prompt`，再继续到 curl。
+Studio 中点击 **Interrupt**，设置在 `generate_topic` 执行后暂停，检查 `generation_result.briefs`，再点 **Continue**。也可以在 `generate_research_prompt` 执行后暂停，检查 `task_specs[].generated_prompt`，再继续到 curl。
 
 命令行支持把三个阶段分开运行，每一步读取上一步已生成的 JSON：
 
@@ -66,9 +66,9 @@ uv run topic-workflow "芯片互连" --stop-after generate_topic \
   --stage-output outputs/review/topic.json
 
 uv run topic-workflow --from-stage-file outputs/review/topic.json \
-  --stop-after generate_summary --stage-output outputs/review/summary.json
+  --stop-after generate_research_prompt --stage-output outputs/review/research-prompts.json
 
-uv run topic-workflow --from-stage-file outputs/review/summary.json --output json --pretty
+uv run topic-workflow --from-stage-file outputs/review/research-prompts.json --output json --pretty
 ```
 
 每条命令之间可打开对应 JSON 检查。第一阶段文件中的描述和标签可修改；下一阶段会重新校验，复用已有生成结果。`--from-stage-file` 也接受下方独立第一阶段 CLI 的完整输出。详见 [暂停、编辑和继续](./docs/workflows/topic-workflow.md#7-在两个阶段之间检查)。
@@ -87,12 +87,12 @@ uv run content-brief-workflow --validate-file \
 
 ### 按目标受众三元组批量生成节点 1
 
-下面的命令按当前 role–JTBD 关联覆盖全部 11 个行业：396 个三元组。程序先为每个三元组确定一个固定标签组合，再从同一组合生成 10 个问题，共 3,960 行。所有问题都继承固定的工作视角、行业层级、具体任务、预期产出、主题、问题意图和范围；`keywords` 仍是自由检索词。它只运行 `generate_topic`，不生成 summary，也不执行 Eureka：
+下面的命令按当前 role–JTBD 关联覆盖全部 11 个行业：396 个三元组。程序先为每个三元组确定一个固定标签组合，再从同一组合生成 10 个问题，共 3,960 行。所有问题都继承固定的工作视角、行业层级、具体任务、预期产出、主题、问题意图和范围；`keywords` 仍是自由检索词。它只运行 `generate_topic`，不生成研究提示词，也不执行 Eureka：
 
 ```bash
 uv run profile-topic-node1 --cases-per-tag-set 10 --workers 4 \
-  --output-json outputs/profile_topics/node1_topics_v4.json \
-  --output-csv outputs/profile_topics/node1_topics_v4.csv
+  --output-json outputs/profile_topics/node1_topics.json \
+  --output-csv outputs/profile_topics/node1_topics.csv
 ```
 
 运行中断或部分三元组失败后，用相同参数加 `--resume`。程序会跳过已经成功的三元组，继续保存 JSON 和 CSV：
@@ -121,8 +121,8 @@ uv run profile-topic-node1 \
   --question-intent identify_applications \
   --scope-level industry \
   --cases-per-tag-set 10 \
-  --output-json outputs/profile_topics/node1_preview_v4.json \
-  --output-csv outputs/profile_topics/node1_preview_v4.csv
+  --output-json outputs/profile_topics/node1_preview.json \
+  --output-csv outputs/profile_topics/node1_preview.csv
 ```
 
 未指定二级枚举时，程序会产生一个可复现的泛行业默认组合；显式参数会覆盖其中对应字段。行业标签只保留 `industry → industry_segment` 两级：选择 `--industry-segment` 时范围会自动变成 `industry_segment`，仍可用 `--scope-level` 显式检查。具体技术、产品、材料和部件名称保存在自由文本 `entities` / `keywords` 中。
@@ -134,7 +134,64 @@ uv run content-brief-workflow --profile-schema \
   --output-file src/recommendation_contents/data/profile_topic.schema.json
 ```
 
-CSV 一行对应一个问题，并保存 `tag_set_id`。同一个 `tag_set_id` 下的问题具有完全相同的七维标签；`summary`、`content_category`、`generated_prompt`、执行状态及链接列由后续节点填写。JSON 保留每次模型调用的完整 generation result，供节点 2 批量读取。旧参数 `--cases-per-triple` 仍可作为兼容别名使用。
+CSV 一行对应一个问题，并保存 `tag_set_id`。同一个 `tag_set_id` 下的问题具有完全相同的七维标签；节点 1 CSV 中的研究提示词、执行状态及链接占位列保持为空。JSON 保留每次模型调用的完整 generation result，供节点 2 批量读取。旧参数 `--cases-per-triple` 仍可作为兼容别名使用。
+
+### 用节点 1 的结果批量生成节点 2
+
+先检查节点 1 的 JSON/CSV；确认问题、描述和标签后，把**完整的节点 1 JSON**作为位置参数传给节点 2，CSV 不能作为恢复输入。完整批次包含 396 个 generation，每个 generation 包含同一标签组合下的 10 个 brief；节点 2 为每个成功的 brief 生成 `research_instructions`、`content_category` 和最终 `generated_prompt`：
+
+```bash
+uv run profile-topic-node2 outputs/profile_topics/node1_topics.json \
+  --workers 4 \
+  --format html \
+  --output-json outputs/profile_topics/node2_research_prompts.json \
+  --output-csv outputs/profile_topics/node2_research_prompts.csv
+```
+
+这个命令只运行 `generate_research_prompt`，**不会调用 Eureka，也不会执行 curl**。因此完成节点 2 后可以停下来，在 JSON 中按 generation 检查完整结构，或在 CSV 中逐行筛选和审阅问题、标签、研究要求与最终 prompt。需要人工维护时编辑 JSON，CSV 只是导出结果。
+
+先确认规模和文件参数，不调用模型：
+
+```bash
+uv run profile-topic-node2 outputs/profile_topics/node1_topics.json \
+  --workers 4 \
+  --format html \
+  --output-json outputs/profile_topics/node2_research_prompts.json \
+  --output-csv outputs/profile_topics/node2_research_prompts.csv \
+  --dry-run
+```
+
+运行时每完成一个 generation 都会输出一行进度，包括完成比例、成功/失败数、已生成行数、耗时、ETA、当前 `tag_set_id` 和状态；每次完成后立即原子更新 JSON 与 CSV 检查点：
+
+```text
+[42/396 |  10.6%] succeeded=41 failed=1 rows=410 elapsed=08:17 eta=1:09:50 <tag_set_id>: succeeded
+```
+
+需要中途停止时按一次 `Ctrl+C`。程序立即写入 `status=paused`，取消尚未开始的调用，然后等待最多 `--workers` 个已经开始的请求返回，并逐个保存结果；等待期间再按一次 `Ctrl+C` 会停止等待并完成最新检查点。Python 线程不能强制终止已经进入模型 provider 的 HTTP 请求，因此进程仍可能等待这些请求按 provider 的网络超时退出。中断命令最终以退出码 130 结束。之后使用**同一个节点 1 数据集和节点 2 输出文件**加 `--resume`，程序会跳过来源未变化的成功项，并继续失败、输入已变化或尚未处理的项：
+
+```bash
+uv run profile-topic-node2 outputs/profile_topics/node1_topics.json \
+  --workers 4 \
+  --format html \
+  --output-json outputs/profile_topics/node2_research_prompts.json \
+  --output-csv outputs/profile_topics/node2_research_prompts.csv \
+  --resume
+```
+
+不带 `--resume` 时，如果输出文件已存在，命令会拒绝覆盖。确认要从节点 1 重新生成整个节点 2 批次时使用 `--overwrite`。`--resume` 与 `--overwrite` 不能同时使用。恢复时会检查工作流版本、阶段、taxonomy、来源数据集和格式；每个标签组合另有来源指纹，节点 1 中已修改的组合会自动重新生成。
+
+想把一次运行限制为可审核的小批次，可以用 `--max-batches 20`；完成这 20 个后状态保持 `paused`，再用 `--resume` 继续。也可以用 `--role`、`--industry`、`--jtbd` 或可重复的 `--tag-set-id` 只处理选中的组合：
+
+```bash
+uv run profile-topic-node2 outputs/profile_topics/node1_topics.json \
+  --tag-set-id <tag_set_id> \
+  --max-batches 20 \
+  --resume
+```
+
+Node 2 JSON 支持维护成功结果：编辑对应 `task_specs[]` 的 `content_category` 或 `research_instructions`，再执行 `--resume`。程序会校验这两个结构化字段，并重新组装 `generated_prompt`，不会再次调用模型。不要直接维护 `generated_prompt`，因为它会根据结构化字段重建。要让模型重新生成已成功的选中组合，首次使用筛选参数配合 `--resume --regenerate-selected`；如果同时用 `--max-batches` 分段，后续继续时只用 `--resume`，否则会再次把已重生成的选中项重置为待处理。
+
+`--format html` 会在最终 prompt 中加入 HTML artifact 指令；`--format report` 会要求 Markdown 报告。新批次默认 `html`；恢复时不传 `--format` 会沿用检查点中的格式，两种格式不能在同一个恢复批次中混用。节点 2 JSON 为后续批量执行节点 3 保留机器结构；当前可以直接从 CSV 的 `generated_prompt` 列抽样并手动执行 curl。
 
 ## 推荐内容批量生成
 
@@ -607,7 +664,7 @@ LANGSMITH_PROJECT=recommendation-contents
 2. 登录和 `LANGSMITH_API_KEY` 对应的 workspace。
 3. 进入 `Tracing` / `Projects`。
 4. 选择 `.env` 里配置的项目名，例如 `recommendation-contents`。
-5. 打开 `topic_workflow` run，查看 `generate_topic`、`generate_summary`、`call_curl_task`。
+5. 打开 `topic_workflow` run，查看 `generate_topic`、`generate_research_prompt`、`call_curl_task`。
    单独调试第一阶段时，CLI run 名仍为 `content_brief_workflow`，内部只有 `generate_topic`。
    Studio 可在运行前查看结构，Tracing 需运行并上传记录后才可查看。
 
@@ -628,7 +685,10 @@ src/recommendation_contents/
   brief_prompts.py          # 第一阶段生成与修复提示词
   brief_graph.py            # 第一阶段独立调试入口
   brief_cli.py              # 第一阶段 CLI、schema 导出和离线校验
-  summary_generation.py     # 第二阶段：选题 → 执行提示词
+  profile_topic_cli.py      # 按画像与标签组合批量运行节点 1
+  profile_research_prompt_cli.py  # 读取节点 1 检查点，批量运行节点 2
+  research_prompt_generation.py  # 第二阶段：选题 → 研究执行提示词
+  summary_generation.py     # 旧导入路径的兼容包装
   workflow_stages.py        # 暂停检查后的输入校验
   workflow_execution.py     # Eureka 执行、轮询和恢复
   llm.py                    # OpenAI chat model 构造
@@ -648,4 +708,4 @@ src/recommendation_contents/
 
 `.langgraph_api/` 是本机 Studio 的运行状态与检查点，保留本地文件但不纳入版本控制。`.venv/`、`__pycache__/`、测试和 lint 缓存同样不纳入版本控制。旧规则和已删除实现可从 Git 历史查看，工作区只保留当前版本。
 
-调整生成行为时，分别修改 `brief_prompts.py` / `summary_generation.py`；图的编排位于 `graph.py`。模型和 Eureka 接口仍通过 `.env` 中的 `OPENAI_*`、`EUREKA_*` 配置。
+调整生成行为时，分别修改 `brief_prompts.py` / `research_prompt_generation.py`；图的编排位于 `graph.py`。模型和 Eureka 接口仍通过 `.env` 中的 `OPENAI_*`、`EUREKA_*` 配置。

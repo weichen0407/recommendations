@@ -17,8 +17,8 @@ from .brief_schema import SCHEMA_VERSION, load_brief_catalog
 from .config import apply_env_file_to_process
 from .profile_topic_generation import all_profile_triples, triple_id
 
-DEFAULT_JSON = Path("outputs/profile_topics/node1_topics_v4.json")
-DEFAULT_CSV = Path("outputs/profile_topics/node1_topics_v4.csv")
+DEFAULT_JSON = Path("outputs/profile_topics/node1_topics.json")
+DEFAULT_CSV = Path("outputs/profile_topics/node1_topics.csv")
 
 CSV_COLUMNS = [
     "row_no",
@@ -42,7 +42,7 @@ CSV_COLUMNS = [
     "classification_rationale",
     "industry_status",
     "assumptions",
-    "summary",
+    "research_instructions",
     "content_category",
     "generated_prompt",
     "execution_status",
@@ -202,6 +202,7 @@ def main(argv: list[str] | None = None) -> int:
                     elapsed_seconds=time.monotonic() - started_at,
                     current_id=triple_id(audience),
                     current_status=generation["status"],
+                    current_error=(generation.get("errors") or [None])[0],
                 ),
                 flush=True,
             )
@@ -326,6 +327,7 @@ def _progress_line(
     elapsed_seconds: float,
     current_id: str,
     current_status: str,
+    current_error: str | None,
 ) -> str:
     processed = already_succeeded + completed_this_run
     percent = 100 * processed / total if total else 100.0
@@ -334,12 +336,13 @@ def _progress_line(
         elapsed_seconds * remaining / completed_this_run if completed_this_run else None
     )
     succeeded = already_succeeded + succeeded_this_run
-    return (
+    line = (
         f"[{processed}/{total} | {percent:5.1f}%] "
         f"succeeded={succeeded} failed={failed_this_run} rows={generated_rows} "
         f"elapsed={_format_duration(elapsed_seconds)} eta={_format_duration(eta_seconds)} "
         f"{current_id}: {current_status}"
     )
+    return f"{line} | {current_error}" if current_error else line
 
 
 def _format_duration(seconds: float | None) -> str:
@@ -393,7 +396,7 @@ def _rows(document):
                 "classification_rationale": classification["rationale"],
                 "industry_status": classification["industry_status"],
                 "assumptions": _json_cell(brief["assumptions"]),
-                "summary": "",
+                "research_instructions": "",
                 "content_category": "",
                 "generated_prompt": "",
                 "execution_status": "not_started",

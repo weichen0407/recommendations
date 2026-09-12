@@ -7,7 +7,11 @@ from typing import Any
 from uuid import UUID
 
 from .brief_schema import LANGUAGES, MAX_BRIEFS, SCHEMA_VERSION, load_brief_catalog, validate_briefs
-from .summary_generation import GenerationError, build_task_spec, validate_summaries
+from .research_prompt_generation import (
+    GenerationError,
+    build_task_spec,
+    validate_research_prompts,
+)
 
 
 def validate_generation_result(value: Any, stage: str) -> None:
@@ -61,8 +65,8 @@ def validate_task_specs(generation: dict, specs: Any, output_format: Any, stage:
         raise GenerationError(stage, ["format must be html or report."])
     if not isinstance(specs, list) or not all(isinstance(spec, dict) for spec in specs):
         raise GenerationError(stage, ["task_specs must be an array of objects."])
-    summaries = {
-        "summaries": [
+    research_prompts = {
+        "research_prompts": [
             {
                 key: spec.get(key)
                 for key in ("brief_id", "content_category", "research_instructions")
@@ -70,13 +74,13 @@ def validate_task_specs(generation: dict, specs: Any, output_format: Any, stage:
             for spec in specs
         ]
     }
-    errors = validate_summaries(summaries, generation["briefs"])
+    errors = validate_research_prompts(research_prompts, generation["briefs"])
     if not errors:
         for brief, spec in zip(generation["briefs"], specs):
             if spec != build_task_spec(brief, spec, generation["input"]["language"], output_format):
                 errors.append(
                     "Task prompt or metadata does not match its brief, language, format or order. "
-                    "To revise a topic, clear task_specs and regenerate_summary."
+                    "To revise a topic, clear task_specs and regenerate_research_prompt."
                 )
     if errors:
         raise GenerationError(stage, errors)

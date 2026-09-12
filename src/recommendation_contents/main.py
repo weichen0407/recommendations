@@ -11,14 +11,14 @@ from uuid import uuid4
 from .config import AppSettings, apply_env_file_to_process
 from .graph import build_graph_with_dependencies
 from .records import DEFAULT_RECORDS_CSV, DEFAULT_RECORDS_MARKDOWN, save_result_table
-from .summary_generation import GenerationError
+from .research_prompt_generation import GenerationError
 from .workflow_execution import DEFAULT_RUNS_DIR, write_run
 
 
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description="Run the topic LangGraph workflow.")
     parser.add_argument(
-        "topic", nargs="?", help="Idea used by generate_topic and generate_summary."
+        "topic", nargs="?", help="Idea used by generate_topic and generate_research_prompt."
     )
     parser.add_argument("--language", choices=["zh-CN", "en"], default=None)
     parser.add_argument("--format", choices=["html", "report"], default=None)
@@ -26,11 +26,11 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument(
         "--from-stage-file",
         type=Path,
-        help="Continue from a reviewed topic or summary JSON file, reusing generated content.",
+        help="Continue from a reviewed topic or research-prompt JSON file, reusing content.",
     )
     parser.add_argument(
         "--stop-after",
-        choices=["generate_topic", "generate_summary"],
+        choices=["generate_topic", "generate_research_prompt", "generate_summary"],
         help="Save this stage for inspection and exit before executing downstream nodes.",
     )
     parser.add_argument(
@@ -75,6 +75,12 @@ def main(argv: list[str] | None = None) -> int:
         help="Do not append this run to the records table files.",
     )
     args = parser.parse_args(argv)
+    # Keep old scripts working while making the graph and newly saved snapshots canonical.
+    stop_after = (
+        "generate_research_prompt"
+        if args.stop_after == "generate_summary"
+        else args.stop_after
+    )
     if (
         sum([args.topic is not None, bool(args.resume_run_id), args.from_stage_file is not None])
         != 1
@@ -104,12 +110,12 @@ def main(argv: list[str] | None = None) -> int:
     graph_options = {}
     config = {"run_name": "topic_workflow"}
     invoke_options = {}
-    if args.stop_after:
+    if stop_after:
         from langgraph.checkpoint.memory import InMemorySaver
 
         graph_options["checkpointer"] = InMemorySaver()
         config["configurable"] = {"thread_id": str(uuid4())}
-        invoke_options["interrupt_after"] = [args.stop_after]
+        invoke_options["interrupt_after"] = [stop_after]
     graph = build_graph_with_dependencies(
         settings=settings,
         runs_dir=None if args.no_save else args.runs_dir,
@@ -136,17 +142,17 @@ def main(argv: list[str] | None = None) -> int:
             )
         )
         return 1
-    if args.stop_after:
+    if stop_after:
         path = args.stage_output or (
             Path("outputs/workflow_stages")
-            / f"{result['generation_result']['generation_id']}.{args.stop_after}.json"
+            / f"{result['generation_result']['generation_id']}.{stop_after}.json"
         )
-        result.update(status="paused", stopped_after=args.stop_after, stage_output_path=str(path))
+        result.update(status="paused", stopped_after=stop_after, stage_output_path=str(path))
         write_run(path, result)
         if args.output == "json":
             print(json.dumps(result, ensure_ascii=False, indent=2 if args.pretty else None))
         else:
-            print(f"Paused after {args.stop_after}. Review: {path}")
+            print(f"Paused after {stop_after}. Review: {path}")
         return 0
     rows = result.get("result_table_rows") or []
     if not args.no_save and rows:

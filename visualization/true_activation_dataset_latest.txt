@@ -1,0 +1,31 @@
+数据集: RunWise重构验证-会话主表与真激活 (j0bbc8517118c429092330b2)
+- 类型: DATAFLOW | 状态: FINISHED
+- 路径: 根目录>02.智慧芽>产品运营>Eureka>丁嘉>RunWise-人群用户洞察>RunWise重构验证>RunWise重构验证-会话主表与真激活
+- 行数: 49199 | 列数: 23
+- 更新: 2026-09-12 04:30:32+0800
+
+
+字段列表 (23列, 17维度, 6度量):
+  - btu_id (STRING/DIM)
+  - product_line (STRING/DIM)
+  - product_agent (STRING/DIM)
+  - resolved_session_id (STRING/DIM)
+  - session_date (DATE/DIM)
+  - session_start_time (TIMESTAMP/DIM)
+  - first_activation_date (DATE/DIM)
+  - first_activation_time (TIMESTAMP/DIM)
+  - register_time (TIMESTAMP/DIM)
+  - is_initiated_session (INT/METRIC)
+  - is_true_activation_session (INT/METRIC)
+  - has_download (INT/METRIC)
+  - has_share (INT/METRIC)
+  - has_copy (INT/METRIC)
+  - max_round (LONG/METRIC)
+  - registration_product_line (STRING/DIM)
+  - register_product_source (STRING/DIM)
+  - register_channel_level_1 (STRING/DIM)
+  - Campaign Name (STRING/DIM)
+  - first_query_time (TIMESTAMP/DIM)
+  - last_query_time (TIMESTAMP/DIM)
+  - full_query_with_round (STRING/DIM)
+  - visit_id (STRING/DIM)

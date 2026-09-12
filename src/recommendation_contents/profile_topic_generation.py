@@ -19,6 +19,7 @@ from .brief_schema import (
     parse_brief_response,
     validate_briefs,
 )
+from .llm import format_llm_error
 
 PROFILE_TAG_KEYS = (
     "role_perspective",
@@ -147,7 +148,7 @@ def generate_profile_topics(
                     )
                 )
             except Exception as exc:  # noqa: BLE001 - model-provider boundary
-                errors = [f"LLM request failed ({type(exc).__name__}); check model configuration."]
+                errors = [format_llm_error(exc)]
                 break
             try:
                 candidate = parse_brief_response(raw)

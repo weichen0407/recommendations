@@ -13,9 +13,9 @@ from .brief_generation import generate_briefs
 from .config import AppSettings
 from .nodes import RuntimeDependencies
 from .records import build_markdown_table
-from .summary_generation import (
+from .research_prompt_generation import (
     GenerationError,
-    generate_task_specs,
+    generate_research_prompt_specs,
 )
 from .workflow_execution import DEFAULT_RUNS_DIR, execute_tasks, read_run, run_path
 from .workflow_stages import validate_generation_result, validate_task_specs
@@ -50,7 +50,7 @@ class WorkflowOutput(TypedDict, total=False):
 
 
 class WorkflowState(WorkflowInput, WorkflowOutput, total=False):
-    summary_attempts: int
+    research_prompt_attempts: int
 
 
 def build_graph():
@@ -133,7 +133,7 @@ def build_graph_with_dependencies(
             "results": [],
             "errors": [],
             "status": "topic_generated",
-            "summary_attempts": 0,
+            "research_prompt_attempts": 0,
             "generated_prompt": "",
             "session_id": "",
             "session_link": "",
@@ -143,27 +143,32 @@ def build_graph_with_dependencies(
             "run_record_path": "",
         }
 
-    def generate_summary(state):
-        validate_generation_result(state["generation_result"], "generate_summary")
+    def generate_research_prompt(state):
+        validate_generation_result(state["generation_result"], "generate_research_prompt")
         if state["format"] not in ("html", "report"):
-            raise GenerationError("generate_summary", ["format must be html or report."])
+            raise GenerationError(
+                "generate_research_prompt", ["format must be html or report."]
+            )
         specs = state["task_specs"]
         attempts = 0
         if specs != []:
             validate_task_specs(
-                state["generation_result"], specs, state["format"], "generate_summary"
+                state["generation_result"],
+                specs,
+                state["format"],
+                "generate_research_prompt",
             )
         else:
-            specs, attempts = generate_task_specs(
+            specs, attempts = generate_research_prompt_specs(
                 state["generation_result"],
                 state["format"],
                 runtime.get_llm,
             )
         return {
             "task_specs": specs,
-            "summary_attempts": attempts,
+            "research_prompt_attempts": attempts,
             "generated_prompt": specs[0]["generated_prompt"],
-            "status": "summary_generated",
+            "status": "research_prompt_generated",
         }
 
     def call_curl_task(state):
@@ -208,11 +213,11 @@ def build_graph_with_dependencies(
 
     workflow = StateGraph(WorkflowState, input_schema=WorkflowInput, output_schema=WorkflowOutput)
     workflow.add_node("generate_topic", generate_topic)
-    workflow.add_node("generate_summary", generate_summary)
+    workflow.add_node("generate_research_prompt", generate_research_prompt)
     workflow.add_node("call_curl_task", call_curl_task)
     workflow.add_edge(START, "generate_topic")
-    workflow.add_edge("generate_topic", "generate_summary")
-    workflow.add_edge("generate_summary", "call_curl_task")
+    workflow.add_edge("generate_topic", "generate_research_prompt")
+    workflow.add_edge("generate_research_prompt", "call_curl_task")
     workflow.add_edge("call_curl_task", END)
     return workflow.compile(checkpointer=checkpointer)
 
