@@ -1,0 +1,21 @@
+{
+  "taxonomy_version": "2.2.0",
+  "base_triples": 396,
+  "role_jtbd_pairs": 36,
+  "default_fixed_tag_sets": 396,
+  "default_questions_per_tag_set": 10,
+  "default_questions": 3960,
+  "valid_non_industry_bundles_checked": 5486,
+  "industry_scope_paths": 53,
+  "all_full_combinations": 290758,
+  "by_role": {
+    "rd_engineer": 65402,
+    "researcher": 41075,
+    "innovation_product_strategy": 38796,
+    "in_house_ip_legal": 27719,
+    "patent_ip_services": 16271,
+    "other": 101495
+  },
+  "elapsed_seconds": 0.103,
+  "counting_scope": "Allowed role-JTBD mappings, task/perspective/output compatibility, JTBD/theme/intent compatibility, matching industry-segment or null; scope forced by segment; excludes free-text keywords/entities."
+}

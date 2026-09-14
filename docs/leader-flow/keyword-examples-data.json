@@ -1,0 +1,343 @@
+{
+  "simulation": true,
+  "records": [
+    {
+      "simulation": true,
+      "user_id": "示例用户甲",
+      "content_id": "keyword-demo-甲-1",
+      "question": "混合键合与微凸点用于芯片互连时，如何比较互连间距和信号损耗？",
+      "tech": [
+        "混合键合",
+        "微凸点"
+      ],
+      "focus": [
+        "互连间距",
+        "信号损耗"
+      ],
+      "view": "方案取舍",
+      "impressions": 20,
+      "clicks": 16,
+      "uses": 12,
+      "copies": 8,
+      "downloads": 3
+    },
+    {
+      "simulation": true,
+      "user_id": "示例用户甲",
+      "content_id": "keyword-demo-甲-2",
+      "question": "混合键合的对准误差与互连间距应如何权衡？",
+      "tech": [
+        "混合键合"
+      ],
+      "focus": [
+        "对准误差",
+        "互连间距"
+      ],
+      "view": "工艺容差",
+      "impressions": 20,
+      "clicks": 14,
+      "uses": 8,
+      "copies": 5,
+      "downloads": 4
+    },
+    {
+      "simulation": true,
+      "user_id": "示例用户甲",
+      "content_id": "keyword-demo-甲-3",
+      "question": "芯片封装的散热材料如何影响温升？",
+      "tech": [
+        "散热材料"
+      ],
+      "focus": [
+        "温升"
+      ],
+      "view": "热性能分析",
+      "impressions": 20,
+      "clicks": 6,
+      "uses": 2,
+      "copies": 1,
+      "downloads": 1
+    },
+    {
+      "simulation": true,
+      "user_id": "示例用户乙",
+      "content_id": "keyword-demo-乙-1",
+      "question": "毛细驱动微流控芯片的气泡干扰应如何设计验证实验？",
+      "tech": [
+        "毛细驱动",
+        "微流控芯片"
+      ],
+      "focus": [
+        "气泡干扰"
+      ],
+      "view": "实验验证",
+      "impressions": 20,
+      "clicks": 15,
+      "uses": 11,
+      "copies": 3,
+      "downloads": 9
+    },
+    {
+      "simulation": true,
+      "user_id": "示例用户乙",
+      "content_id": "keyword-demo-乙-2",
+      "question": "毛细驱动微流控芯片应如何验证流量稳定性和重复性？",
+      "tech": [
+        "毛细驱动",
+        "微流控芯片"
+      ],
+      "focus": [
+        "流量稳定性",
+        "重复性"
+      ],
+      "view": "实验验证",
+      "impressions": 20,
+      "clicks": 14,
+      "uses": 9,
+      "copies": 2,
+      "downloads": 7
+    },
+    {
+      "simulation": true,
+      "user_id": "示例用户乙",
+      "content_id": "keyword-demo-乙-3",
+      "question": "荧光检测的光学噪声应如何分析？",
+      "tech": [
+        "荧光检测"
+      ],
+      "focus": [
+        "光学噪声"
+      ],
+      "view": "噪声分析",
+      "impressions": 20,
+      "clicks": 7,
+      "uses": 3,
+      "copies": 1,
+      "downloads": 2
+    },
+    {
+      "simulation": true,
+      "user_id": "示例用户丙",
+      "content_id": "keyword-demo-丙-1",
+      "question": "液冷板流道设计如何改善储能电池组温差？",
+      "tech": [
+        "液冷板",
+        "流道设计"
+      ],
+      "focus": [
+        "电池组温差"
+      ],
+      "view": "流道优化",
+      "impressions": 20,
+      "clicks": 14,
+      "uses": 10,
+      "copies": 4,
+      "downloads": 3
+    },
+    {
+      "simulation": true,
+      "user_id": "示例用户丙",
+      "content_id": "keyword-demo-丙-2",
+      "question": "液冷板流量分配不均时，如何排查电池组局部温升？",
+      "tech": [
+        "液冷板"
+      ],
+      "focus": [
+        "流量分配",
+        "局部温升"
+      ],
+      "view": "热问题排查",
+      "impressions": 20,
+      "clicks": 12,
+      "uses": 8,
+      "copies": 3,
+      "downloads": 2
+    },
+    {
+      "simulation": true,
+      "user_id": "示例用户丙",
+      "content_id": "keyword-demo-丙-3",
+      "question": "储能电池 SOC 估算方法有哪些？",
+      "tech": [
+        "SOC 估算"
+      ],
+      "focus": [
+        "估算方法"
+      ],
+      "view": "方法调研",
+      "impressions": 20,
+      "clicks": 6,
+      "uses": 2,
+      "copies": 1,
+      "downloads": 1
+    }
+  ],
+  "summary": [
+    {
+      "user": "甲",
+      "field": "电子制造／芯片互连",
+      "keyword_counts": [
+        {
+          "kind": "tech",
+          "keyword": "混合键合",
+          "associated_uses": 20,
+          "associated_impressions": 40
+        },
+        {
+          "kind": "tech",
+          "keyword": "微凸点",
+          "associated_uses": 12,
+          "associated_impressions": 20
+        },
+        {
+          "kind": "focus",
+          "keyword": "互连间距",
+          "associated_uses": 20,
+          "associated_impressions": 40
+        },
+        {
+          "kind": "focus",
+          "keyword": "信号损耗",
+          "associated_uses": 12,
+          "associated_impressions": 20
+        },
+        {
+          "kind": "focus",
+          "keyword": "对准误差",
+          "associated_uses": 8,
+          "associated_impressions": 20
+        },
+        {
+          "kind": "tech",
+          "keyword": "散热材料",
+          "associated_uses": 2,
+          "associated_impressions": 20
+        },
+        {
+          "kind": "focus",
+          "keyword": "温升",
+          "associated_uses": 2,
+          "associated_impressions": 20
+        }
+      ],
+      "view_counts": {
+        "方案取舍": 12,
+        "工艺容差": 8,
+        "热性能分析": 2
+      },
+      "profile": "近期聚焦混合键合的细间距互连，关注互连间距、对准误差与信号损耗，常从方案取舍和工艺容差角度研究。"
+    },
+    {
+      "user": "乙",
+      "field": "医疗器械／体外诊断检测芯片",
+      "keyword_counts": [
+        {
+          "kind": "tech",
+          "keyword": "毛细驱动",
+          "associated_uses": 20,
+          "associated_impressions": 40
+        },
+        {
+          "kind": "tech",
+          "keyword": "微流控芯片",
+          "associated_uses": 20,
+          "associated_impressions": 40
+        },
+        {
+          "kind": "focus",
+          "keyword": "气泡干扰",
+          "associated_uses": 11,
+          "associated_impressions": 20
+        },
+        {
+          "kind": "focus",
+          "keyword": "流量稳定性",
+          "associated_uses": 9,
+          "associated_impressions": 20
+        },
+        {
+          "kind": "focus",
+          "keyword": "重复性",
+          "associated_uses": 9,
+          "associated_impressions": 20
+        },
+        {
+          "kind": "tech",
+          "keyword": "荧光检测",
+          "associated_uses": 3,
+          "associated_impressions": 20
+        },
+        {
+          "kind": "focus",
+          "keyword": "光学噪声",
+          "associated_uses": 3,
+          "associated_impressions": 20
+        }
+      ],
+      "view_counts": {
+        "实验验证": 20,
+        "噪声分析": 3
+      },
+      "profile": "近期聚焦毛细驱动微流控，关注气泡干扰、流量稳定性与重复性，偏向设计验证实验。"
+    },
+    {
+      "user": "丙",
+      "field": "能源／储能电池组",
+      "keyword_counts": [
+        {
+          "kind": "tech",
+          "keyword": "液冷板",
+          "associated_uses": 18,
+          "associated_impressions": 40
+        },
+        {
+          "kind": "tech",
+          "keyword": "流道设计",
+          "associated_uses": 10,
+          "associated_impressions": 20
+        },
+        {
+          "kind": "focus",
+          "keyword": "电池组温差",
+          "associated_uses": 10,
+          "associated_impressions": 20
+        },
+        {
+          "kind": "focus",
+          "keyword": "流量分配",
+          "associated_uses": 8,
+          "associated_impressions": 20
+        },
+        {
+          "kind": "focus",
+          "keyword": "局部温升",
+          "associated_uses": 8,
+          "associated_impressions": 20
+        },
+        {
+          "kind": "tech",
+          "keyword": "SOC 估算",
+          "associated_uses": 2,
+          "associated_impressions": 20
+        },
+        {
+          "kind": "focus",
+          "keyword": "估算方法",
+          "associated_uses": 2,
+          "associated_impressions": 20
+        }
+      ],
+      "view_counts": {
+        "流道优化": 10,
+        "热问题排查": 8,
+        "方法调研": 2
+      },
+      "profile": "近期聚焦液冷板热管理，关注流道设计、流量分配及电池组温差，常从热问题排查和结构优化角度研究。"
+    }
+  ],
+  "validation": {
+    "keyword_source_checked": true,
+    "counts_checked": true,
+    "questions": 9
+  }
+}

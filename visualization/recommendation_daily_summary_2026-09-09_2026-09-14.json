@@ -1,0 +1,103 @@
+{
+  "generated_at": "2026-09-14",
+  "timezone": "Asia/Shanghai",
+  "day_bucket": "send_ts converted to UTC+8 date",
+  "dataset_updated_at": "2026-09-14 04:10:06+0800",
+  "activation_dataset_updated_at": "2026-09-14 04:30:09+0800",
+  "date_range": [
+    "2026-09-09",
+    "2026-09-14"
+  ],
+  "daily": [
+    {
+      "date": "2026-09-09",
+      "show_pv": 11,
+      "show_uv": 7,
+      "click_pv": 6,
+      "click_uv": 1,
+      "pv_conversion_rate": 0.5455,
+      "uv_conversion_rate": 0.1429,
+      "click_sessions": 5,
+      "true_activation_sessions": 2,
+      "true_activation_rate": 0.4,
+      "missing_session": 1
+    },
+    {
+      "date": "2026-09-10",
+      "show_pv": 106,
+      "show_uv": 64,
+      "click_pv": 8,
+      "click_uv": 6,
+      "pv_conversion_rate": 0.0755,
+      "uv_conversion_rate": 0.0938,
+      "click_sessions": 7,
+      "true_activation_sessions": 0,
+      "true_activation_rate": 0,
+      "missing_session": 1
+    },
+    {
+      "date": "2026-09-11",
+      "show_pv": 153,
+      "show_uv": 62,
+      "click_pv": 10,
+      "click_uv": 5,
+      "pv_conversion_rate": 0.0654,
+      "uv_conversion_rate": 0.0806,
+      "click_sessions": 10,
+      "true_activation_sessions": 1,
+      "true_activation_rate": 0.1,
+      "missing_session": 0
+    },
+    {
+      "date": "2026-09-12",
+      "show_pv": 39,
+      "show_uv": 20,
+      "click_pv": 2,
+      "click_uv": 2,
+      "pv_conversion_rate": 0.0513,
+      "uv_conversion_rate": 0.1,
+      "click_sessions": 2,
+      "true_activation_sessions": 0,
+      "true_activation_rate": 0,
+      "missing_session": 0
+    },
+    {
+      "date": "2026-09-13",
+      "show_pv": 36,
+      "show_uv": 24,
+      "click_pv": 13,
+      "click_uv": 12,
+      "pv_conversion_rate": 0.3611,
+      "uv_conversion_rate": 0.5,
+      "click_sessions": 9,
+      "true_activation_sessions": 0,
+      "true_activation_rate": 0,
+      "missing_session": 4
+    },
+    {
+      "date": "2026-09-14",
+      "show_pv": 7,
+      "show_uv": 5,
+      "click_pv": 2,
+      "click_uv": 2,
+      "pv_conversion_rate": 0.2857,
+      "uv_conversion_rate": 0.4,
+      "click_sessions": 1,
+      "true_activation_sessions": 0,
+      "true_activation_rate": 0,
+      "missing_session": 1
+    }
+  ],
+  "total": {
+    "show_pv": 352,
+    "show_uv": 179,
+    "click_pv": 41,
+    "click_uv": 27,
+    "pv_conversion_rate": 0.1165,
+    "uv_conversion_rate": 0.1508,
+    "click_sessions": 34,
+    "true_activation_sessions": 3,
+    "true_activation_rate": 0.0882,
+    "missing_session": 7
+  }
+}

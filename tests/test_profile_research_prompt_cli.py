@@ -11,7 +11,11 @@ from recommendation_contents.profile_topic_generation import (
     default_profile_tag_bundle,
     profile_tag_set_id,
 )
-from recommendation_contents.research_prompt_generation import GenerationError, build_task_spec
+from recommendation_contents.research_prompt_generation import (
+    GenerationError,
+    build_task_spec,
+    default_compact_research_instructions,
+)
 
 
 def _generation(industry: str):
@@ -203,6 +207,26 @@ def test_resume_rebuilds_prompt_from_maintained_structured_fields_without_model_
     assert len(calls) == 1
     assert maintained["generated_prompt"] != old_prompt
     assert "Use the maintained review criteria" in maintained["generated_prompt"]
+
+
+def test_compact_prompt_centers_fixed_tags_and_does_not_embed_material_assumptions():
+    generation = _generation("electronics_manufacturing")
+    brief = generation["briefs"][0]
+    brief["assumptions"] = ["A complete private case file will be supplied later."]
+    research_prompt = {
+        "brief_id": brief["brief_id"],
+        "content_category": "scout_report",
+        "research_instructions": default_compact_research_instructions(brief),
+    }
+
+    spec = build_task_spec(brief, research_prompt, "en")
+
+    assert spec["prompt_template_version"] == "compact-v1"
+    assert "topic_theme=ai_impact" in spec["generated_prompt"]
+    assert "Keywords: AI applications, solution discovery." in spec["generated_prompt"]
+    assert "private case file will be supplied" not in spec["generated_prompt"]
+    assert "instead of requesting materials" in spec["generated_prompt"]
+    assert len(spec["generated_prompt"].split()) < 190
 
 
 def test_source_edit_makes_a_completed_batch_stale_and_regenerates_it(

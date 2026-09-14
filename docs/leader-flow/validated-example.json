@@ -1,0 +1,193 @@
+{
+  "request": {
+    "audience": {
+      "role": "rd_engineer",
+      "industry": "electronics_manufacturing",
+      "jtbd": "technical_solutions"
+    },
+    "tag_bundle": {
+      "role_perspective": "product_design",
+      "industry_segment": "semiconductors",
+      "jtbd_task": "solution_comparison",
+      "desired_output": "comparison_matrix",
+      "topic_theme": "solution_comparison",
+      "question_intent": "compare_approaches",
+      "scope_level": "industry_segment"
+    },
+    "language": "zh-CN",
+    "count": 3
+  },
+  "response": {
+    "briefs": [
+      {
+        "title": "半导体互连技术路线在带宽、功耗与制造成本上有哪些主要取舍？",
+        "description": "从产品设计视角比较半导体互连技术路线在带宽、功耗与制造成本上的取舍，形成支持方案选择的对比矩阵。",
+        "entities": [
+          "芯片互连"
+        ],
+        "keywords": [
+          "芯片互连",
+          "带宽",
+          "功耗",
+          "制造成本"
+        ],
+        "audience": {
+          "role": "rd_engineer",
+          "industry": "electronics_manufacturing",
+          "jtbd": "technical_solutions"
+        },
+        "tags": {
+          "role_perspective": "product_design",
+          "industry_segment": "semiconductors",
+          "jtbd_task": "solution_comparison",
+          "desired_output": "comparison_matrix",
+          "topic_theme": "solution_comparison",
+          "question_intent": "compare_approaches",
+          "scope_level": "industry_segment"
+        },
+        "classification": {
+          "rationale": "问题属于半导体领域的技术方案比较，采用产品设计视角，以对比矩阵支持后续选择。",
+          "industry_status": "classified"
+        },
+        "assumptions": [
+          "运营在半导体范围内选择该比较对象及维度，未指定用户的具体项目、产品参数或已发生事件。"
+        ]
+      },
+      {
+        "title": "半导体封装技术路线在集成能力、散热与制造复杂度上有哪些差异？",
+        "description": "从产品设计视角比较半导体封装技术路线在集成能力、散热与制造复杂度上的差异，形成支持方案选择的对比矩阵。",
+        "entities": [
+          "半导体封装"
+        ],
+        "keywords": [
+          "半导体封装",
+          "集成能力",
+          "散热",
+          "制造复杂度"
+        ],
+        "audience": {
+          "role": "rd_engineer",
+          "industry": "electronics_manufacturing",
+          "jtbd": "technical_solutions"
+        },
+        "tags": {
+          "role_perspective": "product_design",
+          "industry_segment": "semiconductors",
+          "jtbd_task": "solution_comparison",
+          "desired_output": "comparison_matrix",
+          "topic_theme": "solution_comparison",
+          "question_intent": "compare_approaches",
+          "scope_level": "industry_segment"
+        },
+        "classification": {
+          "rationale": "问题属于半导体领域的技术方案比较，采用产品设计视角，以对比矩阵支持后续选择。",
+          "industry_status": "classified"
+        },
+        "assumptions": [
+          "运营在半导体范围内选择该比较对象及维度，未指定用户的具体项目、产品参数或已发生事件。"
+        ]
+      },
+      {
+        "title": "半导体器件技术路线在性能、可靠性与集成成本上应如何比较？",
+        "description": "从产品设计视角比较半导体器件技术路线在性能、可靠性与集成成本上的取舍，形成支持方案选择的对比矩阵。",
+        "entities": [
+          "半导体器件"
+        ],
+        "keywords": [
+          "半导体器件",
+          "性能",
+          "可靠性",
+          "集成成本"
+        ],
+        "audience": {
+          "role": "rd_engineer",
+          "industry": "electronics_manufacturing",
+          "jtbd": "technical_solutions"
+        },
+        "tags": {
+          "role_perspective": "product_design",
+          "industry_segment": "semiconductors",
+          "jtbd_task": "solution_comparison",
+          "desired_output": "comparison_matrix",
+          "topic_theme": "solution_comparison",
+          "question_intent": "compare_approaches",
+          "scope_level": "industry_segment"
+        },
+        "classification": {
+          "rationale": "问题属于半导体领域的技术方案比较，采用产品设计视角，以对比矩阵支持后续选择。",
+          "industry_status": "classified"
+        },
+        "assumptions": [
+          "运营在半导体范围内选择该比较对象及维度，未指定用户的具体项目、产品参数或已发生事件。"
+        ]
+      }
+    ]
+  },
+  "validation": {
+    "taxonomy_version": "2.2.0",
+    "source_examples_valid": true,
+    "fixed_request_valid": true,
+    "fixed_examples_valid": true,
+    "tag_set_id": "rd_engineer__electronics_manufacturing__technical_solutions__3aed2d480e36",
+    "invalid_cases": [
+      {
+        "case": "行业父子不匹配",
+        "field": "industry_segment",
+        "value": "automotive_chassis_body",
+        "errors": [
+          "tag_bundle.industry_segment is incompatible with audience.industry"
+        ]
+      },
+      {
+        "case": "任务与产出不匹配",
+        "field": "desired_output",
+        "value": "trend_brief",
+        "errors": [
+          "tag_bundle.desired_output is incompatible with jtbd_task"
+        ]
+      },
+      {
+        "case": "主题与问题意图不匹配",
+        "field": "question_intent",
+        "value": "assess_risks",
+        "errors": [
+          "tag_bundle.question_intent is incompatible with topic_theme"
+        ]
+      },
+      {
+        "case": "范围与细分行业不一致",
+        "field": "scope_level",
+        "value": "industry",
+        "errors": [
+          "tag_bundle.scope_level is inconsistent with industry_segment"
+        ]
+      },
+      {
+        "case": "擅自新增行业枚举",
+        "field": "industry_segment",
+        "value": "chip_interconnect",
+        "errors": [
+          "tag_bundle.industry_segment must be null or an allowed enum"
+        ]
+      },
+      {
+        "case": "JTBD 与具体任务不匹配",
+        "field": "jtbd_task",
+        "value": "claims_drafting",
+        "errors": [
+          "tag_bundle.jtbd_task is incompatible with audience.jtbd",
+          "tag_bundle.role_perspective is incompatible with jtbd_task",
+          "tag_bundle.desired_output is incompatible with jtbd_task"
+        ]
+      },
+      {
+        "case": "固定标签批次中途改换工作视角",
+        "field": "role_perspective",
+        "value": "system_integration",
+        "errors": [
+          "$.briefs[1].tags must exactly match the input tag_bundle"
+        ]
+      }
+    ]
+  }
+}

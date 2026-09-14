@@ -1,0 +1,13 @@
+{
+  "name": "recommendation-guanyuan-dashboard",
+  "version": "0.1.0",
+  "private": true,
+  "type": "commonjs",
+  "scripts": {
+    "start": "node server.js",
+    "update:dashboard": "node visualization/update_all.js"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}

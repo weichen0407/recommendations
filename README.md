@@ -138,7 +138,7 @@ CSV 一行对应一个问题，并保存 `tag_set_id`。同一个 `tag_set_id` �
 
 ### 用节点 1 的结果批量生成节点 2
 
-先检查节点 1 的 JSON/CSV；确认问题、描述和标签后，把**完整的节点 1 JSON**作为位置参数传给节点 2，CSV 不能作为恢复输入。完整批次包含 396 个 generation，每个 generation 包含同一标签组合下的 10 个 brief；节点 2 为每个成功的 brief 生成 `research_instructions`、`content_category` 和最终 `generated_prompt`：
+先检查节点 1 的 JSON/CSV；确认问题、描述和标签后，把**完整的节点 1 JSON**作为位置参数传给节点 2，CSV 不能作为恢复输入。完整批次包含 396 个 generation，每个 generation 包含同一标签组合下的 10 个 brief；节点 2 为每个成功的 brief 生成 `research_instructions`、`content_category` 和最终 `generated_prompt`。`research_instructions` 只保留 25–60 个英文词左右的核心研究重点，不生成长篇步骤、证据矩阵或材料清单；最终 prompt 以问题、描述、固定枚举标签和关键词为主：
 
 ```bash
 uv run profile-topic-node2 outputs/profile_topics/node1_topics.json \
@@ -229,9 +229,13 @@ uv run profile-topic-node3 outputs/profile_topics/node2_research_prompts.json \
   --wait-for-completion
 ```
 
-执行结果默认保存到 `outputs/profile_topics/node3_eureka_results.json` 和 `outputs/profile_topics/node3_eureka_results.csv`，持久日志为 `outputs/profile_topics/node3_eureka_results.log`，每个任务的内部安全执行记录位于 `outputs/profile_topics/node3_runs/`。JSON 是聚合检查点；内部记录保证每次外部调用前后都能安全恢复；CSV 用于审阅，日志用于观察和排错。CSV 保留旧 records 表的 `input`、`description`、`categories`、`date` 等字段，并新增 `brief_id`、`tag_set_id`、`session_id`、`share_id`、对应链接及执行状态。
+`--prepare-only` 可以在 curl 前先生成完整 JSON/CSV 执行清单。两者都包含节点 2 中全部可执行任务，尚未调用 curl 的行标记为 `not_started`，并预留 `session_id`、`share_id` 和链接字段。真实执行后，JSON/CSV 会持续更新；SQLite 保存防重复提交与恢复状态，日志用于观察和排错。
 
-节点 3 的 `--format html` 会在提交前把中性 prompt 包装为 `artifact-generator` 的 HTML 请求；`--format report` 会包装为 `report-writer` 的 `parallel-report` 请求。同一批内容两种格式各执行一次时，必须指定不同的 `--output-json`、`--output-csv`、`--log-file` 和 `--runs-dir`，否则会发生检查点冲突。完整命令见 [工作流说明](docs/workflows/topic-workflow.md#91-canary全量提交与完成查询)。
+在远端执行开始前，可以直接审核和修改 Node 3 JSON 清单中的 `executions[].generated_prompt`。`--resume` 会执行审核后的 prompt 并更新来源指纹；一旦该条已经产生 session、share 或进入远端提交状态，就禁止继续修改，避免把旧会话关联到新 prompt。CSV 是同步审阅副本，单独修改 CSV 不会改变执行输入。
+
+不希望 token 出现在命令或 shell 历史时，可在节点 3 使用 `--wait-on-401 300 --retry-on-auth-change --retry-attempts 2 --import-clipboard-on-401`。程序等待期间，从浏览器复制 `api/eureka/query/conversational` 请求的 cURL 即可自动导入授权并重试当前任务；该模式使用 `--workers 1`。完整命令见工作流说明。
+
+节点 3 的 `--format html` 会把中性 prompt 包装为 `artifact-generator` 的 HTML 请求；`--format report` 会包装为 `report-writer` 的 `parallel-report` 请求。同一批内容两种格式各执行一次时，必须指定不同的 `--state-db`、`--output-json`、`--output-csv` 和 `--log-file`。完整命令见 [工作流说明](docs/workflows/topic-workflow.md#91-canary全量提交与完成查询)。
 
 另开一个终端可实时查看：
 
@@ -239,11 +243,17 @@ uv run profile-topic-node3 outputs/profile_topics/node2_research_prompts.json \
 tail -f outputs/profile_topics/node3_eureka_results.log
 ```
 
-正式调用前可加 `--dry-run` 检查范围。`--role`、`--industry`、`--jtbd`、可重复的 `--tag-set-id` 和 `--brief-id` 可以缩小本次任务集合；`--max-tasks` 适合分批放量。`--runs-dir` 和 `--log-file` 可以修改内部记录目录和日志路径。
+SQLite 逐条保存，终端日志逐条输出；JSON 默认每 25 条刷新，CSV 默认每 25 条完整刷新。需要每完成一条就刷新 CSV 时，执行节点 3 加 `--csv-checkpoint-every 1`。由于 CSV 包含全部任务，逐条重写会降低批量执行速度。
+
+正式调用前可加 `--dry-run` 检查范围。`--role`、`--industry`、`--jtbd`、可重复的 `--tag-set-id` 和 `--brief-id` 可以缩小本次任务集合；`--max-tasks` 适合分批放量。`--state-db` 和 `--log-file` 可以修改状态数据库和日志路径。
 
 运行时按一次 `Ctrl+C` 会停止继续调度并保存当前检查点；关闭终端后执行相同命令并加 `--resume` 即可继续。已经保存 `session_id` 的任务只会继续创建分享或查询完成状态，不会重新提交 query。程序会在提交前先保存 `submitting`；如果进程在请求发出后、`session_id` 落盘前中断，该任务会标记为 `submission_unknown`，必须人工核对远端，恢复时不会自动重发。`--resume` 也会核对节点 2 来源及 prompt 指纹，来源 prompt 变化时会拒绝把旧会话关联到新 prompt。
 
-已有输出时，不带 `--resume` 的命令会拒绝覆盖。`--overwrite` 只重建聚合文件和运行元数据，仍会复用同一 `--runs-dir` 中已经确认的 session/share，不会自动重提。只有同时改用新的输出路径和新的 `--runs-dir` 才会形成独立远端批次；这可能重复创建已有报告。
+接口明确拒绝且没有生成 session/share 的 `failed` 记录可以使用 `--resume --retry-failed` 重试。建议先加 `--max-tasks 1` 验证；该参数只重置本次实际调度的失败项。`submission_unknown` 不会被此参数重试，因为远端可能已经创建任务。
+
+确认要补齐所有空链接时，可再显式加入 `--retry-uncertain-links`。它会重新提交没有任何 ID 的 `submission_unknown`，并仅重试已有 session 但缺少 share ID 的分享请求；前一种情况可能在远端产生重复任务，因此只应在接受该风险时使用。
+
+已有输出时，不带 `--resume` 的命令会拒绝覆盖。`--overwrite` 只重建聚合状态，仍会复用同一 SQLite 数据库中已经确认的 session/share，不会自动重提。改用新的 `--state-db` 会形成独立远端批次；这可能重复创建已有报告。
 
 ## 推荐内容批量生成
 

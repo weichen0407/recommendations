@@ -1,0 +1,373 @@
+{
+  "simulation": true,
+  "window_days": 30,
+  "records": [
+    {
+      "user_id": "示例用户甲",
+      "content_id": "demo-甲-1",
+      "question": "芯片互连方案在带宽、功耗和成本上如何取舍？",
+      "audience": {
+        "role": "rd_engineer",
+        "industry": "electronics_manufacturing",
+        "jtbd": "technical_solutions"
+      },
+      "tags": {
+        "role_perspective": "product_design",
+        "jtbd_task": "solution_comparison",
+        "desired_output": "comparison_matrix",
+        "topic_theme": "solution_comparison",
+        "question_intent": "compare_approaches",
+        "industry_segment": "semiconductors",
+        "scope_level": "industry_segment"
+      },
+      "taxonomy_version": "2.2.0",
+      "impressions": 20,
+      "clicked_impressions": 16,
+      "copy_sessions": 8,
+      "download_sessions": 3,
+      "used_impressions": 12
+    },
+    {
+      "user_id": "示例用户甲",
+      "content_id": "demo-甲-2",
+      "question": "芯片封装散热方案在性能与集成成本上有哪些差异？",
+      "audience": {
+        "role": "rd_engineer",
+        "industry": "electronics_manufacturing",
+        "jtbd": "technical_solutions"
+      },
+      "tags": {
+        "role_perspective": "product_design",
+        "jtbd_task": "solution_comparison",
+        "desired_output": "comparison_matrix",
+        "topic_theme": "solution_comparison",
+        "question_intent": "compare_approaches",
+        "industry_segment": "semiconductors",
+        "scope_level": "industry_segment"
+      },
+      "taxonomy_version": "2.2.0",
+      "impressions": 20,
+      "clicked_impressions": 14,
+      "copy_sessions": 5,
+      "download_sessions": 4,
+      "used_impressions": 8
+    },
+    {
+      "user_id": "示例用户甲",
+      "content_id": "demo-甲-3",
+      "question": "芯片互连出现连接失效时有哪些排查与改进路径？",
+      "audience": {
+        "role": "rd_engineer",
+        "industry": "electronics_manufacturing",
+        "jtbd": "technical_solutions"
+      },
+      "tags": {
+        "role_perspective": "reliability_engineering",
+        "jtbd_task": "failure_resolution",
+        "desired_output": "improvement_plan",
+        "topic_theme": "safety_reliability",
+        "question_intent": "improve_performance",
+        "industry_segment": "semiconductors",
+        "scope_level": "industry_segment"
+      },
+      "taxonomy_version": "2.2.0",
+      "impressions": 20,
+      "clicked_impressions": 6,
+      "copy_sessions": 1,
+      "download_sessions": 1,
+      "used_impressions": 2
+    },
+    {
+      "user_id": "示例用户乙",
+      "content_id": "demo-乙-1",
+      "question": "体外诊断仪器的重复性应如何设计验证计划？",
+      "audience": {
+        "role": "rd_engineer",
+        "industry": "medical_devices",
+        "jtbd": "technical_feasibility"
+      },
+      "tags": {
+        "role_perspective": "reliability_engineering",
+        "jtbd_task": "validation_planning",
+        "desired_output": "validation_plan",
+        "topic_theme": "feasibility_validation",
+        "question_intent": "plan_validation",
+        "industry_segment": "in_vitro_diagnostics",
+        "scope_level": "industry_segment"
+      },
+      "taxonomy_version": "2.2.0",
+      "impressions": 20,
+      "clicked_impressions": 15,
+      "copy_sessions": 3,
+      "download_sessions": 9,
+      "used_impressions": 11
+    },
+    {
+      "user_id": "示例用户乙",
+      "content_id": "demo-乙-2",
+      "question": "微流控检测芯片的验证测试应覆盖哪些条件？",
+      "audience": {
+        "role": "rd_engineer",
+        "industry": "medical_devices",
+        "jtbd": "technical_feasibility"
+      },
+      "tags": {
+        "role_perspective": "reliability_engineering",
+        "jtbd_task": "validation_planning",
+        "desired_output": "validation_plan",
+        "topic_theme": "feasibility_validation",
+        "question_intent": "plan_validation",
+        "industry_segment": "in_vitro_diagnostics",
+        "scope_level": "industry_segment"
+      },
+      "taxonomy_version": "2.2.0",
+      "impressions": 20,
+      "clicked_impressions": 14,
+      "copy_sessions": 2,
+      "download_sessions": 7,
+      "used_impressions": 9
+    },
+    {
+      "user_id": "示例用户乙",
+      "content_id": "demo-乙-3",
+      "question": "体外诊断检测平台有哪些技术路线差异？",
+      "audience": {
+        "role": "rd_engineer",
+        "industry": "medical_devices",
+        "jtbd": "technical_solutions"
+      },
+      "tags": {
+        "role_perspective": "product_design",
+        "jtbd_task": "solution_comparison",
+        "desired_output": "comparison_matrix",
+        "topic_theme": "solution_comparison",
+        "question_intent": "compare_approaches",
+        "industry_segment": "in_vitro_diagnostics",
+        "scope_level": "industry_segment"
+      },
+      "taxonomy_version": "2.2.0",
+      "impressions": 20,
+      "clicked_impressions": 7,
+      "copy_sessions": 1,
+      "download_sessions": 2,
+      "used_impressions": 3
+    },
+    {
+      "user_id": "示例用户丙",
+      "content_id": "demo-丙-1",
+      "question": "储能电池组的温升异常有哪些排查和改进路径？",
+      "audience": {
+        "role": "rd_engineer",
+        "industry": "energy",
+        "jtbd": "technical_solutions"
+      },
+      "tags": {
+        "role_perspective": "reliability_engineering",
+        "jtbd_task": "failure_resolution",
+        "desired_output": "improvement_plan",
+        "topic_theme": "safety_reliability",
+        "question_intent": "improve_performance",
+        "industry_segment": "batteries_stationary_storage",
+        "scope_level": "industry_segment"
+      },
+      "taxonomy_version": "2.2.0",
+      "impressions": 20,
+      "clicked_impressions": 14,
+      "copy_sessions": 4,
+      "download_sessions": 3,
+      "used_impressions": 10
+    },
+    {
+      "user_id": "示例用户丙",
+      "content_id": "demo-丙-2",
+      "question": "储能系统连接失效应如何排查并形成改进方案？",
+      "audience": {
+        "role": "rd_engineer",
+        "industry": "energy",
+        "jtbd": "technical_solutions"
+      },
+      "tags": {
+        "role_perspective": "reliability_engineering",
+        "jtbd_task": "failure_resolution",
+        "desired_output": "improvement_plan",
+        "topic_theme": "safety_reliability",
+        "question_intent": "improve_performance",
+        "industry_segment": "batteries_stationary_storage",
+        "scope_level": "industry_segment"
+      },
+      "taxonomy_version": "2.2.0",
+      "impressions": 20,
+      "clicked_impressions": 12,
+      "copy_sessions": 3,
+      "download_sessions": 2,
+      "used_impressions": 8
+    },
+    {
+      "user_id": "示例用户丙",
+      "content_id": "demo-丙-3",
+      "question": "储能系统技术路线如何比较寿命与成本？",
+      "audience": {
+        "role": "rd_engineer",
+        "industry": "energy",
+        "jtbd": "technical_solutions"
+      },
+      "tags": {
+        "role_perspective": "product_design",
+        "jtbd_task": "solution_comparison",
+        "desired_output": "comparison_matrix",
+        "topic_theme": "solution_comparison",
+        "question_intent": "compare_approaches",
+        "industry_segment": "batteries_stationary_storage",
+        "scope_level": "industry_segment"
+      },
+      "taxonomy_version": "2.2.0",
+      "impressions": 20,
+      "clicked_impressions": 6,
+      "copy_sessions": 1,
+      "download_sessions": 1,
+      "used_impressions": 2
+    }
+  ],
+  "summary": [
+    {
+      "user": "甲",
+      "industry_segment": "semiconductors",
+      "total_uses": 22,
+      "task_counts": {
+        "solution_comparison": 20,
+        "failure_resolution": 2
+      },
+      "output_counts": {
+        "comparison_matrix": 20,
+        "improvement_plan": 2
+      },
+      "all_tag_use_counts": {
+        "role_perspective:product_design": 20,
+        "jtbd_task:solution_comparison": 20,
+        "desired_output:comparison_matrix": 20,
+        "topic_theme:solution_comparison": 20,
+        "question_intent:compare_approaches": 20,
+        "industry_segment:semiconductors": 22,
+        "scope_level:industry_segment": 22,
+        "role_perspective:reliability_engineering": 2,
+        "jtbd_task:failure_resolution": 2,
+        "desired_output:improvement_plan": 2,
+        "topic_theme:safety_reliability": 2,
+        "question_intent:improve_performance": 2
+      },
+      "all_tag_exposure_counts": {
+        "role_perspective:product_design": 40,
+        "jtbd_task:solution_comparison": 40,
+        "desired_output:comparison_matrix": 40,
+        "topic_theme:solution_comparison": 40,
+        "question_intent:compare_approaches": 40,
+        "industry_segment:semiconductors": 60,
+        "scope_level:industry_segment": 60,
+        "role_perspective:reliability_engineering": 20,
+        "jtbd_task:failure_resolution": 20,
+        "desired_output:improvement_plan": 20,
+        "topic_theme:safety_reliability": 20,
+        "question_intent:improve_performance": 20
+      },
+      "copies": 14,
+      "downloads": 8,
+      "clicks": 36,
+      "profile": "近期主要需要比较半导体技术路线，偏好能直接用于选型的对比矩阵。"
+    },
+    {
+      "user": "乙",
+      "industry_segment": "in_vitro_diagnostics",
+      "total_uses": 23,
+      "task_counts": {
+        "validation_planning": 20,
+        "solution_comparison": 3
+      },
+      "output_counts": {
+        "validation_plan": 20,
+        "comparison_matrix": 3
+      },
+      "all_tag_use_counts": {
+        "role_perspective:reliability_engineering": 20,
+        "jtbd_task:validation_planning": 20,
+        "desired_output:validation_plan": 20,
+        "topic_theme:feasibility_validation": 20,
+        "question_intent:plan_validation": 20,
+        "industry_segment:in_vitro_diagnostics": 23,
+        "scope_level:industry_segment": 23,
+        "role_perspective:product_design": 3,
+        "jtbd_task:solution_comparison": 3,
+        "desired_output:comparison_matrix": 3,
+        "topic_theme:solution_comparison": 3,
+        "question_intent:compare_approaches": 3
+      },
+      "all_tag_exposure_counts": {
+        "role_perspective:reliability_engineering": 40,
+        "jtbd_task:validation_planning": 40,
+        "desired_output:validation_plan": 40,
+        "topic_theme:feasibility_validation": 40,
+        "question_intent:plan_validation": 40,
+        "industry_segment:in_vitro_diagnostics": 60,
+        "scope_level:industry_segment": 60,
+        "role_perspective:product_design": 20,
+        "jtbd_task:solution_comparison": 20,
+        "desired_output:comparison_matrix": 20,
+        "topic_theme:solution_comparison": 20,
+        "question_intent:compare_approaches": 20
+      },
+      "copies": 6,
+      "downloads": 18,
+      "clicks": 36,
+      "profile": "近期更需要设计验证步骤、测试条件和评价指标，偏好验证计划。"
+    },
+    {
+      "user": "丙",
+      "industry_segment": "batteries_stationary_storage",
+      "total_uses": 20,
+      "task_counts": {
+        "failure_resolution": 18,
+        "solution_comparison": 2
+      },
+      "output_counts": {
+        "improvement_plan": 18,
+        "comparison_matrix": 2
+      },
+      "all_tag_use_counts": {
+        "role_perspective:reliability_engineering": 18,
+        "jtbd_task:failure_resolution": 18,
+        "desired_output:improvement_plan": 18,
+        "topic_theme:safety_reliability": 18,
+        "question_intent:improve_performance": 18,
+        "industry_segment:batteries_stationary_storage": 20,
+        "scope_level:industry_segment": 20,
+        "role_perspective:product_design": 2,
+        "jtbd_task:solution_comparison": 2,
+        "desired_output:comparison_matrix": 2,
+        "topic_theme:solution_comparison": 2,
+        "question_intent:compare_approaches": 2
+      },
+      "all_tag_exposure_counts": {
+        "role_perspective:reliability_engineering": 40,
+        "jtbd_task:failure_resolution": 40,
+        "desired_output:improvement_plan": 40,
+        "topic_theme:safety_reliability": 40,
+        "question_intent:improve_performance": 40,
+        "industry_segment:batteries_stationary_storage": 60,
+        "scope_level:industry_segment": 60,
+        "role_perspective:product_design": 20,
+        "jtbd_task:solution_comparison": 20,
+        "desired_output:comparison_matrix": 20,
+        "topic_theme:solution_comparison": 20,
+        "question_intent:compare_approaches": 20
+      },
+      "copies": 8,
+      "downloads": 6,
+      "clicks": 32,
+      "profile": "近期更需要排查异常和形成改进路径，偏好失效处理与改进方案。"
+    }
+  ],
+  "validation": {
+    "checked_tag_sets": 9,
+    "all_tag_sets_valid": true,
+    "counts_checked": true
+  }
+}

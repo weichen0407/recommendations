@@ -1,0 +1,67 @@
+{
+  "taxonomy_version": "2.2.0",
+  "source_examples_valid": true,
+  "fixed_request_valid": true,
+  "fixed_examples_valid": true,
+  "tag_set_id": "rd_engineer__electronics_manufacturing__technical_solutions__3aed2d480e36",
+  "invalid_cases": [
+    {
+      "case": "行业父子不匹配",
+      "field": "industry_segment",
+      "value": "automotive_chassis_body",
+      "errors": [
+        "tag_bundle.industry_segment is incompatible with audience.industry"
+      ]
+    },
+    {
+      "case": "任务与产出不匹配",
+      "field": "desired_output",
+      "value": "trend_brief",
+      "errors": [
+        "tag_bundle.desired_output is incompatible with jtbd_task"
+      ]
+    },
+    {
+      "case": "主题与问题意图不匹配",
+      "field": "question_intent",
+      "value": "assess_risks",
+      "errors": [
+        "tag_bundle.question_intent is incompatible with topic_theme"
+      ]
+    },
+    {
+      "case": "范围与细分行业不一致",
+      "field": "scope_level",
+      "value": "industry",
+      "errors": [
+        "tag_bundle.scope_level is inconsistent with industry_segment"
+      ]
+    },
+    {
+      "case": "擅自新增行业枚举",
+      "field": "industry_segment",
+      "value": "chip_interconnect",
+      "errors": [
+        "tag_bundle.industry_segment must be null or an allowed enum"
+      ]
+    },
+    {
+      "case": "JTBD 与具体任务不匹配",
+      "field": "jtbd_task",
+      "value": "claims_drafting",
+      "errors": [
+        "tag_bundle.jtbd_task is incompatible with audience.jtbd",
+        "tag_bundle.role_perspective is incompatible with jtbd_task",
+        "tag_bundle.desired_output is incompatible with jtbd_task"
+      ]
+    },
+    {
+      "case": "固定标签批次中途改换工作视角",
+      "field": "role_perspective",
+      "value": "system_integration",
+      "errors": [
+        "$.briefs[1].tags must exactly match the input tag_bundle"
+      ]
+    }
+  ]
+}

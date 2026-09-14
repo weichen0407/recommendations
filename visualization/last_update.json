@@ -1,0 +1,26 @@
+{
+  "ok": true,
+  "status": "updated",
+  "source": "local-cache",
+  "started_at": "2026-09-14T05:39:03.777Z",
+  "finished_at": "2026-09-14T05:39:03.836Z",
+  "dashboard": {
+    "id": "recommendation-guanyuan",
+    "title": "推荐系统 Guanyuan 数据",
+    "url": "/",
+    "api_url": "/api/dashboard",
+    "update_url": "/api/update"
+  },
+  "steps": [
+    {
+      "name": "aggregate_share_activation",
+      "command": "node visualization/update_share_activation_report.js",
+      "ok": true,
+      "code": 0,
+      "signal": "",
+      "stdout": "{\n  \"reportFiles\": [\n    \"recommendation_guanyuan_report_2026-09-10.html\",\n    \"recommendation_guanyuan_report_2026-09-11.html\",\n    \"recommendation_guanyuan_report_2026-09-12.html\",\n    \"recommendation_guanyuan_report_2026-09-14.html\"\n  ],\n  \"updatedReportFiles\": [\n    \"recommendation_guanyuan_report_2026-09-10.html\",\n    \"recommendation_guanyuan_report_2026-09-11.html\",\n    \"recommendation_guanyuan_report_2026-09-12.html\",\n    \"recommendation_guanyuan_report_2026-09-14.html\"\n  ],\n  \"skippedReportFiles\": [],\n  \"exportBase\": \"recommendation_share_id_summary_2026-09-09_2026-09-14\",\n  \"clickPv\": 41,\n  \"shareIds\": 23,\n  \"trueActivationShareIds\": 3,\n  \"trueActivationSessions\": 3,\n  \"topShare\": {\n    \"share_id\": \"17d0ee8cc0eba6110df1ea9ddeae80d1\",\n    \"click_pv\": 5,\n    \"click_sessions\": 4,\n    \"uv\": 5,\n    \"user_ids\": 4,\n    \"missing_session\": 1,\n    \"true_activation_sessions\": 0,\n    \"true_activation_pv\": 0,\n    \"true_activation_users\": 0,\n    \"true_activation_session_rate\": 0,\n    \"true_activation_pv_rate\": 0,\n    \"beijing_day_distribution\": \"2026-09-10:3；2026-09-11:1；2026-09-13:1\"\n  },\n  \"trueShareIds\": [\n    {\n      \"share_id\": \"0c542aea5dd7063ef2660cdd642748cc\",\n      \"click_pv\": 2,\n      \"click_sessions\": 2,\n      \"true_activation_sessions\": 1,\n      \"true_activation_session_rate\": 0.5\n    },\n    {\n      \"share_id\": \"42acb055b3e200bdf4be8e0903d60b64\",\n      \"click_pv\": 2,\n      \"click_sessions\": 1,\n      \"true_activation_sessions\": 1,\n      \"true_activation_session_rate\": 1\n    },\n    {\n      \"share_id\": \"7cda8a6d139fae54270dc36ca292164e\",\n      \"click_pv\": 1,\n      \"click_sessions\": 1,\n      \"true_activation_sessions\": 1,\n      \"true_activation_session_rate\": 1\n    }\n  ]\n}\n",
+      "stderr": "",
+      "error": ""
+    }
+  ]
+}

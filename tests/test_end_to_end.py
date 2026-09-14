@@ -174,7 +174,7 @@ def test_only_three_nodes_and_two_generation_calls(tmp_path):
     assert result["status"] == "succeeded"
     assert result["generated_prompt"] == client.queries[0]
     assert result["generated_prompt"].startswith(HTML_INSTRUCTION)
-    assert "in English" in result["generated_prompt"]
+    assert "English recommended-content report" in result["generated_prompt"]
     assert result["results"][0]["isCompleted"] is True
     assert result["results"][0]["completion_response"]["events"]
     assert result["generation_result"]["briefs"][0] == result["task_specs"][0]["brief"]
@@ -553,7 +553,7 @@ def test_import_first_stage_skips_topic_model_and_preserves_reviewed_content(tmp
     assert result["generation_result"] == generation
     assert result["format"] == "report"
     assert len(client.queries) == 2
-    assert all("in English" in query for query in client.queries)
+    assert all("English recommended-content report" in query for query in client.queries)
 
 
 @pytest.mark.parametrize(
@@ -642,7 +642,8 @@ def test_cli_review_files_continue_in_separate_processes(tmp_path, monkeypatch, 
     assert graphs[1][1].queries == []
     assert second["generation_result"] == first["generation_result"]
     assert second["format"] == "report"
-    assert "重点比较封装尺寸约束" in second["generated_prompt"]
+    assert "重点比较封装尺寸约束" in second["generation_result"]["briefs"][0]["description"]
+    assert "Keywords:" in second["generated_prompt"]
     assert not (tmp_path / "runs").exists()
 
     assert (

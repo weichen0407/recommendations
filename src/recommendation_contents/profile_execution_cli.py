@@ -8,6 +8,8 @@ import fcntl
 import hashlib
 import json
 import os
+import sqlite3
+import subprocess
 import sys
 import threading
 import time
@@ -22,22 +24,30 @@ from uuid import UUID, uuid4
 
 from .brief_schema import load_brief_catalog, parse_brief_response
 from .config import AppSettings, apply_env_file_to_process
-from .nodes import RuntimeDependencies
+from .nodes import RuntimeDependencies, check_user_token
 from .research_prompt_generation import GenerationError, format_execution_prompt
-from .workflow_execution import execute_tasks, read_run
+from .workflow_execution import execute_tasks
 from .workflow_stages import validate_task_specs
 
 NODE2_VERSION = "profile-topic-node2/1.0.0"
-WORKFLOW_VERSION = "profile-topic-node3/1.0.0"
+WORKFLOW_VERSION = "profile-topic-node3/2.0.0"
+DEFAULT_STATE_DB = Path("outputs/profile_topics/node3_state.sqlite")
 DEFAULT_JSON = Path("outputs/profile_topics/node3_eureka_results.json")
 DEFAULT_CSV = Path("outputs/profile_topics/node3_eureka_results.csv")
 DEFAULT_LOG = Path("outputs/profile_topics/node3_eureka_results.log")
-DEFAULT_RUNS_DIR = Path("outputs/profile_topics/node3_runs")
 AGGREGATE_CHECKPOINT_EVERY = 25
 
 TERMINAL_ATTENTION_STATUSES = {"failed", "submission_unknown"}
 ATTENTION_STATUSES = TERMINAL_ATTENTION_STATUSES | {"execution_error", "submitting"}
-ACTIVE_STATUSES = {"prepared", "submitting", "needs_auth", "submitted", "pending", "running"}
+ACTIVE_STATUSES = {
+    "not_started",
+    "prepared",
+    "submitting",
+    "needs_auth",
+    "submitted",
+    "pending",
+    "running",
+}
 
 CSV_COLUMNS = [
     "input",
@@ -58,6 +68,7 @@ CSV_COLUMNS = [
     "date",
     "sub_industry",
     "row_no",
+    "question_id",
     "brief_id",
     "tag_set_id",
     "source_generation_id",
@@ -87,6 +98,108 @@ class BatchFileError(ValueError):
     """Stable validation failure for a Node 2 or Node 3 checkpoint."""
 
 
+def _connect_state(path: Path) -> sqlite3.Connection:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    connection = sqlite3.connect(path, timeout=30)
+    connection.execute("PRAGMA busy_timeout = 30000")
+    connection.execute(
+        "CREATE TABLE IF NOT EXISTS metadata (key TEXT PRIMARY KEY, value TEXT NOT NULL)"
+    )
+    connection.execute(
+        "CREATE TABLE IF NOT EXISTS task_runs ("
+        "brief_id TEXT PRIMARY KEY, payload TEXT NOT NULL, updated_at TEXT NOT NULL)"
+    )
+    return connection
+
+
+@contextmanager
+def _state_connection(path: Path):
+    connection = _connect_state(path)
+    try:
+        with connection:
+            yield connection
+    finally:
+        connection.close()
+
+
+def _read_checkpoint(path: Path) -> dict[str, Any]:
+    try:
+        with _state_connection(path) as connection:
+            row = connection.execute(
+                "SELECT value FROM metadata WHERE key = 'checkpoint'"
+            ).fetchone()
+    except sqlite3.Error as exc:
+        raise BatchFileError(f"Cannot read Node 3 state {path} ({type(exc).__name__}).") from exc
+    if row is None:
+        raise BatchFileError(f"Node 3 state has no checkpoint: {path}")
+    try:
+        value = json.loads(row[0])
+    except (TypeError, ValueError) as exc:
+        raise BatchFileError("Node 3 SQLite checkpoint contains invalid JSON") from exc
+    if not isinstance(value, dict):
+        raise BatchFileError("Node 3 SQLite checkpoint must be an object")
+    return value
+
+
+def _write_checkpoint(path: Path, document: dict[str, Any]) -> None:
+    payload = json.dumps(document, ensure_ascii=False, separators=(",", ":"))
+    with _state_connection(path) as connection:
+        connection.execute(
+            "INSERT INTO metadata(key, value) VALUES('checkpoint', ?) "
+            "ON CONFLICT(key) DO UPDATE SET value = excluded.value",
+            (payload,),
+        )
+
+
+class SQLiteTaskRunStore:
+    """One task journal stored as a row in the shared Node 3 SQLite state."""
+
+    def __init__(self, path: Path, brief_id: str):
+        self.path = path
+        self.brief_id = str(UUID(brief_id))
+
+    @contextmanager
+    def run_lock(self):
+        yield
+
+    def has_run(self) -> bool:
+        with _state_connection(self.path) as connection:
+            row = connection.execute(
+                "SELECT 1 FROM task_runs WHERE brief_id = ?", (self.brief_id,)
+            ).fetchone()
+        return row is not None
+
+    def read_run(self) -> dict[str, Any]:
+        with _state_connection(self.path) as connection:
+            row = connection.execute(
+                "SELECT payload FROM task_runs WHERE brief_id = ?", (self.brief_id,)
+            ).fetchone()
+        if row is None:
+            raise ValueError(f"No saved task run for {self.brief_id}")
+        value = json.loads(row[0])
+        if not isinstance(value, dict) or value.get("workflow_version") != "2.0.0":
+            raise ValueError("Unsupported workflow record version")
+        return value
+
+    def write_run(self, data: dict[str, Any]) -> None:
+        payload = json.dumps(data, ensure_ascii=False, separators=(",", ":"))
+        with _state_connection(self.path) as connection:
+            connection.execute(
+                "INSERT INTO task_runs(brief_id, payload, updated_at) VALUES(?, ?, ?) "
+                "ON CONFLICT(brief_id) DO UPDATE SET "
+                "payload = excluded.payload, updated_at = excluded.updated_at",
+                (self.brief_id, payload, _now()),
+            )
+
+    def delete_run(self) -> None:
+        with _state_connection(self.path) as connection:
+            connection.execute("DELETE FROM task_runs WHERE brief_id = ?", (self.brief_id,))
+
+    @property
+    def locator(self) -> str:
+        return f"{self.path.resolve()}#task_runs/{self.brief_id}"
+
+
 def main(argv: list[str] | None = None) -> int:
     catalog = load_brief_catalog()
     parser = argparse.ArgumentParser(
@@ -96,10 +209,10 @@ def main(argv: list[str] | None = None) -> int:
         )
     )
     parser.add_argument("input_json", type=Path, help="profile-topic-node2 JSON checkpoint")
+    parser.add_argument("--state-db", type=Path, default=DEFAULT_STATE_DB)
     parser.add_argument("--output-json", type=Path, default=DEFAULT_JSON)
     parser.add_argument("--output-csv", type=Path, default=DEFAULT_CSV)
     parser.add_argument("--log-file", type=Path, default=DEFAULT_LOG)
-    parser.add_argument("--runs-dir", type=Path, default=DEFAULT_RUNS_DIR)
     parser.add_argument(
         "--format",
         choices=["html", "report"],
@@ -108,6 +221,12 @@ def main(argv: list[str] | None = None) -> int:
     )
     parser.add_argument("--workers", type=int, choices=range(1, 17), default=1)
     parser.add_argument("--max-tasks", type=int, default=0, help="Execute at most N pending prompts")
+    parser.add_argument(
+        "--csv-checkpoint-every",
+        type=int,
+        default=25,
+        help="Rewrite the complete CSV after every N finished tasks; use 1 for per-task updates",
+    )
     parser.add_argument("--role", choices=_audience_values(catalog, "role"))
     parser.add_argument("--industry", choices=_audience_values(catalog, "industry"))
     parser.add_argument("--jtbd", choices=_audience_values(catalog, "jtbd"))
@@ -116,32 +235,87 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--env-file", default=".env")
     parser.add_argument("--resume", action="store_true", help="Continue the existing checkpoint")
     parser.add_argument(
+        "--retry-failed",
+        action="store_true",
+        help="Retry explicitly rejected tasks that have no session or share ID",
+    )
+    parser.add_argument(
+        "--retry-uncertain-links",
+        action="store_true",
+        help=(
+            "Explicitly resubmit submission_unknown tasks with no IDs and retry share "
+            "creation for confirmed sessions with no share ID; resubmission can duplicate "
+            "a remote task whose earlier response was lost"
+        ),
+    )
+    parser.add_argument(
         "--overwrite",
         action="store_true",
-        help="Rebuild aggregate outputs while reusing matching per-task run records",
+        help="Rebuild aggregate state while reusing matching task rows in SQLite",
     )
     parser.add_argument("--dry-run", action="store_true")
+    parser.add_argument(
+        "--prepare-only",
+        action="store_true",
+        help="Create complete JSON/CSV manifests without token checks or curl calls",
+    )
     parser.add_argument(
         "--wait-for-completion",
         action="store_true",
         help="Poll existing/new sessions until the configured completion wait limit",
     )
+    parser.add_argument(
+        "--wait-on-401",
+        type=float,
+        default=0.0,
+        help="Seconds to wait for copied browser authorization when auth is missing or rejected",
+    )
+    parser.add_argument(
+        "--retry-on-auth-change",
+        action="store_true",
+        help="Retry the current task after authorization changes during the wait",
+    )
+    parser.add_argument(
+        "--retry-attempts",
+        type=int,
+        default=1,
+        help="Maximum retries for the current task after authorization changes",
+    )
+    parser.add_argument(
+        "--import-clipboard-on-401",
+        action="store_true",
+        help="Poll the macOS clipboard for a copied Eureka browser curl during auth waits",
+    )
+    parser.add_argument(
+        "--auth-poll-interval",
+        type=float,
+        default=2.0,
+        help="Seconds between clipboard and authorization-cache checks",
+    )
     args = parser.parse_args(argv)
 
     if args.resume and args.overwrite:
         parser.error("--resume and --overwrite cannot be combined")
+    if args.dry_run and args.prepare_only:
+        parser.error("--dry-run and --prepare-only cannot be combined")
     if args.max_tasks < 0:
         parser.error("--max-tasks must be non-negative")
-    paths = [args.input_json, args.output_json, args.output_csv, args.log_file]
+    if args.csv_checkpoint_every <= 0:
+        parser.error("--csv-checkpoint-every must be positive")
+    if args.wait_on_401 < 0 or args.auth_poll_interval <= 0:
+        parser.error("--wait-on-401 must be non-negative and --auth-poll-interval must be positive")
+    if args.retry_attempts < 0:
+        parser.error("--retry-attempts must be non-negative")
+    if args.retry_on_auth_change and args.workers != 1:
+        parser.error("--retry-on-auth-change requires --workers 1")
+    paths = [args.input_json, args.state_db, args.output_json, args.output_csv, args.log_file]
     if len({_resolved(path) for path in paths}) != len(paths):
-        parser.error("Input, JSON, CSV and log paths must all be different")
-    if _resolved(args.runs_dir) in {_resolved(path) for path in paths}:
-        parser.error("--runs-dir must be different from the input and output files")
+        parser.error("Input, SQLite state, JSON, CSV and log paths must all be different")
 
     if args.dry_run:
         return _run_locked(args, parser, catalog)
     try:
-        with _batch_lock(args.output_json):
+        with _batch_lock(args.state_db):
             return _run_locked(args, parser, catalog)
     except BatchFileError as exc:
         parser.error(str(exc))
@@ -170,22 +344,34 @@ def _run_locked(
         parser.error("No successful Node 2 prompts match the filters")
 
     existing: dict[str, Any] | None = None
-    if args.output_json.exists() and (args.resume or args.overwrite):
+    if args.state_db.exists() and (args.resume or args.overwrite):
         try:
-            existing = _load_json(args.output_json, "Node 3 checkpoint")
+            existing = _read_checkpoint(args.state_db)
             existing = _validate_resume_document(
-                existing, source, tasks, args.input_json, args.runs_dir, args.format
+                existing, source, tasks, args.input_json, args.state_db, args.format
+            )
+        except ValueError as exc:
+            parser.error(str(exc))
+    elif args.resume and args.output_json.exists():
+        try:
+            existing = _load_json(args.output_json, "Node 3 JSON manifest")
+            existing = _validate_resume_document(
+                existing, source, tasks, args.input_json, args.state_db, args.format
             )
         except ValueError as exc:
             parser.error(str(exc))
     elif args.resume and args.output_csv.exists():
-        parser.error("Cannot resume from CSV alone; the Node 3 JSON checkpoint is missing")
+        parser.error("Cannot resume from CSV alone; the Node 3 JSON manifest is missing")
     elif not args.resume and not args.overwrite and not args.dry_run:
-        conflicts = [str(path) for path in (args.output_json, args.output_csv) if path.exists()]
+        conflicts = [
+            str(path)
+            for path in (args.state_db, args.output_json, args.output_csv)
+            if path.exists()
+        ]
         if conflicts:
             parser.error("Output exists; use --resume or --overwrite: " + ", ".join(conflicts))
 
-    document = _new_document(source, args.input_json, args.runs_dir, args.format)
+    document = _new_document(source, args.input_json, args.state_db, args.format)
     by_id: dict[str, dict[str, Any]] = {}
     if existing is not None:
         by_id = {record["brief_id"]: record for record in existing["executions"]}
@@ -193,28 +379,60 @@ def _run_locked(
             document = existing
 
     try:
+        _apply_manifest_prompt_overrides(by_id, tasks)
         _assert_sources_unchanged(by_id, tasks)
-        _reconcile_inner_runs(by_id, tasks, args.runs_dir)
+        if args.state_db.exists():
+            _reconcile_inner_runs(by_id, tasks, args.state_db)
     except ValueError as exc:
         parser.error(str(exc))
+
+    if not args.dry_run:
+        for task in tasks:
+            if task["brief_id"] not in by_id:
+                record = _prepared_record(
+                    task, SQLiteTaskRunStore(args.state_db, task["brief_id"])
+                )
+                record["execution_status"] = "not_started"
+                by_id[task["brief_id"]] = record
 
     candidates = [
         task
         for task in selected
-        if _should_schedule(by_id.get(task["brief_id"]), args.wait_for_completion)
+        if _should_schedule(
+            by_id.get(task["brief_id"]),
+            args.wait_for_completion,
+            retry_failed=args.retry_failed,
+            retry_uncertain_links=args.retry_uncertain_links,
+        )
     ]
     scheduled = candidates[: args.max_tasks or None]
     bounded_pause = len(scheduled) < len(candidates)
     already_satisfied = len(selected) - len(candidates)
 
+    retrying_failed = 0
+    retrying_unknown_submissions = 0
+    retrying_unknown_shares = 0
+    if not args.dry_run and not args.prepare_only and args.retry_uncertain_links:
+        (
+            retrying_unknown_submissions,
+            retrying_unknown_shares,
+        ) = _reset_scheduled_uncertain_link_records(by_id, scheduled, args.state_db)
+    if not args.dry_run and not args.prepare_only and args.retry_failed:
+        retrying_failed = _reset_scheduled_failed_records(by_id, scheduled, args.state_db)
+
     document["source"] = _source_metadata(source, args.input_json)
-    document["scope"] = _scope(tasks, failed_source_tag_sets, args.runs_dir, args.format)
+    document["scope"] = _scope(tasks, failed_source_tag_sets, args.state_db, args.format)
     document["executions"] = _ordered_records(by_id, tasks)
     document["last_run"] = {
         "started_at": _now(),
         "finished_at": "",
         "status": "dry_run" if args.dry_run else "running",
         "wait_for_completion": args.wait_for_completion,
+        "retry_failed": args.retry_failed,
+        "retrying_failed_tasks": retrying_failed,
+        "retry_uncertain_links": args.retry_uncertain_links,
+        "retrying_unknown_submissions": retrying_unknown_submissions,
+        "retrying_unknown_shares": retrying_unknown_shares,
         "filters": {
             "role": args.role,
             "industry": args.industry,
@@ -250,14 +468,38 @@ def _run_locked(
         )
         return 0
 
+    if args.prepare_only:
+        document["status"] = "paused"
+        document["last_run"].update(finished_at=_now(), status="prepared")
+        _write_exports(document, args.output_json, args.output_csv, tasks)
+        print(
+            json.dumps(
+                _summary(
+                    document,
+                    args,
+                    selected,
+                    already_satisfied,
+                    [],
+                    True,
+                ),
+                ensure_ascii=False,
+                indent=2,
+            )
+        )
+        return 0
+
     _prepare_log(args.log_file, append=bool(existing and not args.overwrite))
     document["status"] = "running"
     document["executions"] = _ordered_records(by_id, tasks)
-    _save(document, args.output_json, args.output_csv, tasks)
+    _save(document, args.state_db, args.output_json, args.output_csv, tasks)
     _log(
         f"call_curl_task: selected={len(selected)} already_satisfied={already_satisfied} "
         f"scheduled={len(scheduled)} remaining_after_limit={len(candidates) - len(scheduled)} "
-        f"workers={args.workers} wait_for_completion={str(args.wait_for_completion).lower()}",
+        f"retrying_failed={retrying_failed} "
+        f"retrying_unknown_submissions={retrying_unknown_submissions} "
+        f"retrying_unknown_shares={retrying_unknown_shares} "
+        f"workers={args.workers} csv_checkpoint_every={args.csv_checkpoint_every} "
+        f"wait_for_completion={str(args.wait_for_completion).lower()}",
         args.log_file,
     )
 
@@ -269,7 +511,7 @@ def _run_locked(
             wait_for_completion=args.wait_for_completion,
         )
         document["last_run"].update(finished_at=_now(), status=document["status"])
-        _save(document, args.output_json, args.output_csv, tasks)
+        _save(document, args.state_db, args.output_json, args.output_csv, tasks)
         summary = _summary(
             document,
             args,
@@ -293,7 +535,7 @@ def _run_locked(
         return local.runtime
 
     def execute(task: dict[str, Any]) -> dict[str, Any]:
-        run_record_path = _task_run_path(args.runs_dir, task["brief_id"])
+        run_store = SQLiteTaskRunStore(args.state_db, task["brief_id"])
         last_marker: tuple[Any, ...] | None = None
 
         def on_update(results: list[dict[str, Any]]) -> None:
@@ -317,25 +559,65 @@ def _run_locked(
                 )
 
         try:
+            runtime = runtime_for_thread()
+            if args.retry_on_auth_change and not _authorization_ready(runtime):
+                _wait_for_auth_update(
+                    runtime,
+                    original_snapshot=_auth_snapshot(runtime),
+                    wait_seconds=args.wait_on_401,
+                    poll_interval=args.auth_poll_interval,
+                    import_clipboard=args.import_clipboard_on_401,
+                    log_file=args.log_file,
+                    brief_id=task["brief_id"],
+                    attempt=0,
+                )
+
             results, _ = execute_tasks(
                 _execution_generation(task),
                 [task["task_spec"]],
-                runtime_for_thread(),
-                run_record_path,
+                runtime,
+                run_store,
                 wait_for_completion=args.wait_for_completion,
                 on_update=on_update,
             )
+            retry_count = 0
+            while (
+                results[0].get("status") == "needs_auth"
+                and args.retry_on_auth_change
+                and retry_count < args.retry_attempts
+            ):
+                retry_count += 1
+                auth_changed = _wait_for_auth_update(
+                    runtime,
+                    original_snapshot=_auth_snapshot(runtime),
+                    wait_seconds=args.wait_on_401,
+                    poll_interval=args.auth_poll_interval,
+                    import_clipboard=args.import_clipboard_on_401,
+                    log_file=args.log_file,
+                    brief_id=task["brief_id"],
+                    attempt=retry_count,
+                )
+                if not auth_changed:
+                    break
+                results, _ = execute_tasks(
+                    _execution_generation(task),
+                    [task["task_spec"]],
+                    runtime,
+                    run_store,
+                    wait_for_completion=args.wait_for_completion,
+                    on_update=on_update,
+                )
             return _record_from_result(
-                task, results[0], run_record_path, by_id.get(task["brief_id"])
+                task, results[0], run_store, by_id.get(task["brief_id"])
             )
         except Exception as exc:  # noqa: BLE001 - retain a restartable provider boundary
-            recovered = _result_from_inner_run(task, run_record_path)
+            recovered = _result_from_inner_run(task, run_store)
             if recovered is not None and recovered.get("status") != "prepared":
                 return _record_from_result(
-                    task, recovered, run_record_path, by_id.get(task["brief_id"])
+                    task, recovered, run_store, by_id.get(task["brief_id"])
                 )
             return _execution_error_record(
-                task, run_record_path, type(exc).__name__, by_id.get(task["brief_id"])
+                task, run_store, type(exc).__name__, by_id.get(task["brief_id"])
             )
 
     completed = failed_this_run = 0
@@ -361,8 +643,17 @@ def _run_locked(
             failed_tasks=failed_this_run,
         )
         _update_progress(document, tasks)
-        if completed % AGGREGATE_CHECKPOINT_EVERY == 0:
-            _save(document, args.output_json, args.output_csv, tasks, write_csv=False)
+        aggregate_due = completed % AGGREGATE_CHECKPOINT_EVERY == 0
+        csv_due = completed % args.csv_checkpoint_every == 0
+        if aggregate_due or csv_due:
+            _save(
+                document,
+                args.state_db,
+                args.output_json,
+                args.output_csv,
+                tasks,
+                write_csv=csv_due,
+            )
         _log(
             _progress_line(
                 selected_total=len(selected),
@@ -383,7 +674,7 @@ def _run_locked(
         interrupted = True
         document["status"] = "paused"
         document["last_run"]["status"] = "stopping"
-        _save(document, args.output_json, args.output_csv, tasks)
+        _save(document, args.state_db, args.output_json, args.output_csv, tasks)
         for future in futures:
             if future not in handled:
                 future.cancel()
@@ -419,7 +710,7 @@ def _run_locked(
         completed_tasks=completed,
         failed_tasks=failed_this_run,
     )
-    _save(document, args.output_json, args.output_csv, tasks)
+    _save(document, args.state_db, args.output_json, args.output_csv, tasks)
     summary = _summary(
         document,
         args,
@@ -435,20 +726,96 @@ def _run_locked(
 
 
 @contextmanager
-def _batch_lock(output_json: Path):
-    lock_path = output_json.with_name(output_json.name + ".lock")
+def _batch_lock(state_db: Path):
+    lock_path = state_db.with_name(state_db.name + ".lock")
     lock_path.parent.mkdir(parents=True, exist_ok=True)
-    with lock_path.open("a", encoding="utf-8") as lock:
-        try:
-            fcntl.flock(lock.fileno(), fcntl.LOCK_EX | fcntl.LOCK_NB)
-        except BlockingIOError:
-            raise BatchFileError(
-                f"Node 3 checkpoint is already executing: {output_json}"
-            ) from None
-        try:
-            yield
-        finally:
-            fcntl.flock(lock.fileno(), fcntl.LOCK_UN)
+    try:
+        with lock_path.open("a", encoding="utf-8") as lock:
+            try:
+                fcntl.flock(lock.fileno(), fcntl.LOCK_EX | fcntl.LOCK_NB)
+            except BlockingIOError:
+                raise BatchFileError(
+                    f"Node 3 state is already executing: {state_db}"
+                ) from None
+            try:
+                yield
+            finally:
+                fcntl.flock(lock.fileno(), fcntl.LOCK_UN)
+    finally:
+        lock_path.unlink(missing_ok=True)
+
+
+def _authorization_ready(runtime: RuntimeDependencies) -> bool:
+    state = check_user_token({}, runtime)
+    return (
+        state.get("token_status") == "ready"
+        and runtime.get_eureka_client().has_authorization_header()
+    )
+
+
+def _auth_snapshot(runtime: RuntimeDependencies) -> dict[str, str]:
+    return runtime.get_eureka_token_manager().read_cached_auth_snapshot()
+
+
+def _try_import_clipboard(runtime: RuntimeDependencies) -> bool:
+    try:
+        result = subprocess.run(
+            ["pbpaste"], check=False, capture_output=True, text=True
+        )
+    except OSError:
+        return False
+    if result.returncode != 0 or not result.stdout.strip():
+        return False
+    try:
+        imported = runtime.get_eureka_token_manager().import_curl(result.stdout)
+    except ValueError:
+        return False
+    return bool(imported.get("has_authorization") or imported.get("has_signature_id"))
+
+
+def _wait_for_auth_update(
+    runtime: RuntimeDependencies,
+    *,
+    original_snapshot: dict[str, str],
+    wait_seconds: float,
+    poll_interval: float,
+    import_clipboard: bool,
+    log_file: Path,
+    brief_id: str,
+    attempt: int,
+) -> bool:
+    if wait_seconds <= 0:
+        return False
+    action = (
+        "copy api/eureka/query/conversational as cURL now"
+        if import_clipboard
+        else "update the local Eureka authorization cache now"
+    )
+    _log(
+        f"auth_wait brief_id={brief_id} attempt={attempt} "
+        f"timeout_seconds={wait_seconds:g}; {action}",
+        log_file,
+    )
+    deadline = time.monotonic() + wait_seconds
+    while time.monotonic() < deadline:
+        if import_clipboard:
+            _try_import_clipboard(runtime)
+        current = _auth_snapshot(runtime)
+        if current != original_snapshot and _authorization_ready(runtime):
+            _log(
+                f"auth_updated brief_id={brief_id} attempt={attempt}; retrying current task",
+                log_file,
+            )
+            return True
+        remaining = deadline - time.monotonic()
+        if remaining <= 0:
+            break
+        time.sleep(min(max(0.1, poll_interval), remaining))
+    _log(
+        f"auth_wait_expired brief_id={brief_id} attempt={attempt}; current task remains resumable",
+        log_file,
+    )
+    return False
 
 
 def _audience_values(catalog: dict[str, Any], key: str) -> list[str]:
@@ -595,20 +962,20 @@ def _source_metadata(source: dict[str, Any], path: Path) -> dict[str, Any]:
 def _scope(
     tasks: list[dict[str, Any]],
     failed_source_tag_sets: int,
-    runs_dir: Path,
+    state_db: Path,
     output_format: str,
 ) -> dict[str, Any]:
     return {
         "eligible_tasks": len(tasks),
         "successful_source_tag_sets": len({task["tag_set_id"] for task in tasks}),
         "failed_source_tag_sets": failed_source_tag_sets,
-        "runs_dir": str(runs_dir.resolve()),
+        "state_db": str(state_db.resolve()),
         "format": output_format,
     }
 
 
 def _new_document(
-    source: dict[str, Any], source_path: Path, runs_dir: Path, output_format: str
+    source: dict[str, Any], source_path: Path, state_db: Path, output_format: str
 ) -> dict[str, Any]:
     now = _now()
     return {
@@ -619,7 +986,7 @@ def _new_document(
         "updated_at": now,
         "taxonomy_version": source["taxonomy_version"],
         "source": _source_metadata(source, source_path),
-        "scope": _scope([], 0, runs_dir, output_format),
+        "scope": _scope([], 0, state_db, output_format),
         "progress": {},
         "last_run": {},
         "executions": [],
@@ -631,7 +998,7 @@ def _validate_resume_document(
     source: dict[str, Any],
     tasks: list[dict[str, Any]],
     source_path: Path,
-    runs_dir: Path,
+    state_db: Path,
     output_format: str,
 ) -> dict[str, Any]:
     if document.get("workflow_version") != WORKFLOW_VERSION:
@@ -646,9 +1013,9 @@ def _validate_resume_document(
     scope = document.get("scope")
     if not isinstance(scope, dict):
         raise BatchFileError("Resume output scope must be an object")
-    saved_runs_dir = scope.get("runs_dir")
-    if saved_runs_dir and _resolved(Path(saved_runs_dir)) != _resolved(runs_dir):
-        raise BatchFileError("--runs-dir does not match the Node 3 checkpoint")
+    saved_state_db = scope.get("state_db")
+    if saved_state_db and _resolved(Path(saved_state_db)) != _resolved(state_db):
+        raise BatchFileError("--state-db does not match the Node 3 checkpoint")
     if scope.get("format") != output_format:
         raise BatchFileError("--format does not match the Node 3 checkpoint")
     executions = document.get("executions")
@@ -685,8 +1052,34 @@ def _assert_sources_unchanged(
         if record.get("source_fingerprint") != task["source_fingerprint"]:
             raise BatchFileError(
                 f"{brief_id}: source prompt changed after an execution record was created; "
-                "use a new Node 3 output and runs directory"
+                "use a new Node 3 state database"
             )
+
+
+def _apply_manifest_prompt_overrides(
+    records: dict[str, dict[str, Any]], tasks: list[dict[str, Any]]
+) -> None:
+    """Use reviewed generated_prompt edits from a Node 3 JSON manifest before execution."""
+    for task in tasks:
+        record = records.get(task["brief_id"])
+        if record is None:
+            continue
+        reviewed_prompt = record.get("generated_prompt")
+        source_prompt = task["task_spec"]["generated_prompt"]
+        if reviewed_prompt == source_prompt:
+            continue
+        if not isinstance(reviewed_prompt, str) or not reviewed_prompt.strip():
+            raise BatchFileError(
+                f"{task['brief_id']}: edited generated_prompt must not be empty"
+            )
+        if _record_has_external_state(record):
+            raise BatchFileError(
+                f"{task['brief_id']}: generated_prompt cannot be edited after remote execution began"
+            )
+        task["task_spec"]["generated_prompt"] = reviewed_prompt.strip()
+        task["source_fingerprint"] = _task_fingerprint(task)
+        record["generated_prompt"] = reviewed_prompt.strip()
+        record["source_fingerprint"] = task["source_fingerprint"]
 
 
 def _select_tasks(
@@ -719,10 +1112,6 @@ def _ordered_records(
     )
 
 
-def _task_run_path(runs_dir: Path, brief_id: str) -> Path:
-    return runs_dir / f"{UUID(brief_id)}.json"
-
-
 def _execution_generation(task: dict[str, Any]) -> dict[str, Any]:
     return {
         "workflow_version": WORKFLOW_VERSION,
@@ -736,41 +1125,45 @@ def _execution_generation(task: dict[str, Any]) -> dict[str, Any]:
 
 
 def _reconcile_inner_runs(
-    records: dict[str, dict[str, Any]], tasks: list[dict[str, Any]], runs_dir: Path
+    records: dict[str, dict[str, Any]], tasks: list[dict[str, Any]], state_db: Path
 ) -> None:
     for task in tasks:
         brief_id = task["brief_id"]
-        path = _task_run_path(runs_dir, brief_id)
-        if path.exists():
+        store = SQLiteTaskRunStore(state_db, brief_id)
+        if store.has_run():
             try:
-                saved = read_run(path)
-            except (OSError, ValueError, TypeError) as exc:
-                raise BatchFileError(f"Cannot read inner run {path} ({type(exc).__name__})") from exc
+                saved = store.read_run()
+            except (sqlite3.Error, ValueError, TypeError) as exc:
+                raise BatchFileError(
+                    f"Cannot read task state {brief_id} ({type(exc).__name__})"
+                ) from exc
             if saved.get("task_specs") != [task["task_spec"]]:
                 raise BatchFileError(
                     f"{brief_id}: source prompt changed after the inner execution began; "
-                    "use a new Node 3 output and runs directory"
+                    "use a new Node 3 state database"
                 )
             results = saved.get("results")
             if not isinstance(results, list) or len(results) != 1 or not isinstance(results[0], dict):
                 raise BatchFileError(f"{brief_id}: inner run has invalid results")
             records[brief_id] = _record_from_result(
-                task, results[0], path, records.get(brief_id)
+                task, results[0], store, records.get(brief_id)
             )
             continue
         record = records.get(brief_id)
         if record and _record_has_external_state(record):
             raise BatchFileError(
-                f"{brief_id}: inner run record is missing; refusing a possible duplicate submission"
+                f"{brief_id}: task state is missing; refusing a possible duplicate submission"
             )
 
 
-def _result_from_inner_run(task: dict[str, Any], path: Path) -> dict[str, Any] | None:
-    if not path.exists():
+def _result_from_inner_run(
+    task: dict[str, Any], store: SQLiteTaskRunStore
+) -> dict[str, Any] | None:
+    if not store.has_run():
         return None
     try:
-        saved = read_run(path)
-    except (OSError, ValueError, TypeError):
+        saved = store.read_run()
+    except (sqlite3.Error, ValueError, TypeError):
         return None
     if saved.get("task_specs") != [task["task_spec"]]:
         return None
@@ -780,7 +1173,7 @@ def _result_from_inner_run(task: dict[str, Any], path: Path) -> dict[str, Any] |
     return None
 
 
-def _prepared_record(task: dict[str, Any], runs_dir: Path) -> dict[str, Any]:
+def _prepared_record(task: dict[str, Any], store: SQLiteTaskRunStore) -> dict[str, Any]:
     return _record_from_result(
         task,
         {
@@ -795,7 +1188,7 @@ def _prepared_record(task: dict[str, Any], runs_dir: Path) -> dict[str, Any]:
             "completion_poll_count": 0,
             "errors": [],
         },
-        _task_run_path(runs_dir, task["brief_id"]),
+        store,
         None,
     )
 
@@ -803,7 +1196,7 @@ def _prepared_record(task: dict[str, Any], runs_dir: Path) -> dict[str, Any]:
 def _record_from_result(
     task: dict[str, Any],
     result: dict[str, Any],
-    run_record_path: Path,
+    run_store: SQLiteTaskRunStore,
     previous: dict[str, Any] | None,
 ) -> dict[str, Any]:
     spec = task["task_spec"]
@@ -813,6 +1206,7 @@ def _record_from_result(
     generated_date = str(task["research_prompt_generated_at"])[:10]
     return {
         "source_row_no": task["source_row_no"],
+        "question_id": task["brief_id"],
         "brief_id": task["brief_id"],
         "tag_set_id": task["tag_set_id"],
         "source_generation_id": task["source_generation_id"],
@@ -847,7 +1241,7 @@ def _record_from_result(
         "completion_status": result.get("completion_status", ""),
         "completion_poll_count": result.get("completion_poll_count", 0),
         "errors": [str(error)[:2000] for error in result.get("errors", [])],
-        "run_record_path": str(run_record_path.resolve()),
+        "run_record_path": run_store.locator,
         "created_at": (previous or {}).get("created_at", now),
         "updated_at": now,
     }
@@ -855,11 +1249,11 @@ def _record_from_result(
 
 def _execution_error_record(
     task: dict[str, Any],
-    path: Path,
+    store: SQLiteTaskRunStore,
     error_type: str,
     previous: dict[str, Any] | None,
 ) -> dict[str, Any]:
-    record = _prepared_record(task, path.parent)
+    record = _prepared_record(task, store)
     if previous:
         record["created_at"] = previous.get("created_at", record["created_at"])
     record.update(
@@ -879,13 +1273,31 @@ def _record_has_external_state(record: dict[str, Any]) -> bool:
     )
 
 
-def _should_schedule(record: dict[str, Any] | None, wait_for_completion: bool) -> bool:
+def _should_schedule(
+    record: dict[str, Any] | None,
+    wait_for_completion: bool,
+    *,
+    retry_failed: bool = False,
+    retry_uncertain_links: bool = False,
+) -> bool:
     if record is None:
         return True
+    if record.get("execution_status") == "failed":
+        return retry_failed and not _record_has_external_state(record)
+    if record.get("execution_status") == "submission_unknown":
+        return bool(
+            retry_uncertain_links
+            and not record.get("session_id")
+            and not record.get("share_id")
+        )
+    if record.get("share_status") == "submission_unknown":
+        return bool(
+            retry_uncertain_links
+            and record.get("session_id")
+            and not record.get("share_id")
+        )
     status = record.get("execution_status", "prepared")
     if status in TERMINAL_ATTENTION_STATUSES:
-        return False
-    if record.get("share_status") == "submission_unknown" and not wait_for_completion:
         return False
     if wait_for_completion:
         return status != "completed" or not record.get("isCompleted", False)
@@ -896,6 +1308,84 @@ def _should_schedule(record: dict[str, Any] | None, wait_for_completion: bool) -
     ):
         return False
     return status in ACTIVE_STATUSES or status == "execution_error"
+
+
+def _reset_scheduled_uncertain_link_records(
+    records: dict[str, dict[str, Any]],
+    scheduled: list[dict[str, Any]],
+    state_db: Path,
+) -> tuple[int, int]:
+    reset_submissions = 0
+    reset_shares = 0
+    for task in scheduled:
+        brief_id = task["brief_id"]
+        record = records.get(brief_id)
+        if record is None:
+            continue
+        store = SQLiteTaskRunStore(state_db, brief_id)
+        if record.get("execution_status") == "submission_unknown":
+            if record.get("session_id") or record.get("share_id"):
+                raise BatchFileError(
+                    f"{brief_id}: refusing to resubmit an uncertain task with a saved remote ID"
+                )
+            store.delete_run()
+            prepared = _prepared_record(task, store)
+            prepared["execution_status"] = "not_started"
+            prepared["created_at"] = record.get("created_at", prepared["created_at"])
+            records[brief_id] = prepared
+            reset_submissions += 1
+            continue
+        if record.get("share_status") != "submission_unknown":
+            continue
+        if not record.get("session_id") or record.get("share_id"):
+            raise BatchFileError(
+                f"{brief_id}: uncertain share retry requires a session ID and no share ID"
+            )
+        saved = store.read_run()
+        results = saved.get("results")
+        if not isinstance(results, list) or len(results) != 1 or not isinstance(results[0], dict):
+            raise BatchFileError(f"{brief_id}: inner run has invalid results")
+        result = results[0]
+        result.update(
+            status="submitted",
+            share_id="",
+            share_url="",
+            share_status="pending",
+            share_error="",
+        )
+        result["errors"] = [
+            error
+            for error in result.get("errors", [])
+            if "share" not in str(error).lower()
+        ]
+        store.write_run(saved)
+        records[brief_id] = _record_from_result(task, result, store, record)
+        reset_shares += 1
+    return reset_submissions, reset_shares
+
+
+def _reset_scheduled_failed_records(
+    records: dict[str, dict[str, Any]],
+    scheduled: list[dict[str, Any]],
+    state_db: Path,
+) -> int:
+    reset = 0
+    for task in scheduled:
+        record = records.get(task["brief_id"])
+        if record is None or record.get("execution_status") != "failed":
+            continue
+        if _record_has_external_state(record):
+            raise BatchFileError(
+                f"{task['brief_id']}: refusing to retry a failed task with remote state"
+            )
+        store = SQLiteTaskRunStore(state_db, task["brief_id"])
+        store.delete_run()
+        prepared = _prepared_record(task, store)
+        prepared["execution_status"] = "not_started"
+        prepared["created_at"] = record.get("created_at", prepared["created_at"])
+        records[task["brief_id"]] = prepared
+        reset += 1
+    return reset
 
 
 def _record_needs_attention(record: dict[str, Any]) -> bool:
@@ -918,7 +1408,7 @@ def _update_progress(document: dict[str, Any], tasks: list[dict[str, Any]]) -> d
     progress = {
         "eligible_tasks": len(tasks),
         "tracked_tasks": len(records),
-        "unstarted_tasks": len(tasks) - len(records),
+        "unstarted_tasks": len(tasks) - len(records) + counts["not_started"],
         "prepared_tasks": counts["prepared"],
         "submitted_tasks": counts["submitted"],
         "pending_tasks": counts["pending"] + counts["running"],
@@ -972,6 +1462,7 @@ def _finish_document(
 
 def _save(
     document: dict[str, Any],
+    state_db: Path,
     json_path: Path,
     csv_path: Path,
     tasks: list[dict[str, Any]],
@@ -979,6 +1470,18 @@ def _save(
     write_csv: bool = True,
 ) -> None:
     document["updated_at"] = _now()
+    _write_checkpoint(state_db, document)
+    _write_exports(document, json_path, csv_path, tasks, write_csv=write_csv)
+
+
+def _write_exports(
+    document: dict[str, Any],
+    json_path: Path,
+    csv_path: Path,
+    tasks: list[dict[str, Any]],
+    *,
+    write_csv: bool = True,
+) -> None:
     json_path.parent.mkdir(parents=True, exist_ok=True)
     csv_path.parent.mkdir(parents=True, exist_ok=True)
     json_tmp = json_path.with_name(f".{json_path.name}.{uuid4()}.tmp")
@@ -1007,13 +1510,19 @@ def _save(
 def _rows(
     document: dict[str, Any], tasks: list[dict[str, Any]]
 ) -> Iterable[dict[str, Any]]:
-    task_ids = {task["brief_id"] for task in tasks}
-    records = [
-        record for record in document.get("executions", []) if record.get("brief_id") in task_ids
-    ]
-    for row_no, record in enumerate(
-        sorted(records, key=lambda item: item.get("source_row_no", 0)), 1
-    ):
+    records = {
+        record["brief_id"]: record
+        for record in document.get("executions", [])
+        if isinstance(record, dict) and isinstance(record.get("brief_id"), str)
+    }
+    state_db = Path(document["scope"]["state_db"])
+    for row_no, task in enumerate(tasks, 1):
+        record = records.get(task["brief_id"])
+        if record is None:
+            record = _prepared_record(
+                task, SQLiteTaskRunStore(state_db, task["brief_id"])
+            )
+            record["execution_status"] = "not_started"
         yield {
             "input": record["input"],
             "generated_prompt": record["generated_prompt"],
@@ -1033,6 +1542,7 @@ def _rows(
             "date": record["date"],
             "sub_industry": _json_cell(record["sub_industry"]),
             "row_no": row_no,
+            "question_id": record["brief_id"],
             "brief_id": record["brief_id"],
             "tag_set_id": record["tag_set_id"],
             "source_generation_id": record["source_generation_id"],
@@ -1073,12 +1583,14 @@ def _summary(
         "node": "call_curl_task",
         "status": "dry_run" if dry_run else document["status"],
         "source_json": str(args.input_json),
+        "state_db": str(args.state_db),
         "output_json": str(args.output_json),
         "output_csv": str(args.output_csv),
         "log_file": str(args.log_file),
-        "runs_dir": str(args.runs_dir),
         "format": args.format,
         "wait_for_completion": args.wait_for_completion,
+        "retry_failed": args.retry_failed,
+        "retry_uncertain_links": args.retry_uncertain_links,
         "source_status": document["source"].get("status", ""),
         "successful_source_tag_sets": document["scope"].get(
             "successful_source_tag_sets", 0

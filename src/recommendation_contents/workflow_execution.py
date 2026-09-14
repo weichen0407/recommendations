@@ -47,8 +47,25 @@ def write_run(path: Path | None, data: dict[str, Any]) -> None:
         temporary.unlink(missing_ok=True)
 
 
+def _read_run_target(target: Any) -> dict[str, Any]:
+    if hasattr(target, "read_run"):
+        return target.read_run()
+    return read_run(target)
+
+
+def _write_run_target(target: Any, data: dict[str, Any]) -> None:
+    if hasattr(target, "write_run"):
+        target.write_run(data)
+    else:
+        write_run(target, data)
+
+
 @contextmanager
 def _run_lock(path: Path | None):
+    if path is not None and hasattr(path, "run_lock"):
+        with path.run_lock():
+            yield
+        return
     if path is None:
         yield
         return
@@ -122,7 +139,12 @@ def execute_tasks(
     on_update: Callable[[list[dict[str, Any]]], None] | None = None,
 ) -> tuple[list[dict[str, Any]], str]:
     with _run_lock(path):
-        previous = read_run(path) if path is not None and path.exists() else None
+        previous = (
+            _read_run_target(path)
+            if path is not None
+            and (path.has_run() if hasattr(path, "has_run") else path.exists())
+            else None
+        )
         if previous and previous["task_specs"] != specs:
             raise ValueError("Saved execution prompts do not match this run; use a new run ID.")
         by_id = {r["brief_id"]: r for r in previous["results"]} if previous else {}
@@ -151,7 +173,7 @@ def execute_tasks(
             result.setdefault("share_error", "")
 
         def save():
-            write_run(
+            _write_run_target(
                 path,
                 {
                     "workflow_version": "2.0.0",
